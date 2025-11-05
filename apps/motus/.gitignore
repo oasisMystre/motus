@@ -1,0 +1,10 @@
+expo-env.d.ts
+.env
+.env.prod
+
+# Expo
+.expo
+dist/
+web-build/
+
+.env.local

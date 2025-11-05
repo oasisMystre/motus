@@ -1,0 +1,22 @@
+{
+  "name": "@motus/openfoodfacts",
+  "version": "0.0.0",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.10"
+  },
+  "peerDependencies": {
+    "@openfoodfacts/openfoodfacts-nodejs": "^2.0.0-alpha.17"
+  },
+  "dependencies": {
+    "util": "^0.12.5"
+  }
+}

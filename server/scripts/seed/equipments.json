@@ -1,0 +1,18 @@
+[
+  { "name": "All Equipments" },
+  { "name": "None" },
+  { "name": "Wheel" },
+  { "name": "BarBell" },
+  { "name": "Bar" },
+  { "name": "Box" },
+  { "name": "Bench" },
+  { "name": "KettleBell" },
+  { "name": "DumbBell" },
+  { "name": "BodyWeight" },
+  { "name": "Cable" },
+  { "name": "Machine" },
+  { "name": "Plate" },
+  { "name": "Resistence Band" },
+  { "name": "Suspension Band" },
+  { "name": "Other" }
+]

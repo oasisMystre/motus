@@ -1,0 +1,583 @@
+[
+  {
+    "name": "Ab wheels",
+    "equipment": "Wheel",
+    "primaryMuscleGroup": "Abdominals",
+    "otherMuscles": [],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Aerobics",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": [],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Alternate Heel Tap Crunches",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abdominals"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Alternating Step-Up Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Ankle Hops",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Calves"],
+    "exercise_types": ["reps", "time"]
+  },
+  {
+    "name": "Back extension",
+    "equipment": "Bench",
+    "primaryMuscleGroup": "Lower Back",
+    "otherMuscles": ["Glutes"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Bear Crawl",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Shoulders", "Core"],
+    "exercise_types": ["time", "distance"]
+  },
+  {
+    "name": "Bench Dips",
+    "equipment": "Bench",
+    "primaryMuscleGroup": "Triceps",
+    "otherMuscles": ["Chest", "Shoulders"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Bench press",
+    "equipment": "BarBell",
+    "primaryMuscleGroup": "Chest",
+    "otherMuscles": ["Triceps", "Shoulders"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Bent-over row",
+    "equipment": "BarBell",
+    "primaryMuscleGroup": "Back",
+    "otherMuscles": ["Biceps"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Biceps curl",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Biceps",
+    "otherMuscles": [],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Bicycle Crunches",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abdominals"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Bird Dog",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Lower Back"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "BodyWeight Power Maker",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "BodyWeight Turkish Get Up",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Shoulders"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Broad Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Bulgarian split squats",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Hamstrings",
+    "otherMuscles": ["Quadriceps", "Glutes"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Burpee",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Full Body"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Cable",
+    "equipment": "Cable",
+    "primaryMuscleGroup": "Chest",
+    "otherMuscles": ["Shoulders"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Calf Raises",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Calves"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Chest fly",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Chest",
+    "otherMuscles": ["Shoulders"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Clap Pushup",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Triceps"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Crunch",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Abdominals",
+    "otherMuscles": [],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Curtsy Lunge",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs", "Glutes"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Dead Bug Crunches",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abdominals"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Deadlift",
+    "equipment": "BarBell",
+    "primaryMuscleGroup": "Quadriceps",
+    "otherMuscles": ["Hamstrings", "Glutes", "Lower Back"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Dips",
+    "equipment": "Bar",
+    "primaryMuscleGroup": "Chest",
+    "otherMuscles": ["Triceps", "Shoulders"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Diver Pushup",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Shoulders", "Triceps"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Drop Squat",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Quadriceps", "Glutes"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Extended Plank",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core"],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Fast Feet",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Floor IYT Raises",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Shoulders", "Back"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Floor Windshield Wiper",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abdominals", "Obliques"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Flutter Kicks",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abdominals", "Hip Flexors"],
+    "exercise_types": ["time", "reps"]
+  },
+  {
+    "name": "Frog Squat Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Quadriceps", "Glutes"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Front Box Jump",
+    "equipment": "Box",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Front Lunges",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Quadriceps", "Glutes", "Hamstrings"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Glute Bridge",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Glutes", "Hamstrings"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Glute Kickback",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Glutes", "Hamstrings"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Good-morning",
+    "equipment": "BarBell",
+    "primaryMuscleGroup": "Lower Back",
+    "otherMuscles": ["Hamstrings", "Glutes"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Grappler Pushup",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Shoulders", "Triceps"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Hammer curl",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Biceps",
+    "otherMuscles": ["Forearms"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "High Knees",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs", "Core"],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "In and Out Abdominals Crunch",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abdominals"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Inchworm",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Shoulders"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Jog in Place",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": [],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Jumping Jack",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs", "Shoulders"],
+    "exercise_types": ["time", "reps"]
+  },
+  {
+    "name": "Jumping Split Squat",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Quadriceps", "Glutes", "Hamstrings"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Knee Tap Push-Up",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Triceps"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Knee to Opposite Elbow Plank",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Obliques"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Knee to Outside Elbow Plank",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Obliques"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Kneeling Pushups",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Triceps"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Kneeling Squat Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Quadriceps", "Glutes"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Lateral Box Jump",
+    "equipment": "Box",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Lateral raise",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Shoulders",
+    "otherMuscles": ["Traps"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Lateral Run",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Leg curl",
+    "equipment": "Machine",
+    "primaryMuscleGroup": "Hamstrings",
+    "otherMuscles": ["Glutes"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Leg extension",
+    "equipment": "Machine",
+    "primaryMuscleGroup": "Quadriceps",
+    "otherMuscles": [],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Leg press",
+    "equipment": "Machine",
+    "primaryMuscleGroup": "Quadriceps",
+    "otherMuscles": ["Glutes", "Hamstrings"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Leg raise",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Hips",
+    "otherMuscles": ["Abs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Leg Raises",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Lunge",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Quadriceps",
+    "otherMuscles": ["Glutes", "Hamstrings"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Lunge Front Kick",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Mountain Climber",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Shoulders"],
+    "exercise_types": ["time", "reps"]
+  },
+  {
+    "name": "One-Leg DL Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Quadriceps", "Glutes", "Hamstrings"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Pike Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Plank",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core"],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Plank Ankle Taps",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Plank Jack",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Core", "Legs"],
+    "exercise_types": ["time"]
+  },
+  {
+    "name": "Preacher curl",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Biceps",
+    "otherMuscles": [],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Pull-down",
+    "equipment": "Cable",
+    "primaryMuscleGroup": "Back",
+    "otherMuscles": ["Biceps"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Pull-up",
+    "equipment": "Bar",
+    "primaryMuscleGroup": "Back",
+    "otherMuscles": ["Biceps", "Shoulders"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Pulse with Squat Jump",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Legs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Push-up",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Chest",
+    "otherMuscles": ["Triceps", "Shoulders"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Pushdown",
+    "equipment": "Cable",
+    "primaryMuscleGroup": "Triceps",
+    "otherMuscles": [],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Pushup",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Triceps"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Pushup Jack",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Core"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Pushup to Row",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Chest", "Back", "Triceps"],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Reverse Crunches",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Russian twist",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Abdominals",
+    "otherMuscles": ["Obliques"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Seated calf raise",
+    "equipment": "Machine",
+    "primaryMuscleGroup": "Calves",
+    "otherMuscles": [],
+    "exercise_types": ["reps", "weight"]
+  },
+  {
+    "name": "Seated Knee Tucks",
+    "equipment": "BodyWeight",
+    "primaryMuscleGroup": "Cardio",
+    "otherMuscles": ["Abs"],
+    "exercise_types": ["reps"]
+  },
+  {
+    "name": "Shoulder press",
+    "equipment": "DumbBell",
+    "primaryMuscleGroup": "Shoulders",
+    "otherMuscles": ["Triceps"],
+    "exercise_types": ["reps", "weight"]
+  }
+]

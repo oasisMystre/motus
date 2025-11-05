@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "538681374453",
+    "firebase_url": "https://motuszero-default-rtdb.firebaseio.com",
+    "project_id": "motuszero",
+    "storage_bucket": "motuszero.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538681374453:android:08ca2732f35d1f2e68b7bc",
+        "android_client_info": {
+          "package_name": "com.anonymous.motus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538681374453-udvfvum2nsg8p89ia8kbncgq73sn04cf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXQWHmN5_SHgSMXvyUC8_-xEjAgkPg9rc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538681374453-udvfvum2nsg8p89ia8kbncgq73sn04cf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "538681374453-4o9bor5ckh2g766c2gi99meckvm0liv0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.anonymous.motus"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

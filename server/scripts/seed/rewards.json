@@ -1,0 +1,42 @@
+[
+  {
+    "title": "new user rewards",
+    "description": "We've got a special gift for you",
+    "point": 100
+  },
+  {
+    "title": "daily check in",
+    "description": "Once every 24 hours",
+    "point": 100
+  },
+  {
+    "title": "workout logged",
+    "description": "Minimum of 20 minutes session",
+    "point": 100
+  },
+  {
+    "title": "meal logged",
+    "description": "Bonus capped at 3 meals per day",
+    "point": 20
+  },
+  {
+    "title": "weekly goals achieved",
+    "description": "4+ workouts completed in a week",
+    "point": 20
+  },
+  {
+    "title": "7 days streak",
+    "description": "Maintain a 7 days streak and earn",
+    "point": 100
+  },
+  {
+    "title": "14 days streak",
+    "description": "Maintain a 30 days streak and earn",
+    "point": 200
+  },
+  {
+    "title": "30 days streak",
+    "description": "Maintain a 30 days streak and earn",
+    "point": 500
+  }
+]

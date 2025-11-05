@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Set Poppins as the default font family */
+@layer base {
+  * {
+    font-family: "Poppins_400Regular", sans-serif;
+  }
+}

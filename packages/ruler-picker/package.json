@@ -1,0 +1,27 @@
+{
+  "name": "react-native-ruler-picker",
+  "main": "src/index.tsx",
+  "module": "src/index.tsx",
+  "types": "src/index.tsx",
+  "source": "src/index.tsx",
+  "exports": {
+    ".": {
+      "types": "./src/index.tsx",
+      "import": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    }
+  },
+  "react-native": "src/index.tsx",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup --dts --format=esm,cjs src/index.tsx"
+  },
+  "devDependencies": {},
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "dependencies": {
+    "@shopify/flash-list": "1.7.6"
+  }
+}
