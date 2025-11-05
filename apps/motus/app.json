@@ -15,12 +15,57 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "entitlements": {
         "com.apple.developer.applesignin": [
+          "Default",
           "Default"
         ]
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
+          "metamask",
+          "trust",
+          "safe",
+          "rainbow",
+          "uniswap",
+          "zerion",
+          "imtokenv2",
+          "spot",
+          "omni",
+          "dfw",
+          "tpoutside",
+          "robinhood-wallet",
+          "frontier",
+          "blockchain-wallet",
+          "safepalwallet",
+          "bitkeep",
+          "cbwallet",
+          "oneinch",
+          "exodus",
+          "bnc",
+          "ledgerlive",
+          "mewwallet",
+          "awallet",
+          "keyring",
+          "lobstr",
+          "ontoprovider",
+          "mathwallet",
+          "unstoppabledomains",
+          "obvious",
+          "fireblocks-wc",
+          "ambire",
+          "internetmoney",
+          "walletnow",
+          "bitcoincom",
+          "coin98",
+          "arculuswc",
+          "phantom",
+          "cryptobrowser",
+          "chainapp",
+          "huddln",
+          "verso",
+          "haha",
+          "modularwallet",
+          "coinomi",
           "metamask",
           "trust",
           "safe",
@@ -79,6 +124,7 @@
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.motus",
       "permissions": [
+        "android.permission.RECORD_AUDIO",
         "android.permission.RECORD_AUDIO"
       ]
     },
@@ -156,6 +202,10 @@
         "projectId": "5cd0bb53-b9ae-4e1f-b93c-6ff13d0a6f8d"
       }
     },
-    "owner": "apexflix"
+    "owner": "apexflix",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/5cd0bb53-b9ae-4e1f-b93c-6ff13d0a6f8d"
+    }
   }
 }

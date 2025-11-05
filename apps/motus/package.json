@@ -5,11 +5,12 @@
   "version": "1.0.0",
   "scripts": {
     "check": "tsc --noEmit",
+    "lint": "expo lint",
     "start": "expo start",
     "android": "expo run:android --device",
     "ios": "expo run:ios --device",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "publish": "eas build --platform ios --profile preview"
   },
   "trustedDependencies": [
     "@openfoodfacts/openfoodfacts-nodejs"
@@ -66,6 +67,7 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.11",
+    "expo-updates": "~0.28.17",
     "expo-web-browser": "~14.2.0",
     "fast-text-encoding": "^1.0.6",
     "formik": "^2.4.6",
