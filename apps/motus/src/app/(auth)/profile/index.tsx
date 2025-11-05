@@ -3,10 +3,7 @@ import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { userInsertSchema } from "@motus/server";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  KeyboardAwareScrollView,
-  KeyboardStickyView,
-} from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import {
   Animated,
   type NativeScrollEvent,
@@ -86,44 +83,42 @@ export default function ProfileScreen() {
         );
       }}
     >
-      <KeyboardStickyView style={{ flex: 1 }}>
-        <View
-          style={{ marginTop: top * 1.5 }}
-          className="flex-1"
-        >
-          <View className="flex-row gap-x-2 px-12">
-            {screens.map((_, index) => (
-              <View
-                key={index}
-                className="flex-1 h-0.5"
-                style={{
-                  backgroundColor:
-                    currentIndex === index ? Colors.primary : Colors.grey,
-                }}
-              />
-            ))}
-          </View>
-          <KeyboardAwareScrollView
-            ref={courosel}
-            horizontal
-            scrollEnabled={false}
-            onScroll={onScroll}
-            className="flex-1"
-            showsHorizontalScrollIndicator={false}
-          >
-            {screens.map((screen, index, screens) => {
-              const Screen = screen;
-              return (
-                <Screen
-                  key={index}
-                  goBack={goTo(Math.max(index - 1, 0))}
-                  next={goTo(Math.min(index + 1, screens.length))}
-                />
-              );
-            })}
-          </KeyboardAwareScrollView>
+      <View
+        style={{ flex: 1, marginTop: top * 1.5 }}
+        className="flex-1"
+      >
+        <View className="flex-row gap-x-2 px-12">
+          {screens.map((_, index) => (
+            <View
+              key={index}
+              className="flex-1 h-0.5"
+              style={{
+                backgroundColor:
+                  currentIndex === index ? Colors.primary : Colors.grey,
+              }}
+            />
+          ))}
         </View>
-      </KeyboardStickyView>
+        <KeyboardAwareScrollView
+          ref={courosel}
+          horizontal
+          scrollEnabled={false}
+          onScroll={onScroll}
+          className="flex-1"
+          showsHorizontalScrollIndicator={false}
+        >
+          {screens.map((screen, index, screens) => {
+            const Screen = screen;
+            return (
+              <Screen
+                key={index}
+                goBack={goTo(Math.max(index - 1, 0))}
+                next={goTo(Math.min(index + 1, screens.length))}
+              />
+            );
+          })}
+        </KeyboardAwareScrollView>
+      </View>
     </Formik>
   );
 }
