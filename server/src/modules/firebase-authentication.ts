@@ -118,14 +118,17 @@ export class FirebaseAuthentication {
       ? sessionCookie
       : (options.req.headers["x-session-token"] as string | undefined);
 
-    if (sessionCookie)
-      return {
-        ...(await FirebaseAuthentication.authenticateWithSessionCookie(
-          auth,
-          sessionCookie,
-        )),
-        token: sessionCookie,
-      };
+    if (sessionCookie) {
+      const user = await FirebaseAuthentication.authenticateWithSessionCookie(
+        auth,
+        sessionCookie,
+      ).catch(() => null);
+      if (user)
+        return {
+          ...user,
+          token: sessionCookie,
+        };
+    }
 
     const idToken =
       await FirebaseAuthentication.ExtractAccessTokenFromHeaders(

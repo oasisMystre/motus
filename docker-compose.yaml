@@ -7,7 +7,6 @@ services:
       args:
         SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN}
     ports:
-      - "${PORT}:${PORT}"
       - "10001:10001"
     networks:
       - webnet
