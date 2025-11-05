@@ -3,12 +3,13 @@ import { useMemo } from "react";
 import { useFormikContext } from "formik";
 import { useTranslation } from "react-i18next";
 import type { userSelectSchema } from "@motus/server";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "../../constants";
 import Input from "../../components/Input";
 import useDimensions from "../../hooks/useDimensions";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 type SetNameScreenProps = {
   goBack: () => void;
@@ -25,14 +26,11 @@ export function SetNameScreen({ next }: SetNameScreenProps) {
   const isValid = useMemo(() => values.name, [values]);
 
   return (
-    <View
-      className="flex-1 px-6"
+    <KeyboardAwareScrollView
+      contentContainerClassName="flex-1 px-6"
       style={{ width, marginBottom: bottom }}
     >
-      <ScrollView
-        contentContainerClassName="flex-1 gap-y-8 pt-8"
-        keyboardShouldPersistTaps="handled"
-      >
+      <View className="flex-1 gap-y-8 pt-8">
         <View>
           <Text className="text-xl text-white font-poppins-semibold">
             {t("auth.profile.set_name.title")}
@@ -67,7 +65,7 @@ export function SetNameScreen({ next }: SetNameScreenProps) {
             }}
           />
         </View>
-      </ScrollView>
+      </View>
       <View>
         <Pressable
           disabled={!isValid}
@@ -80,6 +78,6 @@ export function SetNameScreen({ next }: SetNameScreenProps) {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 }

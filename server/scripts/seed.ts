@@ -40,8 +40,6 @@ async function main(db: Database) {
     .insert(exercises)
     .values(
       exerciseList.map((exercise) => {
-        console.log(exercise);
-
         const other_muscles = dbMuscles
           .filter((muscle) =>
             exercise.otherMuscles.find((value) => value === muscle.name),
@@ -67,13 +65,13 @@ async function main(db: Database) {
       target: [exercises.user, exercises.name],
       set: { name: exercises.name },
     });
-
+  await db.delete(rewardTypes).execute();
   const dbRewardTypes = Object.fromEntries(
     await Promise.all(
-      rewardList.map(async (reward) => {
+      rewardList.map(async (reward, id) => {
         const [rewardType] = await db
           .insert(rewardTypes)
-          .values(reward)
+          .values({ ...reward, id })
           .onConflictDoUpdate({ target: rewardTypes.title, set: reward })
           .returning()
           .execute();

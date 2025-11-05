@@ -90,7 +90,7 @@ export default function PostCommentScreen() {
       post,
       parent: null,
     },
-    async onSubmit(values, { resetForm, validateForm }) {
+    async onSubmit(values, { resetForm }) {
       const id = v4();
       const comment = { id, ...values, tags: [], createdAt: new Date() };
 

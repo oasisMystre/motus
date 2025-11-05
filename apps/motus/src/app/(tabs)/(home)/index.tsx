@@ -15,7 +15,6 @@ import { FeedPost } from "../../../components/feeds";
 import { useTRPC } from "../../../providers/TRPCProvider";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { postActions, postSelector } from "../../../store/post";
-import { FeedHeader } from "../../../components/feeds/FeedHeader";
 
 export default function HomeScreen() {
   const trpc = useTRPC();
@@ -23,9 +22,7 @@ export default function HomeScreen() {
 
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { points } = useAppSelector((state) => state.reward);
   const postState = useAppSelector((state) => state.post);
-
   const posts = postSelector.selectAll(postState);
 
   assert(user && user.type === "firebase");
@@ -60,13 +57,6 @@ export default function HomeScreen() {
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="white" />
         </View>
-      )}
-      ListHeaderComponent={() => (
-        <FeedHeader
-          user={user}
-          points={points}
-          style={{ marginBottom: 32 }}
-        />
       )}
       renderItem={({ item }) => (
         <FeedPost

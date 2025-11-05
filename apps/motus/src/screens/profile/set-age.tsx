@@ -1,15 +1,18 @@
 import type z from "zod";
+import moment from "moment";
 import { useMemo } from "react";
 import { useFormikContext } from "formik";
 import { useTranslation } from "react-i18next";
+import { Pressable, Text, View } from "react-native";
 import type { userSelectSchema } from "@motus/server";
-import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "../../constants";
 import Input from "../../components/Input";
 import useDimensions from "../../hooks/useDimensions";
 import { CircularBackButton } from "../../components/Header";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 type SetAgeScreenProps = {
   goBack: () => void;
@@ -27,20 +30,17 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
   const isValid = useMemo(() => values.profile?.age, [values]);
 
   return (
-    <View
-      className="flex-1 px-6"
+    <KeyboardAwareScrollView
+      contentContainerClassName="flex-1 px-6"
       style={{ width, marginBottom: bottom }}
     >
-      <ScrollView
-        contentContainerClassName="flex-1 gap-y-8 pt-8"
-        keyboardShouldPersistTaps="handled"
-      >
+      <View className="flex-1 gap-y-8 pt-8">
         <View>
           <Text className="text-xl text-white font-poppins-semibold">
             {t("auth.profile.set_age.title")}
           </Text>
         </View>
-        <View>
+        <View className="flex-1">
           <Input
             label={t("auth.profile.set_age.input_label")}
             labelAttrs={{
@@ -62,7 +62,19 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
             }}
           />
         </View>
-      </ScrollView>
+        <RNDateTimePicker
+          mode="date"
+          display="spinner"
+          textColor="white"
+          themeVariant="dark"
+          accentColor={Colors.primary}
+          style={{ backgroundColor: "transparent" }}
+          value={moment().subtract(values.profile?.age, "years").toDate()}
+          onChange={(_, date) =>
+            setFieldValue("profile.age", moment().diff(moment(date), "year"))
+          }
+        />
+      </View>
       <View className="flex-row items-center gap-x-8">
         <CircularBackButton
           canGoBack
@@ -79,6 +91,6 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 }

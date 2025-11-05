@@ -13,6 +13,7 @@ import {
   meals,
   messages,
   muscles,
+  notifications,
   postLikes,
   posts,
   rewards,
@@ -275,4 +276,19 @@ export const messageInsertSchema = createInsertSchema(messages, {
 });
 export const messageSelectSchema = createSelectSchema(messages, {
   content: messageContentSchema,
+});
+
+const intlSchema = z.object({
+  text: z.string(),
+  external: z.boolean(),
+  extra: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const notificationInsertSchema = createInsertSchema(notifications, {
+  title: intlSchema.nullable().optional(),
+  subtitle: intlSchema.nullable().optional(),
+});
+export const notificationSelectSchema = createSelectSchema(notifications, {
+  title: intlSchema.nullable().optional(),
+  subtitle: intlSchema.nullable().optional(),
 });

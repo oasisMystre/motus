@@ -1,7 +1,5 @@
-import assert from "assert";
 import { createContext, useContext } from "react";
 import { GearIcon } from "phosphor-react-native";
-import { useQuery } from "@tanstack/react-query";
 import { Pressable, View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {

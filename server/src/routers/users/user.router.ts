@@ -19,7 +19,7 @@ export const userRouter = router({
     .input(userSelectSchema.pick({ id: true }).optional())
     .output(userExtendSelectSchema.extend({ token: z.string().optional() }))
     .query(async ({ ctx, input }) => {
-      const id = input && input.id ? input.id : ctx.user.id;
+      const id = input?.id ? input.id : ctx.user.id;
       const user = await getUserById(ctx.drizzle, id);
       if (user) return { ...user, token: ctx.user.token };
 
@@ -39,6 +39,9 @@ export const userRouter = router({
 
       throw new TRPCError({ code: "NOT_FOUND", message: "user not found" });
     }),
+  delete: publicProcedure.mutation(({ ctx }) => {
+    return ctx.drizzle.delete(users).where(eq(users.id, ctx.user.id)).execute();
+  }),
   search: publicProcedure
     .input(
       z
@@ -50,7 +53,7 @@ export const userRouter = router({
     .query(async ({ ctx, input }) => {
       const where: (SQL<unknown> | undefined)[] = [];
 
-      if (input && input.search) {
+      if (input?.search) {
         const innerWhere: SQL<unknown>[] = [];
 
         innerWhere.push(like(users.name, format("%%%s%%", input.search)));

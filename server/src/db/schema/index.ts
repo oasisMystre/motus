@@ -11,6 +11,7 @@ export * from "./exercises";
 export * from "./relations";
 export * from "./messages";
 export * from "./workouts";
+export * from "./notifications";
 export * from "./equipments";
 export * from "./meal-logs";
 export * from "./workout-logs";

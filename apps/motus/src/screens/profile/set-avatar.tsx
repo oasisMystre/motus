@@ -3,11 +3,11 @@ import clsx from "clsx";
 import { useState } from "react";
 import { Image } from "expo-image";
 import { useFormikContext } from "formik";
-import { Octicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import type { userSelectSchema } from "@motus/server";
 import { ImageIcon } from "phosphor-react-native";
+import type { userSelectSchema } from "@motus/server";
 import { launchImageLibraryAsync } from "expo-image-picker";
+import { Octicons, MaterialIcons } from "@expo/vector-icons";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -70,10 +70,15 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
             }}
           >
             <View className="size-32 bg-stone-50 rounded-full items-center justify-center">
-              {asset && (
+              {asset ? (
                 <Image
                   source={asset}
                   style={{ width: 128, height: 128, borderRadius: 100 }}
+                />
+              ) : (
+                <MaterialIcons
+                  name="person"
+                  size={64}
                 />
               )}
               <View className="absolute -bottom-4 right-0 bg-primary p-2 rounded-full">

@@ -12,7 +12,7 @@ import KeyboardView from "../../../../../../../components/KeyboardView";
 
 export default function NutrimentScreen() {
   const { bottom } = useSafeAreaInsets();
-  const { values, errors, isValid, isSubmitting, setFieldValue, handleSubmit } =
+  const { values, isValid, isSubmitting, setFieldValue, handleSubmit } =
     useFormikContext<{
       metadata: {
         nutriments: { [key: string]: { value: number; unit: string } };

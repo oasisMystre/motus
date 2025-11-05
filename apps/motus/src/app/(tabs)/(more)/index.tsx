@@ -78,7 +78,7 @@ export default function MoreScreen() {
           ),
         },
         {
-          name: "Appearence",
+          name: "Appearance",
           icon: (props) => (
             <MaterialIcons
               {...props}

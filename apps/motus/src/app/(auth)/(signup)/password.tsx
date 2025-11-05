@@ -84,7 +84,7 @@ export default function PasswordScreen() {
     },
     onSubmit(values) {
       dispath(formActions.updateSignupForm(values));
-      if (signup && signup.email) {
+      if (signup?.email) {
         return loading.promise(
           createUserWithEmailAndPassword(
             auth,

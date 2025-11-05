@@ -2,8 +2,8 @@ import type z from "zod";
 import { format } from "util";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { RefreshControl } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, RefreshControl } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { BarbellIcon, PlusIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -149,10 +149,9 @@ export default function AddExerciseScreen() {
               </>
             )}
             renderItem={({ section: { custom, data }, item, index }) => {
-              let exercises =
-                createWorkout && createWorkout.exercises
-                  ? [...createWorkout.exercises]
-                  : [];
+              let exercises = createWorkout?.exercises
+                ? [...createWorkout.exercises]
+                : [];
               const selected = exercises.find(
                 (exercise) => exercise.id === item.id,
               );
@@ -221,9 +220,8 @@ export default function AddExerciseScreen() {
             className="absolute bottom-0 inset-x-0"
             style={{ paddingBottom: bottom }}
           >
-            {createWorkout &&
-              createWorkout.exercises &&
-              createWorkout.exercises.length > 0 && (
+            {createWorkout?.exercises &&
+              createWorkout?.exercises.length > 0 && (
                 <Button
                   icon={<PlusIcon color="white" />}
                   text={t(

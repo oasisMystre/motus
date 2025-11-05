@@ -1,6 +1,7 @@
 import { format } from "util";
+import superjson from "superjson";
+import type { AppRouter } from "@motus/server";
 import { getItemAsync } from "expo-secure-store";
-import { type AppRouter, transformer } from "@motus/server";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ const queryClient = new QueryClient();
 const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      transformer,
+      transformer: superjson,
       url: process.env.EXPO_PUBLIC_BASE_API_URL!,
       async headers() {
         const token = await getItemAsync("firebase.token");

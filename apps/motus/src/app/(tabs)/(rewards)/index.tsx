@@ -39,8 +39,8 @@ export default function RewardsScreen() {
         marginVertical: 16,
       }}
       ListFooterComponent={() => (
-        <Pressable className="p-2">
-          <Text className="text-primary">Sell All Transactions</Text>
+        <Pressable className="p-2 hidden">
+          <Text className="text-primary">See All Transactions</Text>
         </Pressable>
       )}
     />

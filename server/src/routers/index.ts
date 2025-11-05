@@ -13,6 +13,7 @@ import { routineRouter } from "./routines/routine.router";
 import { messageRouter } from "./messages/message.router";
 import { exerciseRouter } from "./exercises/exercise.router";
 import { equipmentRouter } from "./equipments/equipment.router";
+import { notificationRouter } from "./notifications/notification.route";
 
 export const appRouter = router({
   mcp: mcpRouter,
@@ -28,6 +29,7 @@ export const appRouter = router({
   message: messageRouter,
   exercise: exerciseRouter,
   equipment: equipmentRouter,
+  nottication: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

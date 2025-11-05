@@ -7,7 +7,6 @@ import { TimerIcon } from "phosphor-react-native";
 import { StyleSheet, View, Text } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { workoutLogInsertSchema } from "@motus/server";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 
@@ -24,7 +23,6 @@ export default function LogWorkoutScreen() {
   const trpc = useTRPCClient();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { bottom } = useSafeAreaInsets();
   const [time, setTime] = useState({ minutes: "", seconds: "", hours: "" });
 
   const {
@@ -175,9 +173,7 @@ export default function LogWorkoutScreen() {
                 keyboardType: "decimal-pad",
                 value: values.metadata.weight && String(values.metadata.weight),
                 onChangeText: (value) => {
-                  const inputting = /\.$/.test(value);
                   const data = Number(value);
-
                   setFieldValue("metadata.weight", data);
                 },
                 focusStyle: style["input:focus"],
