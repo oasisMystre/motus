@@ -2,10 +2,9 @@ import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, View } from "react-native";
 
-
 import { Colors } from "../../../constants";
 import { useTRPC } from "../../../providers/TRPCProvider";
-import {NotificationListItem} from "../../../components/notifications";
+import { NotificationListItem } from "../../../components/notifications";
 
 export default function NotificationPage() {
   const trpc = useTRPC();

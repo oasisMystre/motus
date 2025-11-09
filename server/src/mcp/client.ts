@@ -1,102 +1,135 @@
-import type { Logger } from "pino";
-import z, { type ZodObject } from "zod";
-import {
-  Agent,
-  run,
-  type MCPServerStreamableHttp,
-  type OutputGuardrail,
-} from "@openai/agents";
+import path from "path";
+import { sleep } from "bun";
+import { readFileSync } from "fs";
+import { Agent, type MCPServerStreamableHttp } from "@openai/agents";
 
-const MessageOutput = z.object({ response: z.string() });
+export class McpClientConnectionError extends Error {}
 
-export class MotusMcpClient {
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timeoutId: Timer;
+
+  return Promise.race([
+    promise.finally(() => clearTimeout(timeoutId)),
+    new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(
+        () => reject(new McpClientConnectionError("Connect timeout")),
+        ms,
+      );
+    }),
+  ]);
+}
+
+export class McpClient {
   connected: boolean;
+  private connectionTime!: number;
+  private connecting: Promise<boolean> | null;
 
   constructor(
     private readonly server: MCPServerStreamableHttp,
-    private readonly config: { name: string },
-    private readonly logger?: Logger,
+    private readonly config: {
+      name: string;
+      maxRetries?: number | null;
+      maxConnectionAge?: number | null;
+      connectionTimeout?: number | null;
+      retryStrategy?: (retries: number) => number;
+    },
   ) {
+    this.connecting = null;
+    this.connectionTime = 0;
     this.connected = false;
   }
 
+  get isConnected() {
+    const maxConnectionAge =
+      this.config.maxConnectionAge === null
+        ? Infinity
+        : this.config.maxConnectionAge
+          ? this.config.maxConnectionAge
+          : 3_600_000;
+    return (
+      this.connected && Date.now() - this.connectionTime < maxConnectionAge
+    );
+  }
+
   async connect() {
-    await this.server.connect();
+    if (this.isConnected) return true;
+    if (this.connecting) return this.connecting;
 
-    if (this.connected) return this;
+    await this.close();
 
-    this.connected = true;
+    this.connecting = (async () => {
+      let retries = 0;
+      const maxRetries =
+        this.config.maxRetries === null
+          ? Infinity
+          : this.config.maxRetries
+            ? this.config.maxRetries
+            : 20;
+      while (retries < maxRetries) {
+        try {
+          const timeout =
+            this.config.connectionTimeout === null
+              ? Infinity
+              : this.config.connectionTimeout
+                ? this.config.connectionTimeout
+                : 30_000;
+          await withTimeout(this.server.connect(), timeout);
+          this.connected = true;
+          this.connectionTime = Date.now();
+          break;
+        } catch (error) {
+          console.error(error);
+          retries += 1;
 
-    return this;
+          if (retries < maxRetries) {
+            const backoffMs = this.config.retryStrategy
+              ? this.config.retryStrategy(retries)
+              : Math.min(5000 * Math.pow(2, retries - 1), 30000);
+            await sleep(backoffMs);
+          }
+        }
+      }
+      return false;
+    })().finally(() => {
+      this.connecting = null;
+    });
+
+    return this.connecting;
   }
 
   async close() {
     if (this.connected) {
-      await this.server.close();
+      await this.server.close().catch(() => void 0);
       this.connected = false;
+      this.connecting = null;
     }
   }
 
-  async createAgent<T extends z.ZodObject>(
-    params: Omit<
+  async createAgent(
+    params?: Omit<
       ConstructorParameters<typeof Agent>[number],
       "name" | "mcpServers"
     >,
-    outputType?: T,
+    context?: string,
   ) {
-    await this.connect();
-    if (outputType) {
-      const outputGuardrail = this.createGuardRail(outputType);
-      if (params.outputGuardrails)
-        params.outputGuardrails.push(outputGuardrail);
-      else params.outputGuardrails = [outputGuardrail];
+    const isConnected = await this.connect();
+    let instructions = readFileSync(
+      path.join((await import("../instances")).__srcdir, "src/mcp/prompt.txt"),
+      "utf-8",
+    );
+    if (context) instructions = instructions.replace("%user_context%", context);
 
-      params.outputType = MessageOutput;
+    if (isConnected || this.isConnected) {
+      const agent = new Agent({
+        model: "gpt-4o-mini",
+        ...params,
+        name: this.config.name,
+        mcpServers: [this.server],
+      });
+
+      return agent;
     }
-    const agent = new Agent({
-      ...params,
-      name: this.config.name,
-      mcpServers: [this.server],
-    });
 
-    return agent;
-  }
-
-  private createGuardRail<T extends z.ZodObject>(
-    schema: T,
-  ): OutputGuardrail<typeof MessageOutput> {
-    const guardRailAgent = new Agent({
-      name: "Motus Guardrail check",
-      instructions: "Check if the output schama is valid.",
-      outputType: schema,
-    });
-
-    return {
-      name: "Motus Output Guardrail",
-      async execute({ agentOutput, context }) {
-        const result = await run(guardRailAgent, agentOutput.response, {
-          context,
-        });
-
-        return {
-          outputInfo: result.finalOutput,
-          tripwireTriggered: !schema.safeParse(result.finalOutput).success,
-        };
-      },
-    };
-  }
-
-  static safeOutputType<
-    T extends ZodObject,
-    R = T extends undefined ? unknown : z.infer<T>,
-  >(
-    finalOutput: unknown,
-    outputType: T,
-    passThrough: (value: unknown) => R,
-  ): R {
-    const result = outputType.safeParse(finalOutput);
-    if (result.data) return result.data as R;
-
-    return passThrough?.(finalOutput);
+    throw new McpClientConnectionError("Failed to connect to mcp server.");
   }
 }

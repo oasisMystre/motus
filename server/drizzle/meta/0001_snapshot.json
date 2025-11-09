@@ -52,12 +52,8 @@
           "name": "meals_user_users_id_fk",
           "tableFrom": "meals",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -112,12 +108,8 @@
           "name": "commentLikes_comment_comments_id_fk",
           "tableFrom": "commentLikes",
           "tableTo": "comments",
-          "columnsFrom": [
-            "comment"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["comment"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -125,12 +117,8 @@
           "name": "commentLikes_user_users_id_fk",
           "tableFrom": "commentLikes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -140,10 +128,7 @@
         "commentLikes_comment_user_unique": {
           "name": "commentLikes_comment_user_unique",
           "nullsNotDistinct": true,
-          "columns": [
-            "comment",
-            "user"
-          ]
+          "columns": ["comment", "user"]
         }
       },
       "policies": {},
@@ -205,12 +190,8 @@
           "name": "comments_user_users_id_fk",
           "tableFrom": "comments",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -218,12 +199,8 @@
           "name": "comments_post_posts_id_fk",
           "tableFrom": "comments",
           "tableTo": "posts",
-          "columnsFrom": [
-            "post"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["post"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -231,12 +208,8 @@
           "name": "comment_parent_fk",
           "tableFrom": "comments",
           "tableTo": "comments",
-          "columnsFrom": [
-            "parent"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -291,12 +264,8 @@
           "name": "postLikes_post_posts_id_fk",
           "tableFrom": "postLikes",
           "tableTo": "posts",
-          "columnsFrom": [
-            "post"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["post"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -304,12 +273,8 @@
           "name": "postLikes_user_users_id_fk",
           "tableFrom": "postLikes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -319,10 +284,7 @@
         "postLikes_post_user_unique": {
           "name": "postLikes_post_user_unique",
           "nullsNotDistinct": true,
-          "columns": [
-            "post",
-            "user"
-          ]
+          "columns": ["post", "user"]
         }
       },
       "policies": {},
@@ -397,12 +359,8 @@
           "name": "posts_user_users_id_fk",
           "tableFrom": "posts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -410,12 +368,8 @@
           "name": "posts_log_routine-logs_id_fk",
           "tableFrom": "posts",
           "tableTo": "routine-logs",
-          "columnsFrom": [
-            "log"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["log"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -509,31 +463,22 @@
         "email": {
           "name": "email",
           "nullsNotDistinct": true,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "username": {
           "name": "username",
           "nullsNotDistinct": true,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         },
         "users_uid_unique": {
           "name": "users_uid_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "uid"
-          ]
+          "columns": ["uid"]
         },
         "users_uid_email_unique": {
           "name": "users_uid_email_unique",
           "nullsNotDistinct": true,
-          "columns": [
-            "uid",
-            "email"
-          ]
+          "columns": ["uid", "email"]
         }
       },
       "policies": {},
@@ -576,9 +521,7 @@
         "rewardType_title_unique": {
           "name": "rewardType_title_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "title"
-          ]
+          "columns": ["title"]
         }
       },
       "policies": {},
@@ -622,12 +565,8 @@
           "name": "rewards_type_rewardType_id_fk",
           "tableFrom": "rewards",
           "tableTo": "rewardType",
-          "columnsFrom": [
-            "type"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["type"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -635,12 +574,8 @@
           "name": "rewards_user_users_id_fk",
           "tableFrom": "rewards",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -650,11 +585,7 @@
         "rewards_type_user_createdAt_unique": {
           "name": "rewards_type_user_createdAt_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "type",
-            "user",
-            "createdAt"
-          ]
+          "columns": ["type", "user", "createdAt"]
         }
       },
       "policies": {},
@@ -705,12 +636,8 @@
           "name": "streaks_user_users_id_fk",
           "tableFrom": "streaks",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -720,10 +647,7 @@
         "streaks_user_createdAt_unique": {
           "name": "streaks_user_createdAt_unique",
           "nullsNotDistinct": true,
-          "columns": [
-            "user",
-            "createdAt"
-          ]
+          "columns": ["user", "createdAt"]
         }
       },
       "policies": {},
@@ -768,9 +692,7 @@
         "muscles_name_unique": {
           "name": "muscles_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -814,12 +736,8 @@
           "name": "follows_following_users_id_fk",
           "tableFrom": "follows",
           "tableTo": "users",
-          "columnsFrom": [
-            "following"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["following"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -827,12 +745,8 @@
           "name": "follows_follower_users_id_fk",
           "tableFrom": "follows",
           "tableTo": "users",
-          "columnsFrom": [
-            "follower"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["follower"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -840,10 +754,7 @@
       "compositePrimaryKeys": {
         "pk": {
           "name": "pk",
-          "columns": [
-            "follower",
-            "following"
-          ]
+          "columns": ["follower", "following"]
         }
       },
       "uniqueConstraints": {},
@@ -900,12 +811,8 @@
           "name": "routines_user_users_id_fk",
           "tableFrom": "routines",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -913,12 +820,8 @@
           "name": "routine_previous_fk",
           "tableFrom": "routines",
           "tableTo": "routines",
-          "columnsFrom": [
-            "previous"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["previous"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1001,12 +904,8 @@
           "name": "exercises_equipment_equipments_id_fk",
           "tableFrom": "exercises",
           "tableTo": "equipments",
-          "columnsFrom": [
-            "equipment"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipment"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1014,12 +913,8 @@
           "name": "exercises_primary_muscle_group_muscles_id_fk",
           "tableFrom": "exercises",
           "tableTo": "muscles",
-          "columnsFrom": [
-            "primary_muscle_group"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["primary_muscle_group"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1027,12 +922,8 @@
           "name": "exercises_user_users_id_fk",
           "tableFrom": "exercises",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1042,10 +933,7 @@
         "exercises_user_name_unique": {
           "name": "exercises_user_name_unique",
           "nullsNotDistinct": true,
-          "columns": [
-            "user",
-            "name"
-          ]
+          "columns": ["user", "name"]
         }
       },
       "policies": {},
@@ -1101,12 +989,8 @@
           "name": "messages_user_users_id_fk",
           "tableFrom": "messages",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1114,12 +998,8 @@
           "name": "message_reply_fk",
           "tableFrom": "messages",
           "tableTo": "messages",
-          "columnsFrom": [
-            "reply"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reply"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1167,12 +1047,8 @@
           "name": "workouts_user_users_id_fk",
           "tableFrom": "workouts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1180,12 +1056,8 @@
           "name": "workouts_routine_routines_id_fk",
           "tableFrom": "workouts",
           "tableTo": "routines",
-          "columnsFrom": [
-            "routine"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["routine"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1251,12 +1123,8 @@
           "name": "notifications_user_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1305,9 +1173,7 @@
         "equipments_name_unique": {
           "name": "equipments_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -1375,12 +1241,8 @@
           "name": "meal-logs_user_users_id_fk",
           "tableFrom": "meal-logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1434,12 +1296,8 @@
           "name": "workout-logs_user_users_id_fk",
           "tableFrom": "workout-logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1499,12 +1357,8 @@
           "name": "routine-logs_user_users_id_fk",
           "tableFrom": "routine-logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1512,12 +1366,8 @@
           "name": "routine-logs_routine_routines_id_fk",
           "tableFrom": "routine-logs",
           "tableTo": "routines",
-          "columnsFrom": [
-            "routine"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["routine"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

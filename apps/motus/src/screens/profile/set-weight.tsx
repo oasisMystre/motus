@@ -1,17 +1,18 @@
 import type z from "zod";
 import { useMemo } from "react";
 import { useFormikContext } from "formik";
+import capitalize from "lodash.capitalize";
 import { useTranslation } from "react-i18next";
 import type { userSelectSchema } from "@motus/server";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Colors } from "../../constants";
 import Input from "../../components/Input";
 import useDimensions from "../../hooks/useDimensions";
 import { CircularBackButton } from "../../components/Header";
 import DropdownPicker from "../../components/forms/DropdownPicker";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 type SetWeightScreenProps = {
   goBack: () => void;
@@ -66,7 +67,10 @@ export function SetWeightScreen({ goBack, next }: SetWeightScreenProps) {
           />
           <DropdownPicker
             value={values.profile?.weight?.unit}
-            data={["kg", "ibs"].map((value) => ({ label: value, value }))}
+            data={["kg", "ibs"].map((value) => ({
+              label: ['ibs'].includes(value) ? capitalize(value) : value,
+              value,
+            }))}
             itemTextStyle={{ color: "white" }}
             onValueChanged={({ item: { value } }) =>
               handleChange("profile.weight.unit")(value)

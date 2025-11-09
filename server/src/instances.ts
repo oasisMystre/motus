@@ -8,7 +8,7 @@ import {
 import { getEnv } from "./env";
 import { createDB } from "./db";
 import { config } from "./mcp/config";
-import { MotusMcpClient } from "./mcp/client";
+import { McpClient } from "./mcp/client";
 
 setDefaultOpenAIKey(getEnv("OPEN_API_KEY"));
 setTracingExportApiKey(getEnv("OPEN_API_KEY"));
@@ -21,4 +21,4 @@ const transport = new MCPServerStreamableHttp({
   ...config,
   url: getEnv("MCP_SERVER_URL"),
 });
-export const motusMcpClient = new MotusMcpClient(transport, config);
+export const motusMcpClient = new McpClient(transport, config);

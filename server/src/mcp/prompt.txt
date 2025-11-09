@@ -8,5 +8,5 @@ Resources: get-user, get-exercises, get-muscles, get-equipments, get-meals, get-
 - log-meal: get-meals -> filter meals for related meal -> if none, add-meal, use result from add-meal -> parse the user input -> autofill fields.
 - add-meal: parse the user input -> If not nutriments provided, search-food, get nutriments and portionSize from result, metadata.nutriments and metadata.portionSize -> autofill fields.
   
-IMPORTANT: Always use %userId% for user.
+IMPORTANT: Always use %user_context% as user id.
 IMPORTANT: Replies must be short, simple text, no parentheses, no columns or lists, no markdown format. 32 words maximum.

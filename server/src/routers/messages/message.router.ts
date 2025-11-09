@@ -1,19 +1,16 @@
 import z from "zod";
-import path from "path";
+import { format } from "util";
 import { eq } from "drizzle-orm";
-import { readFileSync } from "fs";
 import { run } from "@openai/agents";
 
 import { messages } from "../../db/schema";
 import { __srcdir } from "../../instances";
 import { publicProcedure, router } from "../../trpc";
 import {
-  messageContentSchema,
   messageInsertSchema,
   messageSelectSchema,
   paginationSchema,
 } from "../../external";
-import { MotusMcpClient } from "../../mcp/client";
 
 export const messageRouter = router({
   create: publicProcedure
@@ -23,7 +20,7 @@ export const messageRouter = router({
       let context = [
         {
           role: "user" as const,
-          content: input.content,
+          content: format('user=%s %s', ctx.user.id, input.content),
           createdAt: new Date(),
         },
       ];
@@ -32,14 +29,11 @@ export const messageRouter = router({
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
       );
 
-      const agent = await ctx.mcpClient.createAgent({
-        model: "gpt-4.1-mini",
-        instructions: readFileSync(
-          path.resolve(__srcdir, "src/mcp/prompt.txt"),
-          "utf-8",
-        ).replace("%userId%", ctx.user.id),
-      });
-
+      const agent = await ctx.mcpClient.createAgent(undefined,  ctx.user.id);
+      console.log( context.map((context) => ({
+        role: context.role,
+        content: context.content,
+      })))
       const response = await run(
         agent,
         context.map((context) => ({

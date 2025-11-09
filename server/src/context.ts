@@ -1,6 +1,4 @@
 import { getAuth } from "firebase-admin/auth";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { MCPServerStreamableHttp } from "@openai/agents";
 import type { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 
 import { motusMcpClient, db, openai } from "./instances";
