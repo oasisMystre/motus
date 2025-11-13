@@ -39,7 +39,7 @@ export default function HomeScreen() {
     <FlatList
       collapsable
       data={posts}
-      style={{ marginTop: top, flex: 1 }}
+      style={{ paddingTop: 16, flex: 1 }}
       keyExtractor={(post) => post.id}
       showsVerticalScrollIndicator={false}
       refreshControl={

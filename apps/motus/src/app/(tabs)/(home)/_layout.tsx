@@ -44,7 +44,10 @@ export default function HomeLayout() {
         name="notifications"
         options={{ title: "Notification", headerShown: true }}
       />
-      <Stack.Screen name="(comments)" />
+      <Stack.Screen
+        name="(comments)"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="[id]"
         options={{ headerShown: false }}

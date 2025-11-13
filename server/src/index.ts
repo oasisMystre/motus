@@ -38,6 +38,7 @@ server.register(fastifySession, {
   cookie: { secure: true, httpOnly: true, sameSite: "lax" },
 });
 
+// @ts-ignore
 server.register(streamableHttp, {
   stateful: false,
   mcpEndpoint: "/mcp",

@@ -5,7 +5,7 @@ export default function LogWorkoutLayout() {
   return (
     <Stack
       screenOptions={({ navigation }) => ({
-        title: "Routines",
+        title: "Workout",
         headerTitleAlign: "center",
         presentation: "fullScreenModal",
         animation: "slide_from_right",
@@ -26,9 +26,8 @@ export default function LogWorkoutLayout() {
     >
       <Stack.Screen
         name="index"
-        options={{ title: "Workout" }}
       />
-      <Stack.Screen name="log-workout" />
+      <Stack.Screen name="log-workout" options={{title: "Create Workout"}} />
     </Stack>
   );
 }

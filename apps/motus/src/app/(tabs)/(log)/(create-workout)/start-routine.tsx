@@ -21,14 +21,17 @@ import {
 import { Colors } from "../../../../constants";
 import useTimer from "../../../../hooks/useTimer";
 import Button from "../../../../components/Button";
+import { useAppDispatch } from "../../../../store";
 import { formActions } from "../../../../store/form";
 import useRoutine from "../../../../hooks/useRoutine";
 import { routineActions } from "../../../../store/routine";
 import KeyboardView from "../../../../components/KeyboardView";
-import { useAppDispatch, useAppSelector } from "../../../../store";
 import TimerSheet from "../../../../components/bottom-sheets/TimerSheet";
 import { ListHeader, ListItem } from "../../../../components/start-routine";
 import ExerciseMenuModal from "../../../../components/create-routine/ExerciseMenuModal";
+import AddExerciseModal from "../../../../components/modals/AddExerciseModal";
+import type { WorkoutLog } from "../../../../components/modals/PostRoutineModal";
+import PostRoutineModal from "../../../../components/modals/PostRoutineModal";
 
 const createInitialSet = (value: any) => {
   const { set, previous, ...rest } = value;
@@ -90,6 +93,8 @@ export default function StartRoutine() {
   const navigation = useNavigation();
   const { bottom } = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [workoutLog, setWorkoutLog] = useState<WorkoutLog | null>(null);
+  const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
   const [timerFieldName, setTimerFieldName] = useState<string | null>(null);
   const [exercise, setExercise] = useState<z.infer<
     typeof exerciseSelectSchema
@@ -97,7 +102,6 @@ export default function StartRoutine() {
 
   const routine = useRoutine(id);
   const dispatch = useAppDispatch();
-  const { createWorkout } = useAppSelector((state) => state.form);
 
   const exercises = useMemo(
     () =>
@@ -130,33 +134,13 @@ export default function StartRoutine() {
       },
 
       async onSubmit(values) {
-        dispatch(formActions.setWorkoutLog({ ...values, title: routine.name }));
-        return router.push("/post-routine");
+        setWorkoutLog({ ...values, title: routine.name });
       },
     });
 
   useTimer(() => {
     setFieldValue("duration", values.duration + 1000);
   });
-
-  useEffect(() => {
-    setFieldValue("metadata.exercises", [
-      ...exercises,
-      ...createWorkout.exercises.map((exercise) => ({
-        ...exercise,
-        sets: [
-          {
-            set: "n",
-            previous: undefined,
-            ...Object.fromEntries(
-              exercise.exercise_types.map((type) => [type, undefined]),
-            ),
-            completed: false,
-          },
-        ],
-      })),
-    ]);
-  }, [createWorkout.exercises]);
 
   useEffect(() => {
     const completedSets = values.metadata.exercises.reduce(
@@ -199,7 +183,6 @@ export default function StartRoutine() {
 
     return () => {
       navigation.setOptions({ headerRight: undefined });
-      dispatch(formActions.updateWorkoutForm({ exercises: [] }));
       dispatch(formActions.setWorkoutLog({ ...values, title: routine.name }));
     };
   }, [isValid, isSubmitting]);
@@ -308,7 +291,7 @@ export default function StartRoutine() {
                   size={16}
                 />
               }
-              onPress={() => router.push("/(create-routine)/(add-exercise)/")}
+              onPress={() => setShowAddExerciseModal(true)}
             />
           )}
         />
@@ -325,6 +308,36 @@ export default function StartRoutine() {
           exercise={exercise}
           removeExercise={removeExercise}
           onClose={() => setExercise(null)}
+        />
+      )}
+      <AddExerciseModal
+        visible={showAddExerciseModal}
+        values={values.metadata.exercises}
+        onValueChange={(values) => {
+          setFieldValue(
+            "metadata.exercises",
+            values.map((exercise) => ({
+              ...exercise,
+              sets: [
+                {
+                  set: "n",
+                  previous: undefined,
+                  ...Object.fromEntries(
+                    exercise.exercise_types.map((type) => [type, undefined]),
+                  ),
+                  completed: false,
+                },
+              ],
+            })),
+          );
+        }}
+        onRequestClose={() => setShowAddExerciseModal(false)}
+      />
+      {workoutLog && (
+        <PostRoutineModal
+          workoutLog={workoutLog}
+          visible={Boolean(workoutLog)}
+          onRequestClose={() => setWorkoutLog(null)}
         />
       )}
     </>

@@ -68,7 +68,7 @@ export function SetWeightScreen({ goBack, next }: SetWeightScreenProps) {
           <DropdownPicker
             value={values.profile?.weight?.unit}
             data={["kg", "ibs"].map((value) => ({
-              label: ['ibs'].includes(value) ? capitalize(value) : value,
+              label: ["ibs"].includes(value) ? capitalize(value) : value,
               value,
             }))}
             itemTextStyle={{ color: "white" }}

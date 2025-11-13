@@ -30,6 +30,7 @@ export const postRouter = router({
 
       if (createdPost) {
         await createNotification(ctx.drizzle, {
+          skip: true,
           user: ctx.user.id,
           title: {
             text: "notifications.new_post",
@@ -39,7 +40,7 @@ export const postRouter = router({
             },
           },
           action: {
-            type: "post_new_comment",
+            type: "new_post",
             extra: {
               post: createdPost.id,
             },

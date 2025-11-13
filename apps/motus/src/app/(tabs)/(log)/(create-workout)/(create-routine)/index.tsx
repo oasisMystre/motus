@@ -1,4 +1,4 @@
-import type z from "zod";
+import z from "zod";
 import { format } from "util";
 import { PlusIcon } from "phosphor-react-native";
 
@@ -32,6 +32,7 @@ import { useAppDispatch, useAppSelector } from "../../../../../store";
 import { useTRPCClient } from "../../../../../providers/TRPCProvider";
 import { ListHeader } from "../../../../../components/create-routine";
 import TimerSheet from "../../../../../components/bottom-sheets/TimerSheet";
+import AddExerciseModal from "../../../../../components/modals/AddExerciseModal";
 import ExerciseMenuModal from "../../../../../components/create-routine/ExerciseMenuModal";
 
 export default function CreateRoutineScreen() {
@@ -42,6 +43,7 @@ export default function CreateRoutineScreen() {
   const { action } = useLocalSearchParams();
   const { createWorkout } = useAppSelector((state) => state.form);
 
+  const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
   const [timerFieldName, setTimerFieldName] = useState<string | null>(null);
   const [exercise, setExercise] = useState<z.infer<
     typeof exerciseSelectSchema
@@ -79,7 +81,7 @@ export default function CreateRoutineScreen() {
 
   const formikContext = useFormik({
     validateOnMount: true,
-    validate: withZodSchema(routineInsertSchema.partial()),
+    validate: withZodSchema(routineInsertSchema.partial().extend({name: z.string('This field is required').trim().min(2)})),
     initialValues: {
       name: createWorkout?.name!,
       metadata: { exercises },
@@ -231,11 +233,7 @@ export default function CreateRoutineScreen() {
                       color="white"
                     />
                   }
-                  onPress={() =>
-                    router.push(
-                      "/(tabs)/(log)/(create-workout)/(create-routine)/(add-exercise)",
-                    )
-                  }
+                  onPress={() => setShowAddExerciseModal(true)}
                 />
               )}
             />
@@ -261,6 +259,33 @@ export default function CreateRoutineScreen() {
             }}
           />
         )}
+        <AddExerciseModal
+          visible={showAddExerciseModal}
+          values={exercises}
+          onRequestClose={() => setShowAddExerciseModal(false)}
+          onValueChange={(values) =>
+            dispatch(
+              formActions.updateWorkoutForm({
+                exercises: values.map((exercise) => ({
+                  ...exercise,
+                  sets: [
+                    {
+                      set: "n",
+                      previous: undefined,
+                      ...Object.fromEntries(
+                        exercise.exercise_types.map((type) => [
+                          type,
+                          undefined,
+                        ]),
+                      ),
+                      completed: false,
+                    },
+                  ],
+                })),
+              }),
+            )
+          }
+        />
       </FormikContext>
     </>
   );

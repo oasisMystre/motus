@@ -44,12 +44,7 @@ export const getPostsWhere = async <T extends SQL<unknown> | undefined>(
     .groupBy(comments.post)
     .as("commentCount");
 
-  const liked = db
-    .select()
-    .from(postLikes)
-    .where(likeWhere)
-    .limit(1)
-    .as("liked");
+  const liked = db.select().from(postLikes).where(likeWhere).as("liked");
 
   const query = db
     .select({

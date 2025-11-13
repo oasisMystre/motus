@@ -9,7 +9,7 @@ export const mcpRouter = router({
     .input(z.object({ message: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const agent = await ctx.mcpClient.createAgent(undefined, ctx.user.id);
-      const response = await run(agent, format('user=%s %s', input.message));
+      const response = await run(agent, format("user=%s %s", input.message));
 
       return response.finalOutput;
     }),

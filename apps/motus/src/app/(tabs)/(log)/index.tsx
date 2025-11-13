@@ -30,7 +30,7 @@ export default function LogScreen() {
   }[] = useMemo(
     () => [
       {
-        name: t("log.log_workout.title"),
+        name: t("log.create_workout.title"),
         icon: (props) => (
           <BarbellIcon
             {...props}
@@ -74,7 +74,7 @@ export default function LogScreen() {
         },
       },
       {
-        name: t("log.create_workout.title"),
+        name: t("log.log_workout.title"),
         icon: (props) => (
           <BarbellIcon
             {...props}

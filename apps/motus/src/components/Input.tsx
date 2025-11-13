@@ -27,11 +27,14 @@ export default function Input({
 }: InputProps) {
   const [isFocus, setIsFocus] = useState(false);
 
-  const textProps = useMemo(() => ({
-    autoCapitalize: "none" as const,
-    placeholderTextColor: Colors.inputPlaceholderTextColor,
-    ...inputAttrs,
-  }), [inputAttrs]);
+  const textProps = useMemo(
+    () => ({
+      autoCapitalize: "none" as const,
+      placeholderTextColor: Colors.inputPlaceholderTextColor,
+      ...inputAttrs,
+    }),
+    [inputAttrs],
+  );
 
   const Input = useMemo(
     () => (
@@ -60,11 +63,11 @@ export default function Input({
         ]}
         onFocus={(event) => {
           setIsFocus(true);
-           textProps.onFocus?.(event);
+          textProps.onFocus?.(event);
         }}
         onBlur={(event) => {
           setIsFocus(false);
-         textProps.onBlur?.(event);
+          textProps.onBlur?.(event);
         }}
       />
     ),

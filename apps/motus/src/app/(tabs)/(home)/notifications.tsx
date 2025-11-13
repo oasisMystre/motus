@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, FlatList } from "react-native";
 
 import { Colors } from "../../../constants";
 import { useTRPC } from "../../../providers/TRPCProvider";
@@ -13,10 +13,10 @@ export default function NotificationPage() {
   );
 
   return notifications && notifications?.length > 0 ? (
-    <FlashList
+    <FlatList
       data={notifications}
       ItemSeparatorComponent={() => (
-        <View style={{ height: 2, backgroundColor: Colors.dividerColor }} />
+        <View style={{ height: 1, backgroundColor: Colors.dividerColor }} />
       )}
       renderItem={({ item }) => <NotificationListItem item={item} />}
     />

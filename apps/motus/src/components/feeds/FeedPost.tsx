@@ -88,7 +88,7 @@ export function FeedPost({ post, user }: FeedPostProps) {
       <View className="flex-row items-center gap-x-4 px-6">
         <Avatar
           url={post.user.profile.avatar}
-          style={{ width: 48, height: 48 }}
+          style={{ width: 40, height: 40 }}
         />
         <View className="flex-1">
           <Text

@@ -20,7 +20,7 @@ export const messageRouter = router({
       let context = [
         {
           role: "user" as const,
-          content: format('user=%s %s', ctx.user.id, input.content),
+          content: format("user=%s %s", ctx.user.id, input.content),
           createdAt: new Date(),
         },
       ];
@@ -29,11 +29,13 @@ export const messageRouter = router({
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
       );
 
-      const agent = await ctx.mcpClient.createAgent(undefined,  ctx.user.id);
-      console.log( context.map((context) => ({
-        role: context.role,
-        content: context.content,
-      })))
+      const agent = await ctx.mcpClient.createAgent(undefined, ctx.user.id);
+      console.log(
+        context.map((context) => ({
+          role: context.role,
+          content: context.content,
+        })),
+      );
       const response = await run(
         agent,
         context.map((context) => ({

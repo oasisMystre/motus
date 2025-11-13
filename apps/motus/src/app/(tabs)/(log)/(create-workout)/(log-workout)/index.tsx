@@ -109,7 +109,7 @@ export default function LogoutWorkoutScreen() {
                     </View>
                   </View>
                   <Button
-                    text="Log Workout"
+                    text="Create Workout"
                     style={{ paddingHorizontal: 16, paddingVertical: 8 }}
                     onPress={() => router.push("/log-workout")}
                   />

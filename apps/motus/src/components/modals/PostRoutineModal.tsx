@@ -1,14 +1,19 @@
+import type z from "zod";
 import clsx from "clsx";
 import moment from "moment";
 import { Image } from "expo-image";
 import { useFormik } from "formik";
+import { useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { ImageIcon } from "phosphor-react-native";
-import { router, useNavigation } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
 import { launchImageLibraryAsync } from "expo-image-picker";
-import { routineLogInsertSchema, postInsertSchema } from "@motus/server";
 import {
+  routineLogInsertSchema,
+  postInsertSchema,
+  type exerciseSelectSchema,
+} from "@motus/server";
+import {
+  Modal,
   Pressable,
   Text,
   ScrollView,
@@ -16,26 +21,60 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { Colors } from "../../../../constants";
-import Input from "../../../../components/Input";
-import { logActions } from "../../../../store/log";
-import { useFirebase } from "../../../../providers";
-import { postActions } from "../../../../store/post";
-import { routineActions } from "../../../../store/routine";
-import KeyboardView from "../../../../components/KeyboardView";
-import { ListHeader } from "../../../../components/start-routine";
-import { useAppDispatch, useAppSelector } from "../../../../store";
-import { useTRPCClient } from "../../../../providers/TRPCProvider";
-import DateTimePicker from "../../../../components/DateTimePicker";
-import { uploadImageFromUri, withZodSchema } from "../../../../utils";
+import Input from "../Input";
+import { BackButton } from "../Header";
+import { Colors } from "../../constants";
+import KeyboardView from "../KeyboardView";
+import { logActions } from "../../store/log";
+import { useAppDispatch } from "../../store";
+import { useFirebase } from "../../providers";
+import { ListHeader } from "../start-routine";
+import { postActions } from "../../store/post";
+import DateTimePicker from "../DateTimePicker";
+import { routineActions } from "../../store/routine";
+import { useTRPC, useTRPCClient } from "../../providers/TRPCProvider";
+import { withZodSchema, uploadImageFromUri } from "../../utils";
 import {
   DiscardWorkoutModal,
   SelectPostVisibilityModal,
-} from "../../../../components/create-routine";
+} from "../create-routine";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 
-export default function PostRoutineScreen() {
-  const trpc = useTRPCClient();
-  const navigation = useNavigation();
+export type WorkoutLog = {
+  type: string;
+  title: string;
+  routine: {
+    id: string;
+    name: string;
+  };
+  sets: number;
+  volume: {
+    value: number;
+    unit: "kg" | "ibs" | "km";
+  };
+  duration: number;
+  metadata: {
+    exercises: (z.infer<typeof exerciseSelectSchema> & {
+      sets: { [key: string]: any; completed: boolean }[];
+    })[];
+  };
+};
+
+type PostRoutineModalProps = {
+  onRequestClose?: () => void;
+  workoutLog: WorkoutLog;
+} & React.ComponentProps<typeof Modal>;
+
+export default function PostRoutineModal({
+  workoutLog,
+  ...props
+}: PostRoutineModalProps) {
+  const trpc = useTRPC();
+  const trpcClient = useTRPCClient();
+  const queryClient = useQueryClient();
+  const { top } = useSafeAreaInsets();
   const {
     firebase: { storage },
   } = useFirebase();
@@ -46,7 +85,6 @@ export default function PostRoutineScreen() {
     useState(false);
 
   const dispatch = useAppDispatch();
-  const form = useAppSelector((state) => state.form.workoutLog);
 
   const {
     values,
@@ -66,25 +104,29 @@ export default function PostRoutineScreen() {
       }),
     ),
     initialValues: {
-      ...form,
+      ...workoutLog,
       images: undefined as string[] | undefined,
       description: undefined,
       createdAt: new Date(),
-      name: form?.title || form?.routine.name || "",
-      title: form?.title || form?.routine.name || "",
+      name: workoutLog?.title || workoutLog?.routine.name || "",
+      title: workoutLog?.title || workoutLog?.routine.name || "",
       visibility: "everyone" as const,
     },
     async onSubmit(values) {
       const [routine, log] = await Promise.all([
-        trpc.routine.update.mutate({
+        trpcClient.routine.update.mutate({
           id: values.routine?.id,
           metadata: { exercises: values.metadata!.exercises },
         }),
-        trpc.log.routine.create.mutate(
+        trpcClient.log.routine.create.mutate(
           routineLogInsertSchema
             .omit({ user: true })
             .pick({ metadata: true, routine: true, name: true })
-            .parse({ ...values, routine: values?.routine?.id, metadata: form }),
+            .parse({
+              ...values,
+              routine: values?.routine?.id,
+              metadata: workoutLog,
+            }),
         ),
       ]);
 
@@ -101,7 +143,7 @@ export default function PostRoutineScreen() {
           await uploadImageFromUri(storage, image, { fileName: log.id }),
         ];
 
-      const post = await trpc.post.create.mutate(
+      const post = await trpcClient.post.create.mutate(
         postInsertSchema.omit({ user: true }).parse({
           ...values,
           log: log.id,
@@ -109,8 +151,19 @@ export default function PostRoutineScreen() {
       );
 
       dispatch(postActions.addPost(post));
+      queryClient.setQueryData(trpc.routine.list.queryKey(), (previousData) => {
+        if (previousData) {
+          const index = previousData.findIndex(
+            (data) => data.id === routine.id,
+          );
+          if (index > -1) previousData[index] = routine;
+          else previousData.push(routine);
+          return previousData;
+        }
 
-      return router.replace("/(tabs)/(home)");
+        return [routine];
+      });
+      if (router.canGoBack()) router.back();
     },
   });
 
@@ -119,34 +172,58 @@ export default function PostRoutineScreen() {
     [isSubmitting, isValid],
   );
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          disabled={disabled}
-          onPress={() => handleSubmit()}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator />
-          ) : (
-            <Text
-              className="font-poppins"
-              style={{ color: isValid ? Colors.primary : Colors.grey }}
-            >
-              Save
-            </Text>
-          )}
-        </Pressable>
-      ),
-    });
-
-    return () => navigation.setOptions({ headerRight: undefined });
-  }, [navigation, form, isSubmitting]);
-
   return (
-    form && (
-      <>
-        <KeyboardView>
+    <Modal
+      animationType="slide"
+      {...props}
+    >
+      <KeyboardView
+        className={clsx("flex-1", props.className)}
+        style={{
+          paddingTop: top,
+          paddingHorizontal: 16,
+          backgroundColor: Colors.backgroundColor,
+        }}
+      >
+        <View className="gap-y-4">
+          <View className="flex flex-row items-center justify-between">
+            <Pressable>
+              <BackButton
+                canGoBack
+                icon={
+                  <Ionicons
+                    name="close"
+                    color="white"
+                    size={24}
+                  />
+                }
+                navigation={{
+                  goBack: (event) => {
+                    if (event) props.onRequestClose?.(event);
+                  },
+                }}
+              />
+            </Pressable>
+            <Text className="text-white text-lg font-poppins-semibold">
+              Create Exercise
+            </Text>
+            <Pressable
+              disabled={disabled}
+              onPress={() => handleSubmit()}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator />
+              ) : (
+                <Text
+                  className="font-poppins"
+                  style={{ color: isValid ? Colors.primary : Colors.grey }}
+                >
+                  Save
+                </Text>
+              )}
+            </Pressable>
+          </View>
+
           <ScrollView
             className="gap-y-8"
             contentContainerClassName="gap-y-4"
@@ -161,7 +238,7 @@ export default function PostRoutineScreen() {
               }}
             />
             <ListHeader
-              values={form}
+              values={workoutLog}
               itemAttrs={{ style: { alignItems: "flex-start" } }}
             />
             <View>
@@ -264,30 +341,30 @@ export default function PostRoutineScreen() {
               </Pressable>
             </View>
           </ScrollView>
-        </KeyboardView>
-        {showDatePicker && (
-          <DateTimePicker
-            value={values.createdAt}
-            onChange={(_, value) => setFieldValue("createdAt", value)}
-            modalAttrs={{
-              onClose: () => setShowDatePicker(false),
-            }}
-          />
-        )}
-        {showDiscardModal && (
-          <DiscardWorkoutModal
-            visible={showDiscardModal}
-            onRequestClose={() => setShowDiscardModal(false)}
-          />
-        )}
-        {showSelectVisibilityModal && (
-          <SelectPostVisibilityModal
-            value={values.visibility}
-            onChange={(value) => setFieldValue("visibility", value)}
-            onClose={() => setShowSelectVisibilityModal(false)}
-          />
-        )}
-      </>
-    )
+        </View>
+      </KeyboardView>
+      {showDatePicker && (
+        <DateTimePicker
+          value={values.createdAt}
+          onChange={(_, value) => setFieldValue("createdAt", value)}
+          modalAttrs={{
+            onClose: () => setShowDatePicker(false),
+          }}
+        />
+      )}
+      {showDiscardModal && (
+        <DiscardWorkoutModal
+          visible={showDiscardModal}
+          onRequestClose={() => setShowDiscardModal(false)}
+        />
+      )}
+      {showSelectVisibilityModal && (
+        <SelectPostVisibilityModal
+          value={values.visibility}
+          onChange={(value) => setFieldValue("visibility", value)}
+          onClose={() => setShowSelectVisibilityModal(false)}
+        />
+      )}
+    </Modal>
   );
 }
