@@ -61,10 +61,11 @@ export function LinearGradientTextLayerBackground({
       )}
       <LinearGradient
         style={{
-          height,
           gap: 24,
           left: 0,
           right: 0,
+          top: 0,
+          bottom: 0,
           zIndex: 10,
           position: "absolute",
           justifyContent: "flex-end",

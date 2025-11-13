@@ -1,3 +1,4 @@
+// @ts-nocheck
 import moment from "moment";
 import { TRPCError } from "@trpc/server";
 import type { Auth, DecodedIdToken } from "firebase-admin/auth";

@@ -98,7 +98,11 @@ export default function LoginScreen() {
           <Pressable
             className="self-end"
             onPress={() => {
-              sendPasswordResetEmail(firebase.auth, "").then(() => {});
+              sendPasswordResetEmail(firebase.auth, values.email).then(() =>
+                snackbar.success({
+                  text: "🎉 Email reset link sent successfully",
+                }),
+              );
             }}
           >
             <Text className="text-sm text-primary">

@@ -27,6 +27,7 @@ export default function App() {
     <Stack
       screenOptions={{
         headerShown: false,
+        headerShadowVisible: false,
         headerTitleAlign: "center",
       }}
     >

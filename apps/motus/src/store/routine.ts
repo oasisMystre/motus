@@ -2,10 +2,11 @@ import type z from "zod";
 import type { routineSelectSchema } from "@motus/server";
 import { createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 
-export const routineAdaptar =
-  createEntityAdapter<z.infer<typeof routineSelectSchema>>({
-    sortComparer: (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-  });
+export const routineAdaptar = createEntityAdapter<
+  z.infer<typeof routineSelectSchema>
+>({
+  sortComparer: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+});
 
 const routineSlice = createSlice({
   name: "routines",

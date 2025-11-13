@@ -11,7 +11,7 @@ import LoadingScreen from "../../../../components/loading/LoadingScreen";
 
 export default function CreateGoalScreen() {
   const { setScreens } = useScreen();
-  const { isSubmitting, status } = useFormikContext();
+  const { status } = useFormikContext();
 
   return (
     <>
@@ -62,26 +62,27 @@ export default function CreateGoalScreen() {
           ] as const
         }
       />
-      {isSubmitting && (
+      {["submitting", "successful"].includes(status) && (
         <LoadingScreen
           className="bg-black"
           title="Great Work"
           subtitle="Creating a personalised plan for you..."
-        >
-          {status === "successful" && (
-            <>
-              <DumbBell />
-              <Text className="text-white font-poppins">
-                Your Plan has been created
-              </Text>
-              <Button
-                text="Continue"
-                style={{ paddingHorizontal: 32 }}
-                onPress={() => router.dismiss()}
-              />
-            </>
-          )}
-        </LoadingScreen>
+          children={
+            status === "successful" && (
+              <>
+                <DumbBell />
+                <Text className="text-white font-poppins">
+                  Your Plan has been created
+                </Text>
+                <Button
+                  text="Continue"
+                  style={{ paddingHorizontal: 32 }}
+                  onPress={() => router.dismiss()}
+                />
+              </>
+            )
+          }
+        />
       )}
     </>
   );

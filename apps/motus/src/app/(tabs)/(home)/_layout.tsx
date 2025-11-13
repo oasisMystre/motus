@@ -20,6 +20,8 @@ export default function HomeLayout() {
             navigation={navigation}
           />
         ),
+        headerShadowVisible: false,
+        headerTitleAlign: "center",
         headerStyle: { backgroundColor: "transparent" },
       })}
     >

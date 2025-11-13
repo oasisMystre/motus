@@ -3,16 +3,16 @@ import moment from "moment";
 import { useMemo } from "react";
 import { useFormikContext } from "formik";
 import { useTranslation } from "react-i18next";
-import { Pressable, Text, View } from "react-native";
 import type { userSelectSchema } from "@motus/server";
+import { Pressable, Text, View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Colors } from "../../constants";
 import Input from "../../components/Input";
 import useDimensions from "../../hooks/useDimensions";
 import { CircularBackButton } from "../../components/Header";
-import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 type SetAgeScreenProps = {
   goBack: () => void;
@@ -62,18 +62,20 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
             }}
           />
         </View>
-        <RNDateTimePicker
-          mode="date"
-          display="spinner"
-          textColor="white"
-          themeVariant="dark"
-          accentColor={Colors.primary}
-          style={{ backgroundColor: "transparent" }}
-          value={moment().subtract(values.profile?.age, "years").toDate()}
-          onChange={(_, date) =>
-            setFieldValue("profile.age", moment().diff(moment(date), "year"))
-          }
-        />
+        {Platform.OS === "ios" && (
+          <RNDateTimePicker
+            mode="date"
+            display="spinner"
+            textColor="white"
+            themeVariant="dark"
+            accentColor={Colors.primary}
+            style={{ backgroundColor: "transparent" }}
+            value={moment().subtract(values.profile?.age, "years").toDate()}
+            onChange={(_, date) =>
+              setFieldValue("profile.age", moment().diff(moment(date), "year"))
+            }
+          />
+        )}
       </View>
       <View className="flex-row items-center gap-x-8">
         <CircularBackButton

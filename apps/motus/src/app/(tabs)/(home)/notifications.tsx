@@ -1,4 +1,3 @@
-import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, View, FlatList } from "react-native";
 
@@ -22,7 +21,7 @@ export default function NotificationPage() {
     />
   ) : (
     <View className="flex-1 flex items-center justify-center">
-      <ActivityIndicator size={32} />
+      <ActivityIndicator  color="white" size={32} />
     </View>
   );
 }

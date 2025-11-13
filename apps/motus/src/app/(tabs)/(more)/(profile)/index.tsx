@@ -281,7 +281,6 @@ const ProfileEditItem = ({ item }: { item: EditItem }) => {
       >
         {item.onChange ? (
           <TextInput
-            focusable
             ref={inputRef}
             editable={editable}
             pointerEvents={item.onPress && "none"}
@@ -297,7 +296,7 @@ const ProfileEditItem = ({ item }: { item: EditItem }) => {
           <Text className="text-white font-poppins">{item.value}</Text>
         )}
         <Pressable
-          className="flex-row items-center gap-x-2 py-2"
+          className="flex-row items-center gap-x-2 p-2"
           onPress={() => {
             if (item.path) router.push(item.path);
             else if (item.onPress) item.onPress();

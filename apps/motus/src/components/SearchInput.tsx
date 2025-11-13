@@ -69,7 +69,7 @@ export default function SearchInput({
         }}
         onChangeText={onChangeText}
       />
-      {isSearching && <ActivityIndicator />}
+      {isSearching && <ActivityIndicator color="white" />}
     </View>
   );
 }

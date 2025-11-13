@@ -87,7 +87,7 @@ export default function SearchScreen() {
             tintColor={Colors.primary}
           />
         }
-        ListEmptyComponent={() => <ActivityIndicator style={{ flex: 1 }} />}
+        ListEmptyComponent={() => <ActivityIndicator color="white" style={{ flex: 1 }} />}
         ItemSeparatorComponent={() => (
           <View style={{ height: 1, backgroundColor: Colors.darkGray }} />
         )}

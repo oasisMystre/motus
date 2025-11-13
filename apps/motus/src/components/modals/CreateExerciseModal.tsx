@@ -138,7 +138,7 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
                 onPress={() => handleSubmit()}
               >
                 {isSubmitting ? (
-                  <ActivityIndicator />
+                  <ActivityIndicator color="white" />
                 ) : (
                   <Text
                     style={{ color: isValid ? Colors.primary : Colors.grey }}

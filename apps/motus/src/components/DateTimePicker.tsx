@@ -25,6 +25,10 @@ export default function DateTimePicker({
         accentColor={Colors.primary}
         style={{ flex: 1, backgroundColor: "transparent" }}
         {...props}
+        onChange={(...args) => {
+          props.onChange?.(...args);
+          modalAttrs?.onClose?.();
+        }}
       />
     </DateTimePickerWrapper>
   );

@@ -24,10 +24,11 @@ export default function LogWorkoutLayout() {
         },
       })}
     >
+      <Stack.Screen name="index" />
       <Stack.Screen
-        name="index"
+        name="log-workout"
+        options={{ title: "Create Workout" }}
       />
-      <Stack.Screen name="log-workout" options={{title: "Create Workout"}} />
     </Stack>
   );
 }

@@ -1,10 +1,10 @@
+import color from "color";
 import assert from "assert";
 import { useFormik } from "formik";
-import { useEffect, useMemo } from "react";
 import { useNavigation } from "expo-router";
-
+import { useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Switch, Text, View, FlatList } from "react-native";
+import { Switch, Text, View, FlatList, Platform } from "react-native";
 
 import { Colors } from "../../../constants";
 import { authActions } from "../../../store/auth";
@@ -110,7 +110,11 @@ export default function NotificationSettingsScreen() {
           </View>
           <Switch
             value={item.checked}
-            trackColor={{ true: Colors.primary }}
+            thumbColor={color(Colors.primary).whiten(0.25).hexa()}
+            trackColor={{
+              true: Colors.primary,
+              false: Platform.OS === "android" ? Colors.primary : undefined,
+            }}
             onValueChange={async (value) => {
               setFieldValue(item.name, value);
             }}

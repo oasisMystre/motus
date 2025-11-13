@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
+  Platform,
   Pressable,
   type StyleProp,
   Text,
@@ -11,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CircularBackButton } from "../Header";
 import { LinearGradientTextLayerBackground } from "..";
+import clsx from "clsx";
 
 type InfoScreenProps = {
   title: string;
@@ -33,17 +35,17 @@ export function InfoScreen({
   return (
     <LinearGradientTextLayerBackground>
       <View
+        className="gap-y-16"
         style={[
           {
-            height: "50%",
-            minHeight: 260,
+          
             paddingHorizontal: 16,
             paddingBottom: bottom,
           },
           style,
         ]}
       >
-        <View className="flex-1 gap-y-2">
+        <View className='gap-y-2'>
           <Text className="text-2xl text-primary font-poppins-medium tracking-normal">
             {title}
           </Text>

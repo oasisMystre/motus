@@ -171,7 +171,7 @@ export default function StartRoutine() {
           onPress={() => handleSubmit()}
         >
           {isSubmitting ? (
-            <ActivityIndicator />
+            <ActivityIndicator color="white" />
           ) : (
             <Text style={{ color: isValid ? Colors.primary : Colors.grey }}>
               Finish

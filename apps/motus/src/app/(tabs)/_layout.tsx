@@ -16,6 +16,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShadowVisible: false,
         tabBarHideOnKeyboard: true,
         headerTitleStyle: {
           fontFamily: "Poppins_500Regular",

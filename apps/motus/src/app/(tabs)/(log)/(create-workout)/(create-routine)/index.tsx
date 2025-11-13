@@ -81,7 +81,11 @@ export default function CreateRoutineScreen() {
 
   const formikContext = useFormik({
     validateOnMount: true,
-    validate: withZodSchema(routineInsertSchema.partial().extend({name: z.string('This field is required').trim().min(2)})),
+    validate: withZodSchema(
+      routineInsertSchema
+        .partial()
+        .extend({ name: z.string("This field is required").trim().min(2) }),
+    ),
     initialValues: {
       name: createWorkout?.name!,
       metadata: { exercises },
@@ -143,7 +147,7 @@ export default function CreateRoutineScreen() {
       navigation.setOptions({
         headerRight: () =>
           isSubmitting ? (
-            <ActivityIndicator />
+            <ActivityIndicator color="white" />
           ) : (
             <Pressable
               disabled={disabled}

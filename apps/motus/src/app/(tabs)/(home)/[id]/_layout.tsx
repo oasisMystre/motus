@@ -45,6 +45,7 @@ export default function ProfileLayout() {
     <Tabs
       screenOptions={({ navigation }) => ({
         title: "Profile",
+        headerShadowVisible: false,
         tabBarStyle: { display: "none" },
         header() {
           return (

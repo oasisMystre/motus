@@ -212,7 +212,7 @@ export default function PostRoutineModal({
               onPress={() => handleSubmit()}
             >
               {isSubmitting ? (
-                <ActivityIndicator />
+                <ActivityIndicator color="white" />
               ) : (
                 <Text
                   className="font-poppins"

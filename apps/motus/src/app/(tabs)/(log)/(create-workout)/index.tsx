@@ -17,6 +17,7 @@ import {
   RoutineListItem,
   RoutineMenu,
 } from "../../../../components/create-workout";
+import { ActivityIndicator } from "react-native";
 
 export default function CreateWorkoutScreen() {
   const trpc = useTRPC();
@@ -30,7 +31,7 @@ export default function CreateWorkoutScreen() {
   const routines = routineSelector.selectAll(routineState);
 
   const { data } = useQuery(trpc.routine.list.queryOptions());
-  const { mutateAsync } = useMutation(
+  const { mutateAsync, isPending } = useMutation(
     trpc.routine.create.mutationOptions({
       onSuccess(data) {
         dispatch(routineActions.addRoutine(data));
@@ -63,7 +64,14 @@ export default function CreateWorkoutScreen() {
             }
           />
           <Button
-            icon={<PlusIcon color="white" />}
+            disabled={isPending}
+            icon={
+              isPending ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <PlusIcon color="white" />
+              )
+            }
             style={{
               flex: 1,
               rowGap: 8,
@@ -100,7 +108,7 @@ export default function CreateWorkoutScreen() {
         )}
       </View>
     ),
-    [t, routines, routine],
+    [t, routines, routine, isPending],
   );
 
   return (

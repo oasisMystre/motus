@@ -8,6 +8,7 @@ export default function SignupLayout() {
     <Stack
       screenOptions={({ navigation }) => ({
         title: "Signup",
+        headerShadowVisible: false,
         headerTitleAlign: "center",
         headerTitleStyle: {
           fontFamily: "Poppins_500Medium",

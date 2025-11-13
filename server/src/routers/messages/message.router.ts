@@ -30,12 +30,6 @@ export const messageRouter = router({
       );
 
       const agent = await ctx.mcpClient.createAgent(undefined, ctx.user.id);
-      console.log(
-        context.map((context) => ({
-          role: context.role,
-          content: context.content,
-        })),
-      );
       const response = await run(
         agent,
         context.map((context) => ({
