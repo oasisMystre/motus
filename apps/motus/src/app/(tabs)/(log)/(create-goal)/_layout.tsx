@@ -54,30 +54,30 @@ export default function CreateGoalLayout() {
             <Stack.Screen name="step-0" />
             <Stack.Screen
               name="(meal)/index"
-              options={{ headerShown: Platform.OS === 'ios' }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen name="(meal)/step-1" />
             <Stack.Screen
               name="(meal)/step-2"
-              options={{ headerShown: Platform.OS === 'ios' }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen name="(meal)/step-3" />
             <Stack.Screen
               name="(meal)/step-4"
-              options={{ headerShown: Platform.OS === 'ios' }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen
               name="(weight)/index"
-              options={{ headerShown: Platform.OS === 'ios' }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen name="(weight)/step-1" />
             <Stack.Screen
               name="(weight)/step-2"
-              options={{ headerShown: Platform.OS === 'ios' }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen
               name="(activity)/index"
-              options={{ headerShown: Platform.OS === 'ios' }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
           </Stack>
         </ScreenProvider>

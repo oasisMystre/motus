@@ -38,14 +38,13 @@ export function InfoScreen({
         className="gap-y-16"
         style={[
           {
-          
             paddingHorizontal: 16,
             paddingBottom: bottom,
           },
           style,
         ]}
       >
-        <View className='gap-y-2'>
+        <View className="gap-y-2">
           <Text className="text-2xl text-primary font-poppins-medium tracking-normal">
             {title}
           </Text>

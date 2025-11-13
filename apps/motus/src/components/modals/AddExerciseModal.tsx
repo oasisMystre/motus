@@ -26,11 +26,13 @@ import { exerciseSelector } from "../../store/exercise";
 import CreateExerciseModal from "./CreateExerciseModal";
 
 type AddExerciseModalProps = {
+  replace?: boolean;
   values: z.infer<typeof exerciseSelectSchema>[];
   onValueChange: (values: z.infer<typeof exerciseSelectSchema>[]) => void;
 } & React.ComponentProps<typeof Modal>;
 
 export default function AddExerciseModal({
+  replace,
   values,
   onValueChange,
   ...props
@@ -85,7 +87,7 @@ export default function AddExerciseModal({
                 />
               </Pressable>
               <Text className="text-white text-lg font-poppins-semibold">
-                Add Exercises
+                {replace ? "Replace" : "Add"} Exercises
               </Text>
               <Pressable onPress={() => setShowCreateExerciseModal(true)}>
                 <Text className="text-primary font-poppins">Create</Text>
@@ -145,6 +147,8 @@ export default function AddExerciseModal({
               const selected = exercises.find(
                 (exercise) => exercise.id === item.id,
               );
+              const exists = replace && selected;
+              if (exists) return null;
 
               return (
                 <Pressable
@@ -156,11 +160,19 @@ export default function AddExerciseModal({
                           ? Colors.border[1]
                           : undefined,
                     },
-                    selected && [
-                      { borderStartWidth: 4, borderStartColor: Colors.primary },
-                    ],
+                    selected &&
+                      !replace && [
+                        {
+                          borderStartWidth: 4,
+                          borderStartColor: Colors.primary,
+                        },
+                      ],
                   ]}
-                  onPress={() => {
+                  onPress={(event) => {
+                    if (replace) {
+                      onValueChange([item]);
+                      props.onRequestClose?.(event);
+                    }
                     if (selected)
                       exercises = exercises.filter(
                         (exercise) => exercise.id !== item.id,
@@ -210,25 +222,27 @@ export default function AddExerciseModal({
               );
             }}
           />
-          <View
-            className="absolute bottom-0 inset-x-0"
-            style={{ paddingBottom: bottom, marginHorizontal: 16 }}
-          >
-            {selectedValues.length > 0 && (
-              <Button
-                icon={<PlusIcon color="white" />}
-                text={format(
-                  "Add %d %s",
-                  selectedValues.length,
-                  selectedValues.length > 1 ? "Exercises" : "Exercise",
-                )}
-                onPress={(event) => {
-                  props.onRequestClose?.(event);
-                  onValueChange(selectedValues);
-                }}
-              />
-            )}
-          </View>
+          {!replace && (
+            <View
+              className="absolute bottom-0 inset-x-0"
+              style={{ paddingBottom: bottom, marginHorizontal: 16 }}
+            >
+              {selectedValues.length > 0 && (
+                <Button
+                  icon={<PlusIcon color="white" />}
+                  text={format(
+                    "Add %d %s",
+                    selectedValues.length,
+                    selectedValues.length > 1 ? "Exercises" : "Exercise",
+                  )}
+                  onPress={(event) => {
+                    props.onRequestClose?.(event);
+                    onValueChange(selectedValues);
+                  }}
+                />
+              )}
+            </View>
+          )}
         </View>
       </KeyboardView>
       <EquipmentListModal

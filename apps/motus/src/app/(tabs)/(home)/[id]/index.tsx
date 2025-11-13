@@ -43,7 +43,12 @@ export default function ProfileScreen() {
         data={data}
         style={{ paddingHorizontal: 16, paddingTop: 32 }}
         contentContainerStyle={{ flexGrow: 1 }}
-        ListEmptyComponent={() => <ActivityIndicator  color='white' className="flex-1" />}
+        ListEmptyComponent={() => (
+          <ActivityIndicator
+            color="white"
+            className="flex-1"
+          />
+        )}
         ListHeaderComponent={() => (
           <View className="gap-y-8 mb-2">
             <View className="self-center flex-row gap-x-1">

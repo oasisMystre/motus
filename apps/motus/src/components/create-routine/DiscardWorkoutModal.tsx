@@ -5,10 +5,13 @@ import { BarbellIcon } from "phosphor-react-native";
 import Button from "../Button";
 import { Colors } from "../../constants";
 import ModalDialog from "../modals/ModalDialog";
+import { useNavigation } from "expo-router";
 
 export function DiscardWorkoutModal(
-  props: React.ComponentProps<typeof ModalDialog>,
+  props: React.ComponentProps<typeof ModalDialog> & { onClose?: () => void },
 ) {
+  const navigation = useNavigation();
+
   return (
     <ModalDialog
       {...props}
@@ -43,7 +46,9 @@ export function DiscardWorkoutModal(
           <Button
             text="Discard workout"
             className="flex-1"
-            onPress={() => router.dismissAll()}
+            onPress={() => {
+              props.onClose?.();
+            }}
           />
         </View>
       </>

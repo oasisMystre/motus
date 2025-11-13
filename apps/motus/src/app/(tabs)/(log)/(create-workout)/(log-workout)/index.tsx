@@ -91,7 +91,10 @@ export default function LogoutWorkoutScreen() {
             contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={() =>
               isPending ? (
-                <ActivityIndicator color="white" className="flex-1" />
+                <ActivityIndicator
+                  color="white"
+                  className="flex-1"
+                />
               ) : (
                 <View className="items-center justify-center gap-y-8 mt-16">
                   <View className="items-center justify-center gap-y-4">

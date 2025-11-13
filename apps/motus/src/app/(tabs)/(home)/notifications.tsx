@@ -21,7 +21,10 @@ export default function NotificationPage() {
     />
   ) : (
     <View className="flex-1 flex items-center justify-center">
-      <ActivityIndicator  color="white" size={32} />
+      <ActivityIndicator
+        color="white"
+        size={32}
+      />
     </View>
   );
 }

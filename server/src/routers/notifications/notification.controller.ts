@@ -6,8 +6,9 @@ import { notifications } from "../../db/schema";
 export const createNotification = (
   db: Database,
   ...values: ({ skip?: boolean } & z.infer<typeof notificationInsertSchema>)[]
-) =>
-  db
-    .insert(notifications)
-    .values(values.filter((value) => !value.skip))
-    .returning();
+) => {
+  const data = values.filter((value) => !value.skip);
+  if (data.length > 0) return db.insert(notifications).values(data).returning();
+
+  return [];
+};

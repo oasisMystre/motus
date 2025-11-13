@@ -1,24 +1,31 @@
 import { Text, View } from "react-native";
-import { useMutation } from "@tanstack/react-query";
 import { BarbellIcon } from "phosphor-react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Button from "../Button";
 import { Colors } from "../../constants";
 import { useAppDispatch } from "../../store";
 import ModalDialog from "../modals/ModalDialog";
-import { routineActions } from "../../store/routine";
 import { useTRPC } from "../../providers/TRPCProvider";
+import { useTanstackStore } from "../../hooks/useTanstackStore";
 
 export function RoutineConfirmDeletion({
   routine,
   ...props
 }: React.ComponentProps<typeof ModalDialog> & { routine: string }) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
+  const { remove } = useTanstackStore(
+    queryClient,
+    trpc.routine.list.queryKey(),
+    (routine) => routine.id,
+  );
+
   const { isPending, mutateAsync } = useMutation(
     trpc.routine.delete.mutationOptions({
       onSuccess() {
-        dispatch(routineActions.removeRoutine(routine));
+        remove(routine);
         props?.onRequestClose?.();
       },
     }),

@@ -4,9 +4,12 @@ import moment from "moment";
 import { Image } from "expo-image";
 import { useFormik } from "formik";
 import { useMemo, useState } from "react";
+import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ImageIcon } from "phosphor-react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { launchImageLibraryAsync } from "expo-image-picker";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   routineLogInsertSchema,
   postInsertSchema,
@@ -29,18 +32,14 @@ import { logActions } from "../../store/log";
 import { useAppDispatch } from "../../store";
 import { useFirebase } from "../../providers";
 import { ListHeader } from "../start-routine";
-import { postActions } from "../../store/post";
 import DateTimePicker from "../DateTimePicker";
-import { routineActions } from "../../store/routine";
-import { useTRPC, useTRPCClient } from "../../providers/TRPCProvider";
+import { useTanstackStore } from "../../hooks/useTanstackStore";
 import { withZodSchema, uploadImageFromUri } from "../../utils";
+import { useTRPC, useTRPCClient } from "../../providers/TRPCProvider";
 import {
   DiscardWorkoutModal,
   SelectPostVisibilityModal,
 } from "../create-routine";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
 
 export type WorkoutLog = {
   type: string;
@@ -72,6 +71,7 @@ export default function PostRoutineModal({
   ...props
 }: PostRoutineModalProps) {
   const trpc = useTRPC();
+  const navigation = useNavigation();
   const trpcClient = useTRPCClient();
   const queryClient = useQueryClient();
   const { top } = useSafeAreaInsets();
@@ -85,6 +85,15 @@ export default function PostRoutineModal({
     useState(false);
 
   const dispatch = useAppDispatch();
+  const { update: updateRoutine } = useTanstackStore(
+    queryClient,
+    trpc.routine.list.queryKey(),
+  );
+  const { update: updatePost } = useTanstackStore(
+    queryClient,
+    trpc.post.list.queryKey(),
+    (post) => post.id,
+  );
 
   const {
     values,
@@ -130,13 +139,8 @@ export default function PostRoutineModal({
         ),
       ]);
 
-      dispatch(
-        logActions.addRoutineLog(log),
-        routineActions.updateRoutine({
-          id: routine.id,
-          changes: routine,
-        }),
-      );
+      updateRoutine(routine);
+      dispatch(logActions.addRoutineLog(log));
 
       if (image)
         values.images = [
@@ -150,20 +154,9 @@ export default function PostRoutineModal({
         }),
       );
 
-      dispatch(postActions.addPost(post));
-      queryClient.setQueryData(trpc.routine.list.queryKey(), (previousData) => {
-        if (previousData) {
-          const index = previousData.findIndex(
-            (data) => data.id === routine.id,
-          );
-          if (index > -1) previousData[index] = routine;
-          else previousData.push(routine);
-          return previousData;
-        }
+      updatePost(post);
 
-        return [routine];
-      });
-      if (router.canGoBack()) router.back();
+      navigation.goBack();
     },
   });
 
@@ -356,6 +349,10 @@ export default function PostRoutineModal({
         <DiscardWorkoutModal
           visible={showDiscardModal}
           onRequestClose={() => setShowDiscardModal(false)}
+          onClose={() => {
+            setShowDiscardModal(false);
+            props.onRequestClose?.();
+          }}
         />
       )}
       {showSelectVisibilityModal && (

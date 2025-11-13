@@ -6,26 +6,25 @@ import Avatar from "../Avatar";
 import Button from "../Button";
 import { Colors } from "../../constants";
 import { useAppDispatch } from "../../store";
+import {  type User } from "../../store/search";
 import { useTRPC } from "../../providers/TRPCProvider";
-import { searchActions, type User } from "../../store/search";
 
 type ListItemProps = {
   item: User;
+  updateUser: (user: User) => void;
 };
 
-export function ListItem({ item }: ListItemProps) {
+export function ListItem({ item, updateUser }: ListItemProps) {
   const trpc = useTRPC();
-  const dispatch = useAppDispatch();
 
   const { mutateAsync, isPending } = useMutation(
     trpc.follow.create.mutationOptions({
       onSuccess(data) {
-        dispatch(
-          searchActions.updateUser({
-            id: data.follower.id,
-            changes: { isFollowing: data.isFollowing },
-          }),
-        );
+        updateUser({
+          ...item,
+          id: data.follower.id,
+          isFollowing: data.isFollowing,
+        });
       },
     }),
   );

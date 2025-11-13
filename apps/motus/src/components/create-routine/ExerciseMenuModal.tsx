@@ -19,17 +19,17 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
 
 export default function ExerciseMenuModal({
   exercise,
   removeExercise,
+  replaceExercise,
   ...props
 }: Omit<React.ComponentProps<typeof BottomSheet>, "children"> & {
   exercise: z.infer<typeof exerciseSelectSchema>;
   removeExercise: (id: string) => void;
+  replaceExercise: (value: z.infer<typeof exerciseSelectSchema>) => void;
 }) {
-  const dispatch = useAppDispatch();
   const { bottom } = useSafeAreaInsets();
 
   const menuItems: {
@@ -42,9 +42,7 @@ export default function ExerciseMenuModal({
       icon: ArrowClockwiseIcon,
       name: "Replace Exercise",
       onPress() {
-        router.push(
-          "/(tabs)/(log)/(create-workout)/(create-routine)/(add-exercise)",
-        );
+        replaceExercise(exercise);
         props.onClose?.();
       },
     },

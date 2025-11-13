@@ -76,7 +76,10 @@ export default function AddFoodScreen() {
             contentContainerStyle={{ flexGrow: 1 }}
             ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
             ListEmptyComponent={() => (
-              <ActivityIndicator color="white" style={{ margin: "auto" }} />
+              <ActivityIndicator
+                color="white"
+                style={{ margin: "auto" }}
+              />
             )}
             ListHeaderComponent={() => (
               <View className="gap-y-8 mb-2">

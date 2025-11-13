@@ -49,7 +49,13 @@ export default function LogMealScreen() {
             data={meals}
             contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={() => {
-              if (isPending) return <ActivityIndicator color="white" style={{ flex: 1 }} />;
+              if (isPending)
+                return (
+                  <ActivityIndicator
+                    color="white"
+                    style={{ flex: 1 }}
+                  />
+                );
 
               return (
                 <View className="items-center justify-center gap-y-6 mt-48">

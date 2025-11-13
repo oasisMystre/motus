@@ -1,22 +1,29 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useAppDispatch, useAppSelector } from "../store";
-import { useTRPCClient } from "../providers/TRPCProvider";
-import { routineActions, routineSelector } from "../store/routine";
+import { useTRPC } from "../providers/TRPCProvider";
+import { useTanstackStore } from "./useTanstackStore";
 
 export default function useRoutine(id: string) {
-  const trpc = useTRPCClient();
-  const dispatch = useAppDispatch();
-  const routineState = useAppSelector((state) => state.routine);
-  const routine = routineSelector.selectById(routineState, id);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const cache = useMemo(() => {
+    const data = queryClient.getQueryData(trpc.routine.list.queryKey());
+    return data?.find((data) => data.id === id);
+  }, [queryClient, trpc]);
+
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.routine.list.queryKey(),
+  );
+  const { data } = useQuery({
+    initialData: cache,
+    ...trpc.routine.retrieve.queryOptions({ id }),
+  });
 
   useEffect(() => {
-    if (routine) return;
+    if (data) return update(data);
+  }, [data]);
 
-    trpc.routine.retrieve
-      .query({ id })
-      .then((routine) => dispatch(routineActions.addRoutine(routine)));
-  }, [routine]);
-
-  return routine;
+  return data;
 }

@@ -1,8 +1,8 @@
 import z from "zod";
 import { format } from "util";
 import { PlusIcon } from "phosphor-react-native";
-
 import { FormikContext, useFormik } from "formik";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { type exerciseSelectSchema, routineInsertSchema } from "@motus/server";
@@ -13,41 +13,68 @@ import {
   View,
   FlatList,
 } from "react-native";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useMemo, useState, useCallback, useLayoutEffect } from "react";
 
 import { Colors } from "../../../../../constants";
 import { withZodSchema } from "../../../../../utils";
 import Button from "../../../../../components/Button";
 import { formActions } from "../../../../../store/form";
-import { routineActions } from "../../../../../store/routine";
+import { useTRPC } from "../../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../../components/KeyboardView";
 import { ListItem } from "../../../../../components/start-routine";
-import { useAppDispatch, useAppSelector } from "../../../../../store";
-import { useTRPCClient } from "../../../../../providers/TRPCProvider";
 import { ListHeader } from "../../../../../components/create-routine";
+import { useAppDispatch, useAppSelector } from "../../../../../store";
+import { useTanstackStore } from "../../../../../hooks/useTanstackStore";
 import TimerSheet from "../../../../../components/bottom-sheets/TimerSheet";
 import AddExerciseModal from "../../../../../components/modals/AddExerciseModal";
 import ExerciseMenuModal from "../../../../../components/create-routine/ExerciseMenuModal";
 
+function createInitialSet(exercise: z.infer<typeof exerciseSelectSchema>) {
+  return {
+    ...exercise,
+    note: null,
+    restTimer: null,
+    sets: [
+      {
+        set: "n",
+        previous: undefined,
+        ...Object.fromEntries(
+          exercise.exercise_types.map((type) => [type, undefined]),
+        ),
+        completed: false,
+      },
+    ],
+  };
+}
+
 export default function CreateRoutineScreen() {
-  const trpc = useTRPCClient();
+  const trpc = useTRPC();
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
   const { bottom } = useSafeAreaInsets();
   const { action } = useLocalSearchParams();
   const { createWorkout } = useAppSelector((state) => state.form);
 
   const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
   const [timerFieldName, setTimerFieldName] = useState<string | null>(null);
+  const [replaceExercise, setReplaceExercise] = useState<z.infer<
+    typeof exerciseSelectSchema
+  > | null>(null);
   const [exercise, setExercise] = useState<z.infer<
     typeof exerciseSelectSchema
   > | null>(null);
+
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.routine.list.queryKey(),
+    (routine) => routine.id,
+  );
+  const { mutateAsync } = useMutation(
+    trpc.routine.create.mutationOptions({
+      onSuccess: update,
+    }),
+  );
 
   const exercises = useMemo(
     () =>
@@ -74,63 +101,35 @@ export default function CreateRoutineScreen() {
     [createWorkout.exercises],
   );
 
-  const header = useCallback(
-    () => <ListHeader exercises={exercises} />,
-    [exercises],
-  );
-
   const formikContext = useFormik({
     validateOnMount: true,
     validate: withZodSchema(
       routineInsertSchema
         .partial()
-        .extend({ name: z.string("This field is required").trim().min(2) }),
+        .extend({ name: z.string("This field is required").trim() }),
     ),
     initialValues: {
       name: createWorkout?.name!,
       metadata: { exercises },
     },
-    async onSubmit(value, { resetForm }) {
-      return trpc.routine.create.mutate(value).then((routine) => {
-        resetForm({ values: { name: "", metadata: { exercises: [] } } });
-        dispatch(routineActions.addRoutine(routine));
-
-        router.back();
-      });
+    async onSubmit(value) {
+      await mutateAsync(value);
+      return router.back();
     },
   });
 
-  const {
-    isValid,
-    errors,
-    isSubmitting,
-    values,
-    handleSubmit,
-    setFieldValue,
-    resetForm,
-  } = formikContext;
+  const { isValid, errors, isSubmitting, values, handleSubmit, setFieldValue } =
+    formikContext;
+
+  const header = useCallback(
+    () => <ListHeader exercises={values.metadata.exercises} />,
+    [values.metadata.exercises],
+  );
 
   const disabled = useMemo(
     () => !isValid || isSubmitting,
     [isValid, isSubmitting],
   );
-
-  useEffect(() => {
-    resetForm({
-      values: {
-        name: values.name,
-        metadata: {
-          exercises: exercises.map((exercise) => {
-            const previousExercise = values.metadata.exercises.find(
-              (value) => value.id === exercise.id,
-            );
-            if (previousExercise) return previousExercise;
-            return exercise;
-          }),
-        },
-      },
-    });
-  }, [exercises]);
 
   useLayoutEffect(() => {
     if (action && action === "edit") {
@@ -138,12 +137,19 @@ export default function CreateRoutineScreen() {
         title: "Edit Routine",
       });
 
-      return () => navigation.setOptions({ title: "Create Routine" });
+      return () => {
+        navigation.setOptions({ title: "Create Routine" });
+        dispatch(formActions.resetWorkoutForm());
+      };
     }
+
+    return () => {
+      dispatch(formActions.resetWorkoutForm());
+    };
   }, [navigation, action]);
 
   useLayoutEffect(() => {
-    if (createWorkout.exercises.length > 0)
+    if (values.metadata.exercises.length > 0)
       navigation.setOptions({
         headerRight: () =>
           isSubmitting ? (
@@ -164,7 +170,15 @@ export default function CreateRoutineScreen() {
           ),
       });
     else navigation.setOptions({ headerRight: undefined });
-  }, [createWorkout, isSubmitting, isValid]);
+  }, [values.metadata.exercises, isSubmitting, isValid]);
+
+  const addExercises = useCallback(
+    (values: z.infer<typeof exerciseSelectSchema>[]) => {
+      const exercises = values.map(createInitialSet);
+      setFieldValue("metadata.exercises", exercises);
+    },
+    [],
+  );
 
   const addSet = useCallback(
     (index: number) => {
@@ -254,6 +268,10 @@ export default function CreateRoutineScreen() {
           <ExerciseMenuModal
             exercise={exercise}
             onClose={() => setExercise(null)}
+            replaceExercise={(exercise) => {
+              setReplaceExercise(exercise);
+              setTimeout(() => setShowAddExerciseModal(true));
+            }}
             removeExercise={(id) => {
               const exercises = values.metadata.exercises.filter(
                 (exercise) => exercise.id !== id,
@@ -264,31 +282,31 @@ export default function CreateRoutineScreen() {
           />
         )}
         <AddExerciseModal
+          replace={Boolean(replaceExercise)}
           visible={showAddExerciseModal}
           values={exercises}
-          onRequestClose={() => setShowAddExerciseModal(false)}
-          onValueChange={(values) =>
-            dispatch(
-              formActions.updateWorkoutForm({
-                exercises: values.map((exercise) => ({
-                  ...exercise,
-                  sets: [
-                    {
-                      set: "n",
-                      previous: undefined,
-                      ...Object.fromEntries(
-                        exercise.exercise_types.map((type) => [
-                          type,
-                          undefined,
-                        ]),
-                      ),
-                      completed: false,
-                    },
-                  ],
-                })),
-              }),
-            )
-          }
+          onRequestClose={() => {
+            setReplaceExercise(null);
+            setShowAddExerciseModal(false);
+          }}
+          onValueChange={(addedExercises) => {
+            if (replaceExercise) {
+              const [exercise] = addedExercises;
+              const exercises = [...values.metadata.exercises] as ReturnType<
+                typeof createInitialSet
+              >[];
+              const index = exercises.findIndex(
+                (item) => item.id === replaceExercise.id,
+              );
+              if (index > -1) {
+                exercises[index] = createInitialSet(exercise);
+                setFieldValue("metadata.exercises", exercises);
+              }
+              return;
+            }
+
+            return addExercises(addedExercises);
+          }}
         />
       </FormikContext>
     </>

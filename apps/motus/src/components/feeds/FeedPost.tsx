@@ -5,10 +5,10 @@ import { format } from "util";
 import { Image } from "expo-image";
 import debounce from "lodash.debounce";
 import { Link, router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef } from "react";
 import { useSharedValue } from "react-native-reanimated";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { postExtendedSelectSchema, userSelectSchema } from "@motus/server";
 import Carousel, {
@@ -20,10 +20,9 @@ import Avatar from "../Avatar";
 import Button from "../Button";
 import { Colors } from "../../constants";
 import { CommentItem } from "./CommentItem";
-import { useAppDispatch } from "../../store";
-import { postActions } from "../../store/post";
 import useDimensions from "../../hooks/useDimensions";
 import { useTRPC } from "../../providers/TRPCProvider";
+import { useTanstackStore } from "../../hooks/useTanstackStore";
 
 type FeedPostProps = {
   user: z.infer<typeof userSelectSchema>;
@@ -32,7 +31,7 @@ type FeedPostProps = {
 
 export function FeedPost({ post, user }: FeedPostProps) {
   const trpc = useTRPC();
-  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const { width } = useDimensions("window");
   const slideProgress = useSharedValue(0);
   const slideRef = useRef<ICarouselInstance>(null);
@@ -50,6 +49,11 @@ export function FeedPost({ post, user }: FeedPostProps) {
     [post],
   );
 
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.post.list.queryKey(),
+    (post) => post.id,
+  );
   const { isPending, ...postLike } = useMutation(
     trpc.post.like.mutationOptions(),
   );
@@ -61,18 +65,12 @@ export function FeedPost({ post, user }: FeedPostProps) {
 
   const togglePostLike = useCallback(async () => {
     const liked = !post.liked;
-    const changes = { liked, post: post.id };
-
-    dispatch(
-      postActions.updateOne({
-        id: post.id,
-        changes: {
-          liked,
-          likeCount: liked ? post.likeCount + 1 : post.likeCount - 1,
-        },
-      }),
-    );
-
+    const changes = {
+      liked,
+      post: post.id,
+      likeCount: liked ? post.likeCount + 1 : post.likeCount - 1,
+    };
+    update({ ...post, ...changes });
     return mutatePostLike(changes);
   }, [postLike]);
 

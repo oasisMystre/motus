@@ -4,23 +4,32 @@ import { format } from "util";
 import { useFormik } from "formik";
 import { object, string } from "yup";
 import { useEffect } from "react";
-
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { PaperPlaneTiltIcon } from "phosphor-react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Pressable, TextInput, View, FlatList } from "react-native";
+import {
+  Pressable,
+  TextInput,
+  Text,
+  View,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 
 import { Colors } from "../../../../constants";
-import { postActions } from "../../../../store/post";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
 import { useAppDispatch, useAppSelector } from "../../../../store";
+import { useTanstackStore } from "../../../../hooks/useTanstackStore";
 import { CommentItem } from "../../../../components/feeds/CommentItem";
 import { commentActions, commentSelectors } from "../../../../store/comment";
 
 export default function PostCommentScreen() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { bottom } = useSafeAreaInsets();
   const { post } = useLocalSearchParams<{ post: string }>();
 
@@ -31,7 +40,12 @@ export default function PostCommentScreen() {
 
   assert(user && user.type === "firebase");
 
-  const { isSuccess, data } = useQuery(
+  const { update: updatePost } = useTanstackStore(
+    queryClient,
+    trpc.post.list.queryKey(),
+    (post) => post.id,
+  );
+  const { isSuccess, data, isFetching } = useQuery(
     trpc.post.comment.list.queryOptions({ filter: { post } }),
   );
 
@@ -44,12 +58,13 @@ export default function PostCommentScreen() {
             changes: { ...data, sent: true, failed: false },
           }),
         );
-        dispatch(
-          postActions.updateOne({
-            id: post,
-            changes: { commentCount: comments.length + 1 },
-          }),
-        );
+        const posts = queryClient.getQueryData(trpc.post.list.queryKey());
+        const postData = posts?.find((item) => item.id === post);
+        if (postData)
+          updatePost({
+            ...postData,
+            commentCount: comments.length + 1,
+          });
       },
       onError(_, data) {
         if (data.id)
@@ -116,6 +131,29 @@ export default function PostCommentScreen() {
           style={{ flex: 1, paddingTop: 16 }}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyExtractor={(comment) => comment.id}
+          ListEmptyComponent={() => {
+            return (
+              <View className="flex-1 items-center justify-center">
+                {isFetching ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <>
+                    <MaterialIcons
+                      name="inbox"
+                      size={32}
+                      color="white"
+                    />
+                    <Text className="text-lg text-white font-poppins-medium">
+                      No Comment Found
+                    </Text>
+                    <Text className="text-white text-white/75 font-poppins">
+                      New comments will be visible here.
+                    </Text>
+                  </>
+                )}
+              </View>
+            );
+          }}
           renderItem={({ item }) => (
             <CommentItem
               comment={item}
