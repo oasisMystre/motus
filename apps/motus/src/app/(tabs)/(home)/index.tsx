@@ -61,8 +61,8 @@ export default function HomeScreen() {
                 <Text className="text-lg text-white font-poppins-medium">
                   No Post Found
                 </Text>
-                <Text className="text-white text-white/75 font-poppins">
-                  Your posts and followers will be visible here.
+                <Text className="text-white text-sm text-white/75 font-poppins">
+                  You and your followers posts will be visible here.
                 </Text>
               </>
             )}

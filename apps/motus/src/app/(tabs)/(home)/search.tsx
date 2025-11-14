@@ -1,7 +1,7 @@
 import { useNavigation } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -31,18 +31,17 @@ export default function SearchScreen() {
     refetch,
     isRefetching,
     isFetching,
-  } = useQuery( trpc.user.search.queryOptions({
-    search: search && search.trim().length > 0 ? search : undefined,
-  }));
-  
+  } = useQuery(
+    trpc.user.search.queryOptions({
+      search: search && search.trim().length > 0 ? search : undefined,
+    }),
+  );
 
   const { update } = useTanstackStore(
     queryClient,
-    trpc.user.search.queryKey(
-      {
-        search: search && search.trim().length > 0 ? search : undefined,
-      }
-    ),
+    trpc.user.search.queryKey({
+      search: search && search.trim().length > 0 ? search : undefined,
+    }),
     (user) => user.id,
   );
 

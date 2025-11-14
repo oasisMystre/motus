@@ -2,7 +2,7 @@ import clsx from "clsx";
 import type z from "zod";
 import { v4 } from "uuid";
 import { format } from "util";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isString, useFormik } from "formik";
 import { CameraIcon } from "phosphor-react-native";
 import { exerciseInsertSchema } from "@motus/server";
@@ -56,6 +56,7 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
     errors,
     setFieldValue,
     isValid,
+    resetForm,
     isSubmitting,
     handleSubmit,
     handleChange,
@@ -103,6 +104,10 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
     if (value) return [value];
     return [];
   }, [values.primary_muscle_group]);
+
+  useEffect(() => {
+    return () => resetForm();
+  }, [props.visible]);
 
   return (
     <>

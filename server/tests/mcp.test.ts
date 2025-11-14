@@ -1,5 +1,3 @@
-import path from "path";
-import { readFileSync } from "fs";
 import { describe, beforeAll, test, afterAll } from "bun:test";
 import {
   MCPServerStreamableHttp,

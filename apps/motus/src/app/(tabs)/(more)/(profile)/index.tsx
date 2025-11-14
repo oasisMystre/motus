@@ -8,12 +8,14 @@ import { type Link, router } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { launchImageLibraryAsync } from "expo-image-picker";
+import { getStorage } from "@react-native-firebase/storage";
 import { CameraIcon, PencilSimpleIcon } from "phosphor-react-native";
 import { Pressable, Text, View, FlatList, TextInput } from "react-native";
 
 import { Colors } from "../../../../constants";
 import Button from "../../../../components/Button";
 import { authActions } from "../../../../store/auth";
+import { uploadImageFromUri } from "../../../../utils";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
 import DateTimePicker from "../../../../components/DateTimePicker";
@@ -60,6 +62,7 @@ export default function ProfileScreen() {
 
   assert(user && user.type === "firebase");
 
+  const storage = useMemo(() => getStorage(), []);
   const {
     isValid,
     isSubmitting,
@@ -70,7 +73,13 @@ export default function ProfileScreen() {
     handleBlur,
   } = useFormik({
     initialValues: user,
-    onSubmit(values) {
+    async onSubmit(values) {
+      if (avatarInput) {
+        const storage = getStorage();
+        values.profile.avatar = await uploadImageFromUri(storage, avatarInput, {
+          fileName: user.id,
+        });
+      }
       return mutateAsync(values);
     },
   });

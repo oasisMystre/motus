@@ -3,12 +3,11 @@ import assert from "assert";
 import { format } from "util";
 import { useFormik } from "formik";
 import { object, string } from "yup";
-import { useEffect } from "react";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { PaperPlaneTiltIcon } from "phosphor-react-native";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Pressable,
@@ -20,12 +19,12 @@ import {
 } from "react-native";
 
 import { Colors } from "../../../../constants";
+import { useAppSelector } from "../../../../store";
+import { useComment } from "../../../../hooks/useComment";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
-import { useAppDispatch, useAppSelector } from "../../../../store";
 import { useTanstackStore } from "../../../../hooks/useTanstackStore";
 import { CommentItem } from "../../../../components/feeds/CommentItem";
-import { commentActions, commentSelectors } from "../../../../store/comment";
 
 export default function PostCommentScreen() {
   const trpc = useTRPC();
@@ -33,10 +32,7 @@ export default function PostCommentScreen() {
   const { bottom } = useSafeAreaInsets();
   const { post } = useLocalSearchParams<{ post: string }>();
 
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const commentState = useAppSelector((state) => state.comment);
-  const comments = commentSelectors.selectAll(commentState);
 
   assert(user && user.type === "firebase");
 
@@ -45,19 +41,15 @@ export default function PostCommentScreen() {
     trpc.post.list.queryKey(),
     (post) => post.id,
   );
-  const { isSuccess, data, isFetching } = useQuery(
-    trpc.post.comment.list.queryOptions({ filter: { post } }),
-  );
+  const { comments, addComment, updateComment, isFetching } = useComment(post);
 
   const { mutate } = useMutation(
     trpc.post.comment.create.mutationOptions({
       onSuccess(data) {
-        dispatch(
-          commentActions.updateComment({
-            id: data.id,
-            changes: { ...data, sent: true, failed: false },
-          }),
-        );
+        updateComment({
+          id: data.id,
+          changes: { ...data, sent: true, failed: false },
+        });
         const posts = queryClient.getQueryData(trpc.post.list.queryKey());
         const postData = posts?.find((item) => item.id === post);
         if (postData)
@@ -68,25 +60,13 @@ export default function PostCommentScreen() {
       },
       onError(_, data) {
         if (data.id)
-          dispatch(
-            commentActions.updateComment({
-              id: data.id,
-              changes: { sent: false, failed: true },
-            }),
-          );
+          updateComment({
+            id: data.id,
+            changes: { sent: false, failed: true },
+          });
       },
     }),
   );
-
-  useEffect(() => {
-    if (data) {
-      dispatch(commentActions.addComments(data));
-
-      return () => {
-        dispatch(commentActions.removeAllComment());
-      };
-    }
-  }, [isSuccess, data, dispatch]);
 
   const {
     isValid,
@@ -101,22 +81,19 @@ export default function PostCommentScreen() {
       text: string().min(1).required(),
     }),
     initialValues: {
-      text: "",
       post,
+      text: "",
       parent: null,
     },
     async onSubmit(values, { resetForm }) {
       const id = v4();
       const comment = { id, ...values, tags: [], createdAt: new Date() };
-
-      dispatch(
-        commentActions.addComment({
-          ...comment,
-          user,
-          sent: false,
-          failed: false,
-        }),
-      );
+      addComment({
+        ...comment,
+        user,
+        sent: false,
+        failed: false,
+      });
 
       mutate(comment);
       resetForm();

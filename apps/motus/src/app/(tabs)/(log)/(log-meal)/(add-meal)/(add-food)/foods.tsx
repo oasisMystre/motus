@@ -10,12 +10,12 @@ import { Text, View, FlatList } from "react-native";
 import type { mealSelectSchema } from "@motus/server";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Button from "../../../../../../components/Button";
-import KeyboardView from "../../../../../../components/KeyboardView";
-import { MealItem } from "../../../../../../components/meal";
-import { useSearch } from "../../../../../../components/SearchInput";
 import { Colors } from "../../../../../../constants";
+import Button from "../../../../../../components/Button";
+import { MealItem } from "../../../../../../components/meal";
 import { useTRPC } from "../../../../../../providers/TRPCProvider";
+import KeyboardView from "../../../../../../components/KeyboardView";
+import { useSearch } from "../../../../../../components/SearchInput";
 import { useAppDispatch, useAppSelector } from "../../../../../../store";
 import { mealActions, mealSelectors } from "../../../../../../store/meals";
 
@@ -38,9 +38,7 @@ export default function MyFoodScreen() {
   const mealState = useAppSelector((state) => state.meal);
   const meals = mealSelectors.selectAll(mealState);
 
-  const { isSuccess, data } = useQuery(
-    trpc.meal.list.queryOptions({ search: value }),
-  );
+  const { data } = useQuery(trpc.meal.list.queryOptions({ search: value }));
 
   useEffect(() => {
     if (data) dispatch(mealActions.setMeals(data));
@@ -48,7 +46,7 @@ export default function MyFoodScreen() {
     return () => {
       mealActions.removeAllMeals();
     };
-  }, [isSuccess, data]);
+  }, [data]);
 
   return (
     <KeyboardView style={{ paddingTop: 24, marginBottom: bottom }}>

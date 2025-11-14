@@ -193,7 +193,7 @@ export default function AddFoodScreen() {
               ],
             });
 
-            if (product.data && product.data.result) {
+            if (product.data?.result) {
               snackbar.success({ text: "Product Found" });
 
               const data = product.data.result as unknown as Product;

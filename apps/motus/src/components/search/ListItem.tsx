@@ -1,12 +1,12 @@
 import z from "zod";
+import { Link } from "expo-router";
 import { Text, View } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 
 import Avatar from "../Avatar";
 import Button from "../Button";
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
-import {  type User } from "../../store/search";
+import type { User } from "../../store/search";
 import { useTRPC } from "../../providers/TRPCProvider";
 
 type ListItemProps = {
@@ -22,7 +22,6 @@ export function ListItem({ item, updateUser }: ListItemProps) {
       onSuccess(data) {
         updateUser({
           ...item,
-          id: data.follower.id,
           isFollowing: data.isFollowing,
         });
       },
@@ -31,10 +30,12 @@ export function ListItem({ item, updateUser }: ListItemProps) {
 
   return (
     <View className="flex-row items-center gap-x-2 py-2">
-      <Avatar
-        url={item.profile.avatar}
-        style={{ width: 40, height: 40 }}
-      />
+      <Link href={`/(tabs)/(home)/${item.id}`}>
+        <Avatar
+          url={item.profile.avatar}
+          style={{ width: 40, height: 40 }}
+        />
+      </Link>
       <View className="flex-1">
         <Text className="font-poppins-medium text-white">{item.name}</Text>
         <Text

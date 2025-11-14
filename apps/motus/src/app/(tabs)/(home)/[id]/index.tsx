@@ -6,8 +6,8 @@ import { View, Text, ActivityIndicator, FlatList } from "react-native";
 
 import { Colors } from "../../../../constants";
 import { useUser } from "../../../../hooks/useUser";
-import { useTRPC } from "../../../../providers/TRPCProvider";
 import { FeedPost } from "../../../../components/feeds";
+import { useTRPC } from "../../../../providers/TRPCProvider";
 
 export default function ProfileScreen() {
   const trpc = useTRPC();

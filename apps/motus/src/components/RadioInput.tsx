@@ -11,6 +11,7 @@ import {
 import { Colors } from "../constants";
 
 type RadioInputProps = {
+  disabled: boolean;
   value: boolean;
   onChange?: (value: boolean) => void;
   checkClassName?: string;
@@ -39,10 +40,12 @@ export default function RadioInput({
   checkStyle,
   unCheckStyle,
   innerAttrs,
+  disabled,
   ...props
 }: RadioInputProps) {
   return (
     <Pressable
+      disabled={disabled}
       onPress={() => {
         if (onChange) onChange(!value);
       }}

@@ -253,10 +253,12 @@ export default function AddExerciseModal({
         visible={showMuscles}
         onRequestClose={() => setShowShowMuscles(false)}
       />
-      <CreateExerciseModal
-        visible={showCreateExerciseModal}
-        onRequestClose={() => setShowCreateExerciseModal(false)}
-      />
+      {showCreateExerciseModal && (
+        <CreateExerciseModal
+          visible={showCreateExerciseModal}
+          onRequestClose={() => setShowCreateExerciseModal(false)}
+        />
+      )}
     </Modal>
   );
 }

@@ -14,7 +14,6 @@ import {
 export const followRouter = router({
   create: publicProcedure
     .input(followInsertSchema.omit({ follower: true }))
-    .output(followSelectSchema.omit({ following: true }))
     .mutation(async ({ ctx, input }) => {
       const [createdFollow] = await ctx.drizzle
         .insert(follows)
@@ -45,21 +44,7 @@ export const followRouter = router({
             icon: ctx.user.profile.avatar,
           });
 
-        const follow = await ctx.drizzle.query.follows.findFirst({
-          with: {
-            follower: true,
-          },
-          where: and(
-            eq(follows.follower, createdFollow.follower),
-            eq(follows.following, createdFollow.following),
-          ),
-          columns: {
-            following: false,
-            follower: false,
-          },
-        });
-
-        if (follow) return follow;
+        if (createdFollow) return createdFollow;
       }
 
       throw new TRPCError({

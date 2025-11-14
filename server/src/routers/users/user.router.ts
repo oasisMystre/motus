@@ -49,7 +49,9 @@ export const userRouter = router({
         .extend({ search: z.string().min(1).optional() })
         .optional(),
     )
-    .output(z.array(userSelectSchema.extend({ isFollowing: z.boolean() })))
+    .output(
+      z.array(userSelectSchema.extend({ isFollowing: z.boolean().nullable() })),
+    )
     .query(async ({ ctx, input }) => {
       const where: (SQL<unknown> | undefined)[] = [];
 
@@ -65,12 +67,18 @@ export const userRouter = router({
       const following = ctx.drizzle.select().from(follows).as("following");
 
       const query = ctx.drizzle
-        .select({
+        .selectDistinctOn([users.id], {
           ...getTableColumns(users),
           isFollowing: coalesce(following.isFollowing, false).mapWith(Boolean),
         })
         .from(users)
-        .leftJoin(following, eq(following.follower, ctx.user.id))
+        .leftJoin(
+          following,
+          and(
+            eq(following.follower, ctx.user.id),
+            eq(following.following, users.id),
+          ),
+        )
         .where(and(...where, not(eq(users.id, ctx.user.id))));
 
       if (input) {
@@ -78,7 +86,9 @@ export const userRouter = router({
         if (input.offset) query.offset(input.offset);
       }
 
-      return query.execute();
+      const result = await query.execute();
+      console.log(result);
+      return result;
     }),
   analytic: publicProcedure
     .input(z.object())

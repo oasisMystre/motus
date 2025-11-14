@@ -110,7 +110,11 @@ export default function NotificationSettingsScreen() {
           </View>
           <Switch
             value={item.checked}
-            thumbColor={color(Colors.primary).whiten(0.25).hexa()}
+            thumbColor={
+              Platform.OS === "android"
+                ? color(Colors.primary).whiten(0.25).hexa()
+                : undefined
+            }
             trackColor={{
               true: Colors.primary,
               false: Platform.OS === "android" ? Colors.primary : undefined,

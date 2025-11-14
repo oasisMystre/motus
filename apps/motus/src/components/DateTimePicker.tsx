@@ -27,7 +27,7 @@ export default function DateTimePicker({
         {...props}
         onChange={(...args) => {
           props.onChange?.(...args);
-          modalAttrs?.onClose?.();
+          if (Platform.OS !== "ios") modalAttrs?.onClose?.();
         }}
       />
     </DateTimePickerWrapper>

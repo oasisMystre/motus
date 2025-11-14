@@ -88,6 +88,7 @@
     "react-native-gesture-handler": "~2.24.0",
     "react-native-get-random-values": "^2.0.0",
     "react-native-keyboard-controller": "^1.19.3",
+    "react-native-markdown-display": "^7.0.2",
     "react-native-mmkv": "^3.3.3",
     "react-native-nitro-modules": "^0.27.6",
     "react-native-otp-entry": "^1.8.5",
