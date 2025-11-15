@@ -1,15 +1,12 @@
 import type z from "zod";
-import { useEffect } from "react";
-
+import { useQuery } from "@tanstack/react-query";
 import { BarbellIcon } from "phosphor-react-native";
 import type { equipmentSelectSchema } from "@motus/server";
 import { Pressable, Text, View, FlatList } from "react-native";
 
 import ModalDialog from "./ModalDialog";
 import { Colors } from "../../constants";
-import { useAppDispatch, useAppSelector } from "../../store";
-import { useTRPCClient } from "../../providers/TRPCProvider";
-import { equipmentSelectors, metadataActions } from "../../store/metadata";
+import { useTRPC, useTRPCClient } from "../../providers/TRPCProvider";
 
 type EquipmentListModalProps = {
   values?: z.infer<typeof equipmentSelectSchema>[];
@@ -23,20 +20,10 @@ export default function EquipmentListModal({
   onValueChange,
   ...props
 }: EquipmentListModalProps) {
-  const trpc = useTRPCClient();
-  const dispatch = useAppDispatch();
-  const { equipments } = useAppSelector((state) => state.metadata);
-  const allEquipments = equipmentSelectors.selectAll(equipments);
-
-  useEffect(() => {
-    if (allEquipments.length < 1)
-      trpc.equipment.list
-        .query()
-        .then((equipments) =>
-          dispatch(metadataActions.addEquipments(equipments)),
-        )
-        .catch(console.error);
-  }, [allEquipments]);
+  const trpc = useTRPC();
+  const { data: equipments = [] } = useQuery(
+    trpc.equipment.list.queryOptions(),
+  );
 
   return (
     <ModalDialog {...props}>
@@ -48,7 +35,7 @@ export default function EquipmentListModal({
           <Text className="text-2xl text-white font-poppins">Equipments</Text>
         </View>
         <FlatList
-          data={allEquipments}
+          data={equipments}
           contentContainerStyle={{
             marginTop: 16,
             borderRadius: 16,

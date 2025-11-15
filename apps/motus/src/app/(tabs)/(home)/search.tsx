@@ -17,8 +17,8 @@ import { BackButton } from "../../../components/Header";
 import { useTRPC } from "../../../providers/TRPCProvider";
 import SearchInput from "../../../components/SearchInput";
 import KeyboardView from "../../../components/KeyboardView";
-import { useTanstackStore } from "../../../hooks/useTanstackStore";
 import { ListItem } from "../../../components/search/ListItem";
+import { useTanstackStore } from "../../../hooks/useTanstackStore";
 
 export default function SearchScreen() {
   const trpc = useTRPC();

@@ -174,7 +174,9 @@ export default function MultipleSelectInput<
                       : "transparent",
                 }}
               >
-                <Text className="flex-1 text-white">{item.label}</Text>
+                <Text className="flex-1 text-white">
+                  {capitalize(item.label)}
+                </Text>
                 {selected && (
                   <CheckIcon
                     size={14}

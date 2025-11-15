@@ -1,11 +1,11 @@
 import { Stack } from "expo-router";
 
 import { Colors } from "../../constants";
-import { useAppSelector } from "../../store";
+import { useFirebase } from "../../providers";
 import { BackButton } from "../../components/Header";
 
 export default function AuthLayout() {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user } = useFirebase();
 
   return (
     <Stack
@@ -41,7 +41,7 @@ export default function AuthLayout() {
           headerStyle: { backgroundColor: Colors.navColor },
         })}
       />
-      <Stack.Protected guard={Boolean(user && user.type === "firebase")}>
+      <Stack.Protected guard={Boolean(user)}>
         <Stack.Screen
           name="profile/index"
           options={{ headerShown: false }}

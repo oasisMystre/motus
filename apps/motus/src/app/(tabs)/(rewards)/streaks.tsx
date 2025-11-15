@@ -1,20 +1,21 @@
-import assert from "assert";
+import { useQuery } from "@tanstack/react-query";
 import { Text, View, FlatList } from "react-native";
 
-import { useAppSelector } from "../../../store";
-import { streakSelectors } from "../../../store/streak";
+import { useFirebase } from "../../../providers";
+import { useTRPC } from "../../../providers/TRPCProvider";
+import { useSensor } from "../../../providers/SensorProvider";
 import { StreakItem } from "../../../components/streaks/StreakItem";
 import { StreakInfo } from "../../../components/streaks/StreakInfo";
 import { StreakProgress } from "../../../components/streaks/StreakProgress";
 
 export default function StreaksScreen() {
-  const { user } = useAppSelector((state) => state.auth);
-  assert(user && user.type === "firebase" && user.profile);
-
-  const { currentSteps, longestStreak, ...streakState } = useAppSelector(
-    (state) => state.streak,
+  const trpc = useTRPC();
+  const { user } = useFirebase();
+  const { data: streaks = [] } = useQuery(trpc.streak.list.queryOptions());
+  const { data: longestStreak } = useQuery(
+    trpc.streak.aggregate.queryOptions(),
   );
-  const streaks = streakSelectors.selectAll(streakState);
+  const { currentSteps } = useSensor();
 
   return (
     <FlatList

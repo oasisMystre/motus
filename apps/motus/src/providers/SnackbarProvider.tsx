@@ -150,4 +150,11 @@ export default function SnackbarProvider({
   );
 }
 
+export const withSnackbar =
+  <T extends React.ElementType>(Component: T) =>
+  (props: React.ComponentProps<T>) => (
+    <SnackbarProvider>
+      <Component {...props} />
+    </SnackbarProvider>
+  );
 export const useSnackbar = () => useContext(SnackbarContext) as SnackbarContext;

@@ -78,6 +78,7 @@ export default function PostRoutineModal({
   const {
     firebase: { storage },
   } = useFirebase();
+
   const [image, setImage] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);

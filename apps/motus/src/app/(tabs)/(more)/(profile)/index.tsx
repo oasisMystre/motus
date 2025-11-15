@@ -8,18 +8,17 @@ import { type Link, router } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { launchImageLibraryAsync } from "expo-image-picker";
-import { getStorage } from "@react-native-firebase/storage";
 import { CameraIcon, PencilSimpleIcon } from "phosphor-react-native";
 import { Pressable, Text, View, FlatList, TextInput } from "react-native";
 
 import { Colors } from "../../../../constants";
 import Button from "../../../../components/Button";
-import { authActions } from "../../../../store/auth";
+import { useFirebase } from "../../../../providers";
 import { uploadImageFromUri } from "../../../../utils";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
 import DateTimePicker from "../../../../components/DateTimePicker";
-import { useAppDispatch, useAppSelector } from "../../../../store";
+import { useAppDispatch } from "../../../../store";
 import { UnitSheet } from "../../../../components/bottom-sheets/UnitSheet";
 import { ChoiceSheet } from "../../../../components/bottom-sheets/ChoiceSheet";
 
@@ -38,6 +37,11 @@ type EditItem = {
 
 export default function ProfileScreen() {
   const trpc = useTRPC();
+  const {
+    user,
+    setUser,
+    firebase: { storage },
+  } = useFirebase();
   const [dateInput, setDateInput] = useState(false);
   const [genderInput, setGenderInput] = useState(false);
   const [avatarInput, setAvatarInput] = useState<string | null>(null);
@@ -50,19 +54,15 @@ export default function ProfileScreen() {
   } | null>(null);
 
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
 
   const { mutateAsync } = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess(data) {
-        dispatch(authActions.updateUser(data));
+        setUser((previous) => (previous ? { ...previous, ...data } : null));
       },
     }),
   );
 
-  assert(user && user.type === "firebase");
-
-  const storage = useMemo(() => getStorage(), []);
   const {
     isValid,
     isSubmitting,
@@ -75,7 +75,6 @@ export default function ProfileScreen() {
     initialValues: user,
     async onSubmit(values) {
       if (avatarInput) {
-        const storage = getStorage();
         values.profile.avatar = await uploadImageFromUri(storage, avatarInput, {
           fileName: user.id,
         });

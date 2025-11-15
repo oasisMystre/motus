@@ -124,16 +124,17 @@ export function FeedPost({ post, user }: FeedPostProps) {
           </View>
         </View>
         {post.images && post.images.length > 0 && (
-          <View>
+          <View className="relative">
             <Carousel
               ref={slideRef}
-              data={[1, 2]}
+              data={post.images}
               width={Math.max(width, 400)}
               height={Math.max(width, 400)}
+              loop={false}
               onProgressChange={slideProgress}
-              renderItem={() => (
+              renderItem={({ item }) => (
                 <Image
-                  source={require("../../../assets/images/auth-screen-1.png")}
+                  source={{ uri: item }}
                   contentFit="contain"
                   style={{
                     width: "100%",
@@ -143,14 +144,16 @@ export function FeedPost({ post, user }: FeedPostProps) {
                 />
               )}
             />
-            <Pagination.Basic
-              data={[1, 2]}
-              progress={slideProgress}
-              onPress={onPressPagination}
-              dotStyle={{ backgroundColor: Colors.grey, borderRadius: 50 }}
-              activeDotStyle={{ backgroundColor: Colors.primary }}
-              containerStyle={{ columnGap: 4 }}
-            />
+            {post.images.length > 1 && (
+              <Pagination.Basic
+                data={post.images}
+                progress={slideProgress}
+                onPress={onPressPagination}
+                containerStyle={{ columnGap: 4 }}
+                dotStyle={{ backgroundColor: Colors.grey, borderRadius: 50 }}
+                activeDotStyle={{ backgroundColor: Colors.primary }}
+              />
+            )}
           </View>
         )}
         <View className="gap-y-2 px-6">

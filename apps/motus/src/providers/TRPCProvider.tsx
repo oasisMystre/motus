@@ -4,12 +4,31 @@ import type { AppRouter } from "@motus/server";
 import { getItemAsync } from "expo-secure-store";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  defaultShouldDehydrateQuery,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 export const { TRPCProvider, useTRPC, useTRPCClient } =
   createTRPCContext<AppRouter>();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    },
+    dehydrate: {
+      shouldDehydrateQuery(query) {
+        return (
+          defaultShouldDehydrateQuery(query) || query.state.status === "pending"
+        );
+      },
+    },
+  },
+});
 const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({

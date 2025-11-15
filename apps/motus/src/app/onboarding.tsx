@@ -12,9 +12,8 @@ import {
   View,
 } from "react-native";
 
-import { useAppDispatch } from "../store";
-import { authActions } from "../store/auth";
 import useDimensions from "../hooks/useDimensions";
+import { useFirebase } from "../providers/FirebaseProvider";
 import {
   LinearGradientTextLayerBackground,
   PaginationDots,
@@ -23,7 +22,7 @@ import {
 
 export default function OnboardingCarousel() {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const { setAnonymousUser } = useFirebase();
   const { width } = useDimensions("window");
   const { top, bottom } = useSafeAreaInsets();
 
@@ -125,7 +124,7 @@ export default function OnboardingCarousel() {
             onSwipeComplete={() => {
               const uid = uuid();
               AsyncStorage.setItem("anonymous_user", uid).then(() =>
-                dispatch(authActions.setUser({ type: "anonymous", uid })),
+                setAnonymousUser({ uid }),
               );
             }}
           />

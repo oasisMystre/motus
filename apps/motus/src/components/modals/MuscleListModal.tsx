@@ -1,15 +1,13 @@
 import type z from "zod";
-import { useEffect } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import type { muscleSelectSchema } from "@motus/server";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { CheckIcon, HospitalIcon } from "phosphor-react-native";
 
 import ModalDialog from "./ModalDialog";
 import { Colors } from "../../constants";
-import { useTRPCClient } from "../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../store";
-import { equipmentSelectors, metadataActions } from "../../store/metadata";
+import { useTRPC } from "../../providers/TRPCProvider";
 
 type MuscleListModalProps = {
   title?: string;
@@ -25,18 +23,8 @@ export default function MuscleListModal({
   checkType,
   ...props
 }: MuscleListModalProps) {
-  const trpc = useTRPCClient();
-  const dispatch = useAppDispatch();
-
-  const { muscles } = useAppSelector((state) => state.metadata);
-  const allMuscles = equipmentSelectors.selectAll(muscles);
-
-  useEffect(() => {
-    if (allMuscles.length < 1)
-      trpc.muscle.list
-        .query()
-        .then((muscles) => dispatch(metadataActions.addMuscles(muscles)));
-  }, [allMuscles]);
+  const trpc = useTRPC();
+  const { data: muscles = [] } = useQuery(trpc.muscle.list.queryOptions());
 
   return (
     <ModalDialog {...props}>
@@ -50,7 +38,7 @@ export default function MuscleListModal({
           </Text>
         </View>
         <FlatList
-          data={allMuscles}
+          data={muscles}
           keyExtractor={({ id }) => id}
           contentContainerStyle={{
             marginTop: 16,

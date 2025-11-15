@@ -1,4 +1,3 @@
-import assert from "assert";
 import { useQuery } from "@tanstack/react-query";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
@@ -10,16 +9,13 @@ import {
 } from "react-native";
 
 import { Colors } from "../../../constants";
-import { useAppSelector } from "../../../store";
+import { useFirebase } from "../../../providers";
 import { FeedPost } from "../../../components/feeds";
 import { useTRPC } from "../../../providers/TRPCProvider";
 
 export default function HomeScreen() {
   const trpc = useTRPC();
-
-  const { user } = useAppSelector((state) => state.auth);
-
-  assert(user && user.type === "firebase");
+  const { user } = useFirebase();
 
   const {
     refetch,

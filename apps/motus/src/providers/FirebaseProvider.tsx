@@ -1,21 +1,33 @@
+import type z from "zod";
 import * as Sentry from "@sentry/react-native";
 import { setItemAsync } from "expo-secure-store";
+import type { userExtendSelectSchema } from "@motus/server";
 import { getStorage } from "@react-native-firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import "../firebase";
-import { useAppDispatch } from "../store";
-import { authActions } from "../store/auth";
+import type { NonNullable } from "../@types";
 import { useTRPCClient } from "./TRPCProvider";
 
+type User = z.infer<typeof userExtendSelectSchema>;
+
 type FirebaseContext = {
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setAnonymousUser: React.Dispatch<
+    React.SetStateAction<{ uid: string } | undefined>
+  >;
+  anonymousUser?: { uid: string };
   firebase: {
     auth: ReturnType<typeof getAuth>;
     storage: ReturnType<typeof getStorage>;
   };
-  state: "idle" | "initializing" | "completed";
+  state:
+    | "firebase.auth.idle"
+    | "firebase.auth.initializing"
+    | "firebase.auth.initialized";
 };
 
 export const FirebaseContext = createContext<FirebaseContext | null>(null);
@@ -24,44 +36,37 @@ export default function FirebaseProvider({
   children,
 }: React.PropsWithChildren) {
   const trpc = useTRPCClient();
-  const auth = useRef(getAuth());
-  const storage = useRef(getStorage());
-  const [state, setState] = useState<FirebaseContext["state"]>("idle");
+  const [user, setUser] = useState<User | null>(null);
+  const [anonymousUser, setAnonymousUser] = useState<{ uid: string }>();
+  const [state, setState] =
+    useState<FirebaseContext["state"]>("firebase.auth.idle");
 
-  const dispatch = useAppDispatch();
+  const auth = useMemo(() => getAuth(), []);
+  const storage = useMemo(() => getStorage(), []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth.current,
-      async (firebaseUser) => {
-        setState("initializing");
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setState("firebase.auth.initializing");
 
-        if (firebaseUser) {
-          const idToken = await firebaseUser.getIdToken();
-          await setItemAsync("firebase.token", idToken);
+      if (firebaseUser) {
+        const idToken = await firebaseUser.getIdToken();
+        await setItemAsync("firebase.token", idToken);
 
-          const user = await trpc.user.retrieve.query().catch((error) => {
-            Sentry.captureException(error);
-            return null;
-          });
-          if (user) {
-            if (user.token) await setItemAsync("firebase.session", user.token);
-
-            dispatch(
-              authActions.setUser({
-                ...user,
-                type: firebaseUser.isAnonymous ? "anonymous" : "firebase",
-              }),
-            );
-          }
-        } else {
-          const uid = await AsyncStorage.getItem("anonymous_user");
-          dispatch(authActions.setUser({ type: "anonymous", uid }));
+        const user = await trpc.user.retrieve.query().catch((error) => {
+          Sentry.captureException(error);
+          return null;
+        });
+        if (user) {
+          if (user.token) await setItemAsync("firebase.session", user.token);
+          setUser(user);
         }
+      } else {
+        const uid = await AsyncStorage.getItem("anonymous_user");
+        if (uid) setAnonymousUser({ uid });
+      }
 
-        setState("completed");
-      },
-    );
+      setState("firebase.auth.initialized");
+    });
 
     return () => unsubscribe();
   }, []);
@@ -69,8 +74,12 @@ export default function FirebaseProvider({
   return (
     <FirebaseContext.Provider
       value={{
-        firebase: { auth: auth.current, storage: storage.current },
+        user,
+        setUser,
+        setAnonymousUser,
         state,
+        anonymousUser,
+        firebase: { auth, storage },
       }}
     >
       {children}
@@ -78,4 +87,5 @@ export default function FirebaseProvider({
   );
 }
 
-export const useFirebase = () => useContext(FirebaseContext) as FirebaseContext;
+export const useFirebase = () =>
+  useContext(FirebaseContext) as NonNullable<FirebaseContext>;

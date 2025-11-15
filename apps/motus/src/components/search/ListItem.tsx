@@ -1,13 +1,17 @@
 import z from "zod";
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
+import type { userSelectSchema } from "@motus/server";
 import { useMutation } from "@tanstack/react-query";
 
 import Avatar from "../Avatar";
 import Button from "../Button";
 import { Colors } from "../../constants";
-import type { User } from "../../store/search";
 import { useTRPC } from "../../providers/TRPCProvider";
+
+export type User = z.infer<typeof userSelectSchema> & {
+  isFollowing: boolean | null;
+};
 
 type ListItemProps = {
   item: User;

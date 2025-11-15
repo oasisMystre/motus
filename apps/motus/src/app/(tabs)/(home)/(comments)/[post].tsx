@@ -19,7 +19,7 @@ import {
 } from "react-native";
 
 import { Colors } from "../../../../constants";
-import { useAppSelector } from "../../../../store";
+import { useFirebase } from "../../../../providers";
 import { useComment } from "../../../../hooks/useComment";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
@@ -28,13 +28,10 @@ import { CommentItem } from "../../../../components/feeds/CommentItem";
 
 export default function PostCommentScreen() {
   const trpc = useTRPC();
+  const { user } = useFirebase();
   const queryClient = useQueryClient();
   const { bottom } = useSafeAreaInsets();
   const { post } = useLocalSearchParams<{ post: string }>();
-
-  const { user } = useAppSelector((state) => state.auth);
-
-  assert(user && user.type === "firebase");
 
   const { update: updatePost } = useTanstackStore(
     queryClient,

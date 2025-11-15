@@ -13,9 +13,8 @@ import {
 
 import { Colors } from "../../../constants";
 import { withZodSchema } from "../../../utils";
-import { useLoading } from "../../../providers";
-import { authActions } from "../../../store/auth";
 import useDimensions from "../../../hooks/useDimensions";
+import { useFirebase, useLoading } from "../../../providers";
 import { useTRPCClient } from "../../../providers/TRPCProvider";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import {
@@ -47,7 +46,7 @@ export default function ProfileScreen() {
   const scrollX = useRef(new Animated.Value(0));
 
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, setUser } = useFirebase();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const onScroll = Animated.event<NativeScrollEvent>(
@@ -73,7 +72,9 @@ export default function ProfileScreen() {
           trpc.user.update
             .mutate(await userInsertSchema.partial().parseAsync(values))
             .then((data) => {
-              dispatch(authActions.updateUser({ type: "firebase", ...data }));
+              setUser((previous) =>
+                previous ? { ...previous, ...data } : null,
+              );
               router.replace("/(tabs)");
             }),
           {

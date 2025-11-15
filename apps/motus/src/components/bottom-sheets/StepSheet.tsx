@@ -1,5 +1,4 @@
 import Color from "color";
-import assert from "assert";
 import { useFormik } from "formik";
 import { useEffect, useMemo } from "react";
 import { useNavigation } from "expo-router";
@@ -15,28 +14,24 @@ import BottomSheet, {
 
 import Button from "../Button";
 import { Colors } from "../../constants";
-import { authActions } from "../../store/auth";
+import { useFirebase } from "../../providers";
 import { useTRPC } from "../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../store";
 
 export default function StepSheet(
   props: Omit<React.ComponentProps<typeof BottomSheet>, "children">,
 ) {
   const trpc = useTRPC();
   const navigation = useNavigation();
+  const { user, setUser } = useFirebase();
   const intl = useMemo(() => new Intl.NumberFormat(), []);
 
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
   const { mutateAsync } = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess(data) {
-        dispatch(authActions.updateUser(data));
+        setUser((previous) => (previous ? { ...previous, ...data } : null));
       },
     }),
   );
-
-  assert(user && user.type === "firebase");
 
   const { values, setFieldValue, isSubmitting, handleSubmit, handleBlur } =
     useFormik({

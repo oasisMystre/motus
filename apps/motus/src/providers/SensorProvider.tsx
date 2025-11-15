@@ -1,43 +1,61 @@
 import moment from "moment";
+import type React from "react";
 import debounce from "lodash.debounce";
 import { Platform } from "react-native";
 import { Pedometer } from "expo-sensors";
-import { useMutation } from "@tanstack/react-query";
-import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { useTRPC } from "./TRPCProvider";
 import { useSnackbar } from "./SnackbarProvider";
-import { useAppDispatch, useAppSelector } from "../store";
-import { streakActions, streakSelectors } from "../store/streak";
+import { useFirebase } from "./FirebaseProvider";
+import { useTanstackStore } from "../hooks/useTanstackStore";
+
+type SensorContext = {
+  currentSteps: number;
+};
+export const SensorContext = createContext({
+  currentSteps: 0,
+});
 
 export default function SensorProvider({ children }: React.PropsWithChildren) {
   const trpc = useTRPC();
   const toast = useSnackbar();
-  const end = moment().endOf("day").toDate();
-  const start = moment().startOf("day").toDate();
+  const { user } = useFirebase();
+  const queryClient = useQueryClient();
+
+  const [currentSteps, setCurrentSteps] = useState(0);
   const [permissionGranted, setPeromissionGranted] = useState(false);
   const [pedometerAvailable, setPedometerAvailable] = useState<boolean>(false);
 
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  const { currentSteps, ...streakState } = useAppSelector(
-    (state) => state.streak,
-  );
+  const end = useMemo(() => moment().endOf("day").toDate(), []);
+  const start = useMemo(() => moment().startOf("day").toDate(), []);
 
-  const streaks = streakSelectors.selectAll(streakState);
+  const { data: streaks = [] } = useQuery(trpc.streak.list.queryOptions());
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.streak.list.queryKey(),
+    (streak) => streak.id,
+  );
 
   const { mutateAsync: createStreakMutateAsync } = useMutation(
     trpc.streak.create.mutationOptions({
       onSuccess(data) {
-        dispatch(streakActions.addStreak(data));
+        update(data);
       },
     }),
   );
   const { mutateAsync: updateStreakMutateAsync } = useMutation(
     trpc.streak.update.mutationOptions({
       onSuccess(data) {
-        dispatch(streakActions.updateStreak({ id: data.id, changes: data }));
+        update(data);
       },
     }),
   );
@@ -66,7 +84,7 @@ export default function SensorProvider({ children }: React.PropsWithChildren) {
 
   const syncFn = useCallback(
     async (steps: number, start: Date, end: Date) => {
-      if (user && user.type === "firebase") {
+      if (user) {
         const todayStreak = streaks.find(
           (streak) =>
             moment(streak.createdAt).isSameOrAfter(start) &&
@@ -87,26 +105,29 @@ export default function SensorProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    if (pedometerAvailable)
-      toast.success({ text: "🎉 This device can detect motion." });
-  }, [pedometerAvailable]);
+    if (pedometerAvailable) {
+      if (Platform.OS === "ios")
+        Pedometer.getStepCountAsync(start, end).then((result) =>
+          setCurrentSteps(result.steps),
+        );
+
+      const subscription = Pedometer.watchStepCount((result) =>
+        setCurrentSteps(result.steps),
+      );
+
+      return () => subscription.remove();
+    }
+  }, [pedometerAvailable, permissionGranted]);
 
   useEffect(() => {
-    if (Platform.OS === "ios")
-      Pedometer.getStepCountAsync(start, end).then((result) => {
-        dispatch(streakActions.setCurrentSteps(result.steps));
-      });
+    if (user) sync(currentSteps, start, end);
+  }, [user, start, end, currentSteps]);
 
-    const subscription = Pedometer.watchStepCount((result) => {
-      dispatch(streakActions.setCurrentSteps(result.steps));
-    });
-
-    return () => subscription.remove();
-  }, [permissionGranted]);
-
-  useEffect(() => {
-    if (user && user.type === "firebase") sync(currentSteps, start, end);
-  }, [currentSteps]);
-
-  return children;
+  return (
+    <SensorContext.Provider value={{ currentSteps }}>
+      {children}
+    </SensorContext.Provider>
+  );
 }
+
+export const useSensor = () => useContext(SensorContext);

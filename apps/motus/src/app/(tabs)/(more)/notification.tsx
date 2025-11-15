@@ -1,5 +1,4 @@
 import color from "color";
-import assert from "assert";
 import { useFormik } from "formik";
 import { useNavigation } from "expo-router";
 import { useEffect, useMemo } from "react";
@@ -7,22 +6,18 @@ import { useMutation } from "@tanstack/react-query";
 import { Switch, Text, View, FlatList, Platform } from "react-native";
 
 import { Colors } from "../../../constants";
-import { authActions } from "../../../store/auth";
+import { useFirebase } from "../../../providers";
 import { useTRPC } from "../../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../../store";
 
 export default function NotificationSettingsScreen() {
   const trpc = useTRPC();
+  const { user, setUser } = useFirebase();
   const navigation = useNavigation();
-
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  assert(user && user.type === "firebase");
 
   const { mutateAsync } = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess(data) {
-        dispatch(authActions.updateUser(data));
+        setUser((previous) => (previous ? { ...previous, ...data } : null));
       },
     }),
   );

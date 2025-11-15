@@ -44,7 +44,10 @@ export default function GenderPicker({
               }}
             >
               <Text className="flex-1 text-white capitalize">{gender}</Text>
-              <RadioInput value={selected} />
+              <RadioInput
+                value={selected}
+                disabled
+              />
             </View>
           </Pressable>
         );

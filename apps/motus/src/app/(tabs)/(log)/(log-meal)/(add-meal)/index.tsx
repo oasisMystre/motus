@@ -212,6 +212,7 @@ export default function AddMealScreen() {
                       }
                     >
                       <RadioInput
+                        disabled
                         value={selected}
                         style={{ width: 16, height: 16 }}
                       />

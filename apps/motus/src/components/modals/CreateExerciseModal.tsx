@@ -2,13 +2,14 @@ import clsx from "clsx";
 import type z from "zod";
 import { v4 } from "uuid";
 import { format } from "util";
-import { useEffect, useMemo, useState } from "react";
 import { isString, useFormik } from "formik";
 import { CameraIcon } from "phosphor-react-native";
+import { useEffect, useMemo, useState } from "react";
 import { exerciseInsertSchema } from "@motus/server";
 import { launchImageLibraryAsync } from "expo-image-picker";
 import { getStorage } from "@react-native-firebase/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ActivityIndicator,
   Pressable,
@@ -23,23 +24,23 @@ import Avatar from "../Avatar";
 import { BackButton } from "../Header";
 import SelectInput from "../SelectInput";
 import KeyboardView from "../KeyboardView";
+import { useFirebase } from "../../providers";
 import { Colors } from "../../constants/colors";
 import MuscleListModal from "./MuscleListModal";
 import EquipmentListModal from "./EquipmentListModal";
-import { exerciseActions } from "../../store/exercise";
+import { useTRPC } from "../../providers/TRPCProvider";
 import MultipleSelectInput from "../MultipleSelectInput";
-import { useTRPCClient } from "../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../store";
 import { ExerciseTypes } from "../../constants/exercise-types";
 import { withZodSchema, uploadImageFromUri } from "../../utils";
-import { equipmentSelectors, muscleSelectors } from "../../store/metadata";
 
 type CreateExerciseModalProps = {
   onRequestClose?: (event?: GestureResponderEvent) => void;
 } & React.ComponentProps<typeof Modal>;
 
 export default function CreateExerciseModal(props: CreateExerciseModalProps) {
-  const trpc = useTRPCClient();
+  const trpc = useTRPC();
+  const { user } = useFirebase();
+  const queryClient = useQueryClient();
   const { top } = useSafeAreaInsets();
 
   const [image, setImage] = useState<string | null>(null);
@@ -47,9 +48,26 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
   const [showEquipments, setShowEquipments] = useState(false);
   const [showPrimaryMuscle, setShowPrimaryMuscle] = useState(false);
 
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  const { equipments, muscles } = useAppSelector((state) => state.metadata);
+  const { data: equipments = [] } = useQuery(
+    trpc.equipment.list.queryOptions(),
+  );
+  const { data: muscles = [] } = useQuery(trpc.muscle.list.queryOptions());
+  const { mutateAsync } = useMutation(
+    trpc.exercise.create.mutationOptions({
+      onSuccess(exercise) {
+        queryClient.setQueryData(
+          trpc.exercise.list.queryKey(),
+          (previousData) => {
+            if (previousData) previousData.custom.push(exercise);
+
+            return previousData;
+          },
+        );
+
+        props?.onRequestClose?.();
+      },
+    }),
+  );
 
   const {
     values,
@@ -79,27 +97,29 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
           fileName: format("%s/%s.jpg", user?.uid, id),
         });
       }
-      return trpc.exercise.create.mutate({ ...value, id }).then((exercise) => {
-        dispatch(exerciseActions.addCustomExercise(exercise));
-        props?.onRequestClose?.();
-      });
+      return mutateAsync({ ...value, id });
     },
   });
 
   const selectedEquipments = useMemo(() => {
-    const value = equipmentSelectors.selectById(equipments, values.equipment);
-    if (value) return [value];
+    if (values.equipment) {
+      const value = equipments.find(
+        (equipment) => equipment.id === values.equipment,
+      );
+      if (value) return [value];
+    }
     return [];
   }, [values.equipment]);
   const otherMuscles = useMemo(
     () =>
-      values.other_muscles.map((id) => muscleSelectors.selectById(muscles, id)),
+      values.other_muscles.map(
+        (id) => muscles.find((muscle) => muscle.id === id)!,
+      ),
     [values.other_muscles],
   );
   const primaryMuscleGroups = useMemo(() => {
-    const value = muscleSelectors.selectById(
-      muscles,
-      values.primary_muscle_group,
+    const value = muscles.find(
+      (muscle) => muscle.id === values.primary_muscle_group,
     );
     if (value) return [value];
     return [];
@@ -195,7 +215,7 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
                 onPress={() => setShowEquipments(true)}
                 error={touched.equipment && errors?.equipment}
                 onValueChange={([value]) => {
-                  setFieldValue("equipmemt", value.id);
+                  setFieldValue("equipment", value?.id);
                   setTouched({ metadata: { equipment: true } });
                 }}
               />
@@ -211,7 +231,7 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
                   setTouched({
                     metadata: { primary_muscle_group: true },
                   });
-                  setFieldValue("primary_muscle_group", value);
+                  setFieldValue("primary_muscle_group", value?.id);
                 }}
               />
               <SelectInput
@@ -225,7 +245,10 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
                   errors.other_muscles
                 }
                 onValueChange={(values) => {
-                  setFieldValue("other_muscles", values);
+                  setFieldValue(
+                    "other_muscles",
+                    values.map((value) => value.id),
+                  );
                   setTouched({
                     metadata: { other_muscles: true },
                   });

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import type z from "zod";
 import { format } from "util";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { exerciseSelectSchema } from "@motus/server";
 import { BarbellIcon, PlusIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,11 +20,10 @@ import { BackButton } from "../Header";
 import SearchInput from "../SearchInput";
 import { Colors } from "../../constants";
 import KeyboardView from "../KeyboardView";
-import { useAppSelector } from "../../store";
 import MuscleListModal from "./MuscleListModal";
 import EquipmentListModal from "./EquipmentListModal";
-import { exerciseSelector } from "../../store/exercise";
 import CreateExerciseModal from "./CreateExerciseModal";
+import { useTRPC } from "../../providers/TRPCProvider";
 
 type AddExerciseModalProps = {
   replace?: boolean;
@@ -37,27 +37,25 @@ export default function AddExerciseModal({
   onValueChange,
   ...props
 }: AddExerciseModalProps) {
+  const trpc = useTRPC();
   const { bottom, top } = useSafeAreaInsets();
   const [showMuscles, setShowShowMuscles] = useState(false);
   const [showEquipments, setShowEquipments] = useState(false);
   const [selectedValues, setSelectedValues] = useState(values);
   const [showCreateExerciseModal, setShowCreateExerciseModal] = useState(false);
 
-  const { exercises, customExercises } = useAppSelector(
-    (state) => state.exercise,
-  );
-  const allExercises = exerciseSelector.selectAll(exercises);
-  const allCustomExercises = exerciseSelector.selectAll(customExercises);
+  const { data } = useQuery(trpc.exercise.list.queryOptions());
+
   const sections = useMemo(
     () => [
       {
         title: "Custom Exercises",
         custom: true,
-        data: [...allCustomExercises],
+        data: data ? data.custom : [],
       },
-      { title: "Exercises", data: [...allExercises] },
+      { title: "Exercises", data: data ? data.default : [] },
     ],
-    [allCustomExercises, allExercises],
+    [data],
   );
 
   return (

@@ -1,20 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { useAppSelector } from "../store";
+import { useFirebase } from "../providers";
 import { useTRPCClient } from "../providers/TRPCProvider";
 
 export function useUser(id: string) {
   const trpc = useTRPCClient();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user } = useFirebase();
 
-  if (user && user.type === "firebase" && user.id === id) return user;
+  if (user?.id === id) return user;
 
   const { data } = useQuery({
     queryKey: ["profile", id],
     staleTime: Infinity,
     refetchOnMount: false,
-    refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     queryFn: () => trpc.user.retrieve.query({ id }),
   });
 

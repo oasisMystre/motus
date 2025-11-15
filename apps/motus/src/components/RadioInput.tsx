@@ -11,7 +11,7 @@ import {
 import { Colors } from "../constants";
 
 type RadioInputProps = {
-  disabled: boolean;
+  disabled?: boolean;
   value: boolean;
   onChange?: (value: boolean) => void;
   checkClassName?: string;

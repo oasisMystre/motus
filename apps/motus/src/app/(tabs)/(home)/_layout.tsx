@@ -1,15 +1,13 @@
-import assert from "assert";
 import { Stack } from "expo-router";
 
-import { useAppSelector } from "../../../store";
+import { useFirebase } from "../../../providers";
+import { useReward } from "../../../hooks/useReward";
 import { BackButton } from "../../../components/Header";
 import { FeedHeader } from "../../../components/feeds/FeedHeader";
 
 export default function HomeLayout() {
-  const { user } = useAppSelector((state) => state.auth);
-  const { points } = useAppSelector((state) => state.reward);
-
-  assert(user && user.type === "firebase");
+  const { user } = useFirebase();
+  const { points } = useReward();
 
   return (
     <Stack

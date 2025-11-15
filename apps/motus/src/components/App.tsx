@@ -1,27 +1,26 @@
 import { useEffect } from "react";
 import { router, Stack } from "expo-router";
 
-import { useAppSelector } from "../store";
+import { useFirebase } from "../providers";
 
 export default function App() {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, anonymousUser } = useFirebase();
+
   useEffect(() => {
     if (user) {
-      if (user.type === "anonymous")
-        if (user.uid) router.replace("/(auth)");
-        else router.replace("/onboarding");
-      else if (user.type === "firebase") {
-        if (
-          user.profile.gender &&
-          user.profile.age &&
-          user.profile.weight &&
-          user.profile.height
-        )
-          router.replace("/(tabs)");
-        else router.replace("/(auth)/profile");
-      }
-    } else router.replace("/onboarding");
-  }, [user?.type, user?.uid]);
+      if (
+        user.profile.gender &&
+        user.profile.age &&
+        user.profile.weight &&
+        user.profile.height
+      )
+        router.replace("/(tabs)");
+      else router.replace("/(auth)/profile");
+    } else {
+      if (anonymousUser) router.replace("/(auth)");
+      else router.replace("/onboarding");
+    }
+  }, [user, anonymousUser]);
 
   return (
     <Stack
@@ -31,13 +30,13 @@ export default function App() {
         headerTitleAlign: "center",
       }}
     >
-      <Stack.Protected
-        guard={Boolean(user?.type === "firebase" && user.profile)}
-      >
+      <Stack.Screen name="onboarding" />
+      <Stack.Protected guard={Boolean(user?.profile)}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
-      <Stack.Screen name="onboarding" />
-      <Stack.Screen name="(auth)" />
+      <Stack.Protected guard={Boolean(anonymousUser)}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
     </Stack>
   );
 }
