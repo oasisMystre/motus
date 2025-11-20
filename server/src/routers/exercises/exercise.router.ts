@@ -97,15 +97,18 @@ export const exerciseRouter = router({
       return { default: _default, custom };
     }),
   update: publicProcedure
-    .input(exerciseInsertSchema.omit({ user: true }).partial())
+    .input(
+      exerciseInsertSchema
+        .omit({ user: true })
+        .partial()
+        .extend(exerciseSelectSchema.pick({ id: true }).shape),
+    )
     .output(exerciseSelectSchema)
     .mutation(async ({ ctx, input }) => {
       const [updatedxercise] = await ctx.drizzle
         .update(exercises)
         .set(input)
-        .where(
-          and(eq(exercises.id, input.id!), eq(exercises.user, ctx.user.id)),
-        )
+        .where(and(eq(exercises.id, input.id), eq(exercises.user, ctx.user.id)))
         .returning()
         .execute();
 
@@ -119,5 +122,15 @@ export const exerciseRouter = router({
       }
 
       throw new TRPCError({ code: "NOT_FOUND", message: "exercise not found" });
+    }),
+  delete: publicProcedure
+    .input(exerciseSelectSchema.pick({ id: true }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.drizzle
+        .delete(exercises)
+        .where(
+          and(eq(exercises.id, input.id!), eq(exercises.user, ctx.user.id)),
+        )
+        .execute();
     }),
 });

@@ -2,6 +2,7 @@ import { router } from "../trpc";
 
 import { mcpRouter } from "./mcp/mcp.router";
 import { logRouter } from "./logs/log.router";
+
 import { postRouter } from "./posts/post.router";
 import { userRouter } from "./users/user.router";
 import { mealRouter } from "./meals/meal.router";

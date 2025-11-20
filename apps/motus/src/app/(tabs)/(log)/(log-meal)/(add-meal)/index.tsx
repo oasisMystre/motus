@@ -1,26 +1,32 @@
 import type z from "zod";
-import { useEffect, useMemo, useState } from "react";
 import { useFormikContext } from "formik";
-import type { mealSelectSchema } from "@motus/server";
 import { CoffeeIcon } from "phosphor-react-native";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import type { mealSelectSchema } from "@motus/server";
+import React, { useEffect, useMemo, useState } from "react";
+import { Pressable, Text, View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  KeyboardAwareScrollView,
+  KeyboardToolbar,
+} from "react-native-keyboard-controller";
 
 import { Colors } from "../../../../../constants";
 import Input from "../../../../../components/Input";
 import Button from "../../../../../components/Button";
 import RadioInput from "../../../../../components/RadioInput";
-import KeyboardView from "../../../../../components/KeyboardView";
 import { MealHeader, MealInfo, MealList } from "../../../../../components/meal";
+
+import AddFoodModal from "../../../../../components/meal/AddFoodModal";
 
 export default function AddMealScreen() {
   const navigation = useNavigation();
   const { bottom } = useSafeAreaInsets();
-  const { action } = useLocalSearchParams<{ action?: "edit" | "duplicate" }>();
   const [file, setFile] = useState<string>();
   const { showPortionSize } = useLocalSearchParams();
+  const [showAddFoodModal, setShowAddFoodModal] = useState(false);
+  const { action } = useLocalSearchParams<{ action?: "edit" | "duplicate" }>();
 
   const screenTitle = useMemo(
     () => (action === "edit" ? "Edit Meal Log" : "Meal Log"),
@@ -100,11 +106,15 @@ export default function AddMealScreen() {
       values.meals.reduce(
         (acc, meal) => {
           const value = meal.metadata.nutriments[key];
-          if (value)
+          if (value) {
+            const _value = parseFloat(
+              meal.metadata.nutriments[key].value?.toString() ?? "0",
+            );
             return {
               unit: meal.metadata.nutriments[key].unit,
-              value: acc.value + meal.metadata.nutriments[key].value,
+              value: acc.value + (Number.isNaN(_value) ? 0 : _value),
             };
+          }
           return acc;
         },
         { unit: "g", value: 0 },
@@ -138,14 +148,22 @@ export default function AddMealScreen() {
   }, [info]);
 
   return (
-    <KeyboardView style={{ marginBottom: bottom, zIndex: 0 }}>
-      <View className="flex-1">
+    <>
+      <KeyboardAwareScrollView
+        bottomOffset={35}
+        contentContainerStyle={{
+          flex: 1,
+          marginBottom: bottom,
+          zIndex: 0,
+        }}
+      >
         <ScrollView
-          contentContainerStyle={{ flex: 1 }}
-          style={{ flex: 1 }}
-          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            padding: 8,
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 gap-y-8 p-2">
+          <View className="gap-y-8">
             <Input
               label="Meal Name"
               error={touched.name && errors.name}
@@ -232,25 +250,32 @@ export default function AddMealScreen() {
             </View>
             <MealList meals={values.meals} />
           </View>
+          <View className=" gap-y-4">
+            <Button
+              text="Add Food"
+              style={{
+                backgroundColor: "none",
+                borderWidth: 1,
+                borderColor: Colors.grey,
+              }}
+              onPress={() => setShowAddFoodModal(true)}
+            />
+            <Button
+              text="Save meal"
+              disabled={disabled}
+              submitting={isSubmitting}
+              onPress={() => handleSubmit()}
+            />
+          </View>
         </ScrollView>
-        <View className=" gap-y-4">
-          <Button
-            text="Add Food"
-            style={{
-              backgroundColor: "none",
-              borderWidth: 1,
-              borderColor: Colors.grey,
-            }}
-            onPress={() => router.push("/(add-food)")}
-          />
-          <Button
-            text="Save meal"
-            disabled={disabled}
-            submitting={isSubmitting}
-            onPress={() => handleSubmit()}
-          />
-        </View>
-      </View>
-    </KeyboardView>
+      </KeyboardAwareScrollView>
+      <AddFoodModal
+        visible={showAddFoodModal}
+        values={values.meals}
+        onChange={(values) => setFieldValue("meals", values)}
+        onRequestClose={() => setShowAddFoodModal(false)}
+      />
+      <KeyboardToolbar />
+    </>
   );
 }

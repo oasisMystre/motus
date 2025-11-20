@@ -17,9 +17,10 @@ export const mapCommentWithExtra = (
 export const useComment = (post: string) => {
   const trpc = useTRPC();
   const [comments, setComments] = useState<Comment[]>([]);
-  const { data = [], isFetching } = useQuery(
-    trpc.post.comment.list.queryOptions({ filter: { post } }),
-  );
+  const { data, isFetching } = useQuery({
+    refetchOnMount: true,
+    ...trpc.post.comment.list.queryOptions({ filter: { post } }),
+  });
 
   const addComment = useCallback(
     (comment: Comment) => {
@@ -45,9 +46,10 @@ export const useComment = (post: string) => {
   );
 
   useEffect(() => {
-    setComments(
-      data.map((comment) => ({ ...comment, sent: true, failed: false })),
-    );
+    if (data)
+      setComments(
+        data.map((comment) => ({ ...comment, sent: true, failed: false })),
+      );
   }, [data]);
 
   return {

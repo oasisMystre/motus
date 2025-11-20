@@ -57,7 +57,10 @@ export function MealInfo({ info, energy }: MealInfoProps) {
           y="percentage"
           colorScale={data.map((data) => data.color)}
           labels={({ datum }) => datum.label}
-          innerRadius={80}
+          width={96}
+          height={96}
+          radius={48}
+          innerRadius={28}
         />
         <View
           className="items-center justify-center"

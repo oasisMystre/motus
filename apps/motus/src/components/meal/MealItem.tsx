@@ -1,30 +1,46 @@
 import clsx from "clsx";
 import Color from "color";
-import { Pressable, Text, View } from "react-native";
+import { useMemo } from "react";
+import { type Pressable, Text, View } from "react-native";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import { Colors } from "../../constants";
 import CheckboxInput from "../CheckboxInput";
+import CrudListItemAction, {
+  type CrudListItemActionProps,
+} from "../CrudListItemAction";
 
 type MealItemProps = {
   title: string;
   subtitle: string;
   selected: boolean;
-} & React.ComponentProps<typeof Pressable>;
+  hideActions?: boolean;
+} & React.ComponentProps<typeof Pressable> &
+  CrudListItemActionProps;
 
 export function MealItem({
   title,
   subtitle,
   selected,
+  onEdit,
+  onDelete,
+  hideActions,
   ...props
 }: MealItemProps) {
-  return (
-    <Pressable {...props}>
+  const actionFn = useMemo(() => CrudListItemAction({ onDelete, onEdit }), []);
+  const child = useMemo(
+    () => (
       <View
         className={clsx(
-          "flex-row items-center p-2 rounded-xl",
+          "h-16 flex-row items-center p-2 rounded-lg",
           props.className,
         )}
-        style={[{ backgroundColor: Color("white").alpha(0.1).hexa() }]}
+        style={[
+          {
+            backgroundColor: Color("white").alpha(0.1).hexa(),
+            marginHorizontal: hideActions ? 16 : undefined,
+          },
+        ]}
       >
         <View className="flex-1">
           <Text className="text-white font-poppins-medium">{title}</Text>
@@ -35,8 +51,23 @@ export function MealItem({
             {subtitle}
           </Text>
         </View>
-        <CheckboxInput value={selected} />
+        <CheckboxInput
+          value={selected}
+          onPress={props.onPress}
+          className="z-0"
+        />
       </View>
-    </Pressable>
+    ),
+    [],
+  );
+  if (hideActions) return child;
+  return (
+    <ReanimatedSwipeable
+      enableTrackpadTwoFingerGesture
+      renderRightActions={actionFn}
+      containerStyle={{ paddingHorizontal: 16 }}
+    >
+      {child}
+    </ReanimatedSwipeable>
   );
 }

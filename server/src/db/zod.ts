@@ -87,8 +87,25 @@ export const followSelectSchema = createSelectSchema(follows, {
   following: userSelectSchema,
 });
 
-export const mealInsertSchema = createInsertSchema(meals);
-export const mealSelectSchema = createSelectSchema(meals);
+const mealMetadataSchema = z.object({
+  portionSize: z.object({
+    value: z.number(),
+    unit: z.enum(["kg", "g", "cup", "litre", "bag", "sachet"]),
+  }),
+  nutriments: z.record(
+    z.string(),
+    z.object({
+      value: z.number(),
+      unit: z.enum(["g", "mg", "%", "cal", "kcal"]),
+    }),
+  ),
+});
+export const mealInsertSchema = createInsertSchema(meals, {
+  metadata: mealMetadataSchema,
+});
+export const mealSelectSchema = createSelectSchema(meals, {
+  metadata: mealMetadataSchema,
+});
 
 const routineLogMetadataSchema = z.object({
   sets: z.coerce.number().gt(0, { error: "sets required" }),

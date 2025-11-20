@@ -38,14 +38,18 @@ export function MealList({ meals }: MealListProps) {
                 className="text-sm font-poppins"
                 style={{ color: Colors.grey }}
               >
-                {format("%d %s", portionSize.value, portionSize.unit)}
+                {format(
+                  "%d %s",
+                  portionSize?.value ?? 0,
+                  portionSize.unit ?? "g",
+                )}
               </Text>
             </View>
             <Text
               className="font-poppins"
               style={{ color: Colors.grey }}
             >
-              {format("%d %s", energy.value, energy.unit)}
+              {format("%d %s", energy?.value ?? 0, energy?.unit ?? "g")}
             </Text>
           </View>
         );

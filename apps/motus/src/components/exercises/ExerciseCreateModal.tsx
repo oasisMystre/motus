@@ -5,11 +5,11 @@ import { format } from "util";
 import { isString, useFormik } from "formik";
 import { CameraIcon } from "phosphor-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { exerciseInsertSchema } from "@motus/server";
 import { launchImageLibraryAsync } from "expo-image-picker";
 import { getStorage } from "@react-native-firebase/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { exerciseInsertSchema, type exerciseSelectSchema } from "@motus/server";
 import {
   ActivityIndicator,
   Pressable,
@@ -26,18 +26,22 @@ import SelectInput from "../SelectInput";
 import KeyboardView from "../KeyboardView";
 import { useFirebase } from "../../providers";
 import { Colors } from "../../constants/colors";
-import MuscleListModal from "./MuscleListModal";
-import EquipmentListModal from "./EquipmentListModal";
+import MuscleListModal from "../modals/MuscleListModal";
+import EquipmentListModal from "../modals/EquipmentListModal";
 import { useTRPC } from "../../providers/TRPCProvider";
 import MultipleSelectInput from "../MultipleSelectInput";
 import { ExerciseTypes } from "../../constants/exercise-types";
 import { withZodSchema, uploadImageFromUri } from "../../utils";
 
 type CreateExerciseModalProps = {
+  initialValues?: z.infer<typeof exerciseSelectSchema>;
   onRequestClose?: (event?: GestureResponderEvent) => void;
 } & React.ComponentProps<typeof Modal>;
 
-export default function CreateExerciseModal(props: CreateExerciseModalProps) {
+export default function CreateExerciseModal({
+  initialValues,
+  ...props
+}: CreateExerciseModalProps) {
   const trpc = useTRPC();
   const { user } = useFirebase();
   const queryClient = useQueryClient();
@@ -68,6 +72,28 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
       },
     }),
   );
+  const { mutateAsync: updateExerciseAsync } = useMutation(
+    trpc.exercise.create.mutationOptions({
+      onSuccess(exercise) {
+        queryClient.setQueryData(
+          trpc.exercise.list.queryKey(),
+          (previousData) => {
+            if (previousData) {
+              const index = previousData.custom.findIndex(
+                (item) => item.id === exercise.id,
+              );
+              if (index > -1) previousData.custom[index] = exercise;
+              else previousData.custom.push(exercise);
+            }
+
+            return previousData;
+          },
+        );
+
+        props?.onRequestClose?.();
+      },
+    }),
+  );
 
   const {
     values,
@@ -85,19 +111,21 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
     validateOnMount: true,
     validate: withZodSchema(exerciseInsertSchema),
     initialValues: {
-      name: "",
-      other_muscles: [],
-      exercise_types: [],
-      metadata: {},
+      name: initialValues?.name ?? "",
+      metadata: initialValues?.metadata ?? {},
+      exercise_types: initialValues?.exercise_types ?? [],
+      primary_muscle_group: initialValues?.primary_muscle_group.id,
+      other_muscles: initialValues?.other_muscles.map((item) => item.id) ?? [],
     } as unknown as z.infer<typeof exerciseInsertSchema>,
-    async onSubmit(value) {
-      const id = v4();
+    async onSubmit(values) {
+      const id = values.id ?? v4();
       if (image) {
-        value.image = await uploadImageFromUri(getStorage(), image, {
+        values.image = await uploadImageFromUri(getStorage(), image, {
           fileName: format("%s/%s.jpg", user?.uid, id),
         });
       }
-      return mutateAsync({ ...value, id });
+      if ("id" in values && values.id) return updateExerciseAsync(values);
+      else return mutateAsync({ ...values, id });
     },
   });
 
@@ -132,8 +160,9 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
   return (
     <>
       <Modal
-        animationType="slide"
         {...props}
+        animationType="slide"
+        backdropColor={Colors.backgroundColor}
       >
         <KeyboardView
           className={clsx("flex-1", props.className)}
@@ -156,7 +185,7 @@ export default function CreateExerciseModal(props: CreateExerciseModalProps) {
                 />
               </Pressable>
               <Text className="text-white text-lg font-poppins-semibold">
-                Create Exercise
+                {initialValues ? "Edit Exercise" : "Create Exercise"}
               </Text>
               <Pressable
                 disabled={!isValid && isSubmitting}

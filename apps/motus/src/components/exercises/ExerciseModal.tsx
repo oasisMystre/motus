@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { exerciseSelectSchema } from "@motus/server";
 import { BarbellIcon, PlusIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
   Modal,
   Pressable,
@@ -20,10 +21,12 @@ import { BackButton } from "../Header";
 import SearchInput from "../SearchInput";
 import { Colors } from "../../constants";
 import KeyboardView from "../KeyboardView";
-import MuscleListModal from "./MuscleListModal";
-import EquipmentListModal from "./EquipmentListModal";
-import CreateExerciseModal from "./CreateExerciseModal";
 import { useTRPC } from "../../providers/TRPCProvider";
+import CreateExerciseModal from "./ExerciseCreateModal";
+import MuscleListModal from "../modals/MuscleListModal";
+import EquipmentListModal from "../modals/EquipmentListModal";
+import CrudListItemAction from "../CrudListItemAction";
+import { ExerciseConfirmDeletion } from "./ExerciseConfirmDeletion";
 
 type AddExerciseModalProps = {
   replace?: boolean;
@@ -43,6 +46,10 @@ export default function AddExerciseModal({
   const [showEquipments, setShowEquipments] = useState(false);
   const [selectedValues, setSelectedValues] = useState(values);
   const [showCreateExerciseModal, setShowCreateExerciseModal] = useState(false);
+  const [showDeleteExerciseModal, setShowDeleteExerciseModal] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<
+    z.infer<typeof exerciseSelectSchema> | undefined
+  >(undefined);
 
   const { data } = useQuery(trpc.exercise.list.queryOptions());
 
@@ -60,8 +67,9 @@ export default function AddExerciseModal({
 
   return (
     <Modal
-      animationType="slide"
       {...props}
+      animationType="slide"
+      backdropColor={Colors.backgroundColor}
     >
       <KeyboardView
         className={clsx("flex-1", props.className)}
@@ -149,74 +157,89 @@ export default function AddExerciseModal({
               if (exists) return null;
 
               return (
-                <Pressable
-                  className="flex-row gap-x-4 px-2 py-4 border-b"
-                  style={[
-                    {
-                      borderColor:
-                        data.length > 0 && index < data.length - 1
-                          ? Colors.border[1]
-                          : undefined,
+                <ReanimatedSwipeable
+                  enableTrackpadTwoFingerGesture
+                  renderRightActions={CrudListItemAction({
+                    onEdit() {
+                      setSelectedExercise(item);
+                      setShowCreateExerciseModal(true);
                     },
-                    selected &&
-                      !replace && [
-                        {
-                          borderStartWidth: 4,
-                          borderStartColor: Colors.primary,
-                        },
-                      ],
-                  ]}
-                  onPress={(event) => {
-                    if (replace) {
-                      onValueChange([item]);
-                      props.onRequestClose?.(event);
-                    }
-                    if (selected)
-                      exercises = exercises.filter(
-                        (exercise) => exercise.id !== item.id,
-                      );
-                    else exercises.push(item);
-
-                    setSelectedValues(exercises);
-                  }}
+                    onDelete() {
+                      setSelectedExercise(item);
+                      setShowDeleteExerciseModal(true);
+                    },
+                  })}
+                  containerStyle={{ paddingHorizontal: 16 }}
                 >
-                  <View
-                    className="size-16 items-center justify-center rounded-full"
-                    style={{ backgroundColor: Colors.darkGray }}
+                  <Pressable
+                    className="flex-row gap-x-4 px-2 py-4 border-b"
+                    style={[
+                      {
+                        borderColor:
+                          data.length > 0 && index < data.length - 1
+                            ? Colors.border[1]
+                            : undefined,
+                      },
+                      selected &&
+                        !replace && [
+                          {
+                            borderStartWidth: 4,
+                            borderStartColor: Colors.primary,
+                          },
+                        ],
+                    ]}
+                    onPress={(event) => {
+                      if (replace) {
+                        onValueChange([item]);
+                        props.onRequestClose?.(event);
+                      }
+                      if (selected)
+                        exercises = exercises.filter(
+                          (exercise) => exercise.id !== item.id,
+                        );
+                      else exercises.push(item);
+
+                      setSelectedValues(exercises);
+                    }}
                   >
-                    <BarbellIcon
-                      size={32}
-                      color={Colors.grey}
-                      weight="duotone"
-                      style={{ transform: [{ rotate: "24deg" }] }}
-                    />
-                  </View>
-                  <View className="">
-                    <Text className="text-lg text-white font-poppins-medium">
-                      {item.name}
-                    </Text>
-                    <View className="flex-row items-center gap-x-2">
-                      {[item.primary_muscle_group, ...item.other_muscles].map(
-                        (muscle, index) => (
-                          <Text
-                            key={index}
-                            style={{ color: Colors.grey }}
-                          >
-                            {muscle.name}
-                          </Text>
-                        ),
-                      )}
-                      {custom && (
-                        <View
-                          className="px-2 py-1 rounded-md"
-                          style={{ backgroundColor: Colors.background[3] }}
-                        >
-                          <Text style={{ color: Colors.grey }}>Custom</Text>
-                        </View>
-                      )}
+                    <View
+                      className="size-16 items-center justify-center rounded-full"
+                      style={{ backgroundColor: Colors.darkGray }}
+                    >
+                      <BarbellIcon
+                        size={32}
+                        color={Colors.grey}
+                        weight="duotone"
+                        style={{ transform: [{ rotate: "24deg" }] }}
+                      />
                     </View>
-                  </View>
-                </Pressable>
+                    <View className="">
+                      <Text className="text-lg text-white font-poppins-medium">
+                        {item.name}
+                      </Text>
+                      <View className="flex-row items-center gap-x-2">
+                        {[item.primary_muscle_group, ...item.other_muscles].map(
+                          (muscle, index) => (
+                            <Text
+                              key={index}
+                              style={{ color: Colors.grey }}
+                            >
+                              {muscle.name}
+                            </Text>
+                          ),
+                        )}
+                        {custom && (
+                          <View
+                            className="px-2 py-1 rounded-md"
+                            style={{ backgroundColor: Colors.background[3] }}
+                          >
+                            <Text style={{ color: Colors.grey }}>Custom</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </Pressable>
+                </ReanimatedSwipeable>
               );
             }}
           />
@@ -251,10 +274,24 @@ export default function AddExerciseModal({
         visible={showMuscles}
         onRequestClose={() => setShowShowMuscles(false)}
       />
+      {selectedExercise && (
+        <ExerciseConfirmDeletion
+          exercise={selectedExercise}
+          visible={showDeleteExerciseModal}
+          onRequestClose={() => {
+            setSelectedExercise(undefined);
+            setShowCreateExerciseModal(false);
+          }}
+        />
+      )}
       {showCreateExerciseModal && (
         <CreateExerciseModal
+          initialValues={selectedExercise}
           visible={showCreateExerciseModal}
-          onRequestClose={() => setShowCreateExerciseModal(false)}
+          onRequestClose={() => {
+            setSelectedExercise(undefined);
+            setShowCreateExerciseModal(false);
+          }}
         />
       )}
     </Modal>

@@ -19,8 +19,8 @@ export default function DeleteAccountModal(
   return (
     <ModalDialog
       {...props}
-      containerClassName="w-[92%] max-w-[360px] self-center m-auto gap-y-8 px-4 py-6 rounded-xl"
       containerStyle={{ height: "auto" }}
+      containerClassName="w-[92%] max-w-[360px] self-center m-auto gap-y-8 px-4 py-6 rounded-xl"
     >
       <>
         <View className="gap-y-6">

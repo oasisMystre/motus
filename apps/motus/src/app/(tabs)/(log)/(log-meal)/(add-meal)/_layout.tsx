@@ -32,8 +32,8 @@ export default function LogMealLayout() {
       meal
         ? {
             name: meal.name,
-            category: meal.category,
             meals: meal.meals,
+            category: meal.category,
             metadata: meal.metadata,
           }
         : {
@@ -102,13 +102,6 @@ export default function LogMealLayout() {
         <Stack.Screen
           name="index"
           options={{ title: "Meal Log" }}
-        />
-        <Stack.Screen
-          name="(add-food)"
-          options={{
-            title: "Add Food",
-            headerShown: false,
-          }}
         />
       </Stack>
     </Formik>

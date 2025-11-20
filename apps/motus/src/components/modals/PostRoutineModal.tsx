@@ -168,8 +168,9 @@ export default function PostRoutineModal({
 
   return (
     <Modal
-      animationType="slide"
       {...props}
+      animationType="slide"
+      backdropColor={Colors.backgroundColor}
     >
       <KeyboardView
         className={clsx("flex-1", props.className)}

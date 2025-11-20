@@ -26,6 +26,33 @@ export const mealRouter = router({
 
       throw new TRPCError({ code: "BAD_REQUEST", message: "meal not created" });
     }),
+  update: publicProcedure
+    .input(
+      mealInsertSchema
+        .omit({ user: true })
+        .partial()
+        .extend(mealSelectSchema.pick({ id: true }).shape),
+    )
+    .output(mealSelectSchema)
+    .mutation(async ({ ctx, input }) => {
+      const [meal] = await ctx.drizzle
+        .update(meals)
+        .set(input)
+        .where(and(eq(meals.user, ctx.user.id), eq(meals.id, input.id)))
+        .returning()
+        .execute();
+      if (meal) return meal;
+
+      throw new TRPCError({ code: "NOT_FOUND", message: "meal not found" });
+    }),
+  delete: publicProcedure
+    .input(mealSelectSchema.pick({ id: true }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.drizzle
+        .delete(meals)
+        .where(and(eq(meals.user, ctx.user.id), eq(meals.id, input.id)))
+        .execute();
+    }),
   create_atomic: publicProcedure
     .input(z.array(mealInsertSchema.omit({ user: true })))
     .output(z.array(mealSelectSchema))

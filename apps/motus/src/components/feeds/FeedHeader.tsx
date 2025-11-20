@@ -27,12 +27,12 @@ export function FeedHeader({ user, points, ...props }: FeedHeaderProps) {
       style={{ marginTop: top }}
     >
       <View className="flex-1 flex-row items-center gap-x-4">
-        <Pressable onPress={() => router.push(`/(home)/${user.id}`)}>
+        <Link href={`/(home)/${user.id}`}>
           <Avatar
             url={user.profile.avatar}
             style={{ width: 48, height: 48 }}
           />
-        </Pressable>
+        </Link>
         <LinearGradient
           start={{ x: 0, y: 0 }}
           locations={[0, 1]}

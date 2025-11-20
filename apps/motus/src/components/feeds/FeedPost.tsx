@@ -57,6 +57,11 @@ export function FeedPost({ post, user }: FeedPostProps) {
   const { isPending, ...postLike } = useMutation(
     trpc.post.like.mutationOptions(),
   );
+  const { isPending: isPendingFollowing, ...followUser } = useMutation(
+    trpc.follow.create.mutationOptions({
+      onSuccess() {},
+    }),
+  );
 
   const mutatePostLike = useMemo(
     () => debounce(postLike.mutateAsync, 500),
@@ -84,10 +89,12 @@ export function FeedPost({ post, user }: FeedPostProps) {
   return (
     <View className="gap-y-2">
       <View className="flex-row items-center gap-x-4 px-6">
-        <Avatar
-          url={post.user.profile.avatar}
-          style={{ width: 40, height: 40 }}
-        />
+        <Link href={`/(home)/${post.user.id}`}>
+          <Avatar
+            url={post.user.profile.avatar}
+            style={{ width: 40, height: 40 }}
+          />
+        </Link>
         <View className="flex-1">
           <Text
             className="!font-poppins-medium"
@@ -105,7 +112,13 @@ export function FeedPost({ post, user }: FeedPostProps) {
         {canFollow && (
           <Button
             text="Follow"
+            submitting={isPendingFollowing}
             style={{ paddingVertical: 4 }}
+            onPress={() =>
+              followUser.mutateAsync({
+                following: post.user.id,
+              })
+            }
           />
         )}
       </View>
@@ -159,7 +172,6 @@ export function FeedPost({ post, user }: FeedPostProps) {
         <View className="gap-y-2 px-6">
           <View className="flex-row items-center gap-x-4">
             <Pressable
-              disabled={isPending}
               className="flex-row items-center gap-x-1"
               onPress={togglePostLike}
             >

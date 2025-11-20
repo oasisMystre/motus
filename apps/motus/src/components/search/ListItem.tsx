@@ -1,4 +1,4 @@
-import z from "zod";
+import type z from "zod";
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
 import type { userSelectSchema } from "@motus/server";

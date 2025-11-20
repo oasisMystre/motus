@@ -1,5 +1,4 @@
 import { v4 } from "uuid";
-import assert from "assert";
 import { format } from "util";
 import { useFormik } from "formik";
 import { object, string } from "yup";
@@ -9,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { PaperPlaneTiltIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
 import {
   Pressable,
   TextInput,
@@ -22,7 +22,6 @@ import { Colors } from "../../../../constants";
 import { useFirebase } from "../../../../providers";
 import { useComment } from "../../../../hooks/useComment";
 import { useTRPC } from "../../../../providers/TRPCProvider";
-import KeyboardView from "../../../../components/KeyboardView";
 import { useTanstackStore } from "../../../../hooks/useTanstackStore";
 import { CommentItem } from "../../../../components/feeds/CommentItem";
 
@@ -98,75 +97,71 @@ export default function PostCommentScreen() {
   });
 
   return (
-    <KeyboardView>
-      <View className="flex-1">
-        <FlatList
-          data={comments}
-          style={{ flex: 1, paddingTop: 16 }}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          keyExtractor={(comment) => comment.id}
-          ListEmptyComponent={() => {
-            return (
-              <View className="flex-1 items-center justify-center">
-                {isFetching ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <>
-                    <MaterialIcons
-                      name="inbox"
-                      size={32}
-                      color="white"
-                    />
-                    <Text className="text-lg text-white font-poppins-medium">
-                      No Comment Found
-                    </Text>
-                    <Text className="text-white text-white/75 font-poppins">
-                      New comments will be visible here.
-                    </Text>
-                  </>
-                )}
-              </View>
-            );
-          }}
-          renderItem={({ item }) => (
-            <CommentItem
-              comment={item}
-              showReply
-              replyAttrs={{
-                onPress() {
-                  setFieldValue("parent", item.id);
-                  setFieldValue("text", format("@%s ", item.user.username));
-                },
-              }}
-            />
-          )}
-        />
-        <View
-          className="flex-row items-center gap-x-4"
-          style={{ marginBottom: bottom }}
-        >
-          <TextInput
-            multiline
-            value={values.text}
-            placeholderTextColor="white"
-            cursorColor={Colors.primary}
-            selectionColor={Colors.primary}
-            placeholder="Add a comment..."
-            className="flex-1 font-poppins p-4 rounded-xl text-white"
-            style={{ backgroundColor: Colors.darkGray }}
-            onBlur={handleBlur("text")}
-            onChangeText={handleChange("text")}
+    <View className="flex-1 p-4">
+      <FlatList
+        data={comments}
+        style={{ flex: 1 }}
+        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        keyExtractor={(comment) => comment.id}
+        ListEmptyComponent={() => {
+          return (
+            <View className="flex-1 items-center justify-center">
+              {isFetching ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <>
+                  <MaterialIcons
+                    name="inbox"
+                    size={32}
+                    color="white"
+                  />
+                  <Text className="text-lg text-white font-poppins-medium">
+                    No Comment Found
+                  </Text>
+                  <Text className="text-white text-white/75 font-poppins">
+                    New comments will be visible here.
+                  </Text>
+                </>
+              )}
+            </View>
+          );
+        }}
+        renderItem={({ item }) => (
+          <CommentItem
+            comment={item}
+            showReply
+            replyAttrs={{
+              onPress() {
+                setFieldValue("parent", item.id);
+                setFieldValue("text", format("@%s ", item.user.username));
+              },
+            }}
           />
-          <Pressable
-            disabled={!isValid}
-            onPress={() => handleSubmit()}
-          >
-            <PaperPlaneTiltIcon
-              color={isValid ? Colors.primary : Colors.gray}
-            />
-          </Pressable>
-        </View>
-      </View>
-    </KeyboardView>
+        )}
+      />
+      <KeyboardStickyView
+        className="flex-row items-center gap-x-4"
+        style={{ marginBottom: bottom }}
+      >
+        <TextInput
+          multiline
+          value={values.text}
+          placeholderTextColor="white"
+          cursorColor={Colors.primary}
+          selectionColor={Colors.primary}
+          placeholder="Add a comment..."
+          className="flex-1 font-poppins p-4 rounded-xl text-white"
+          style={{ backgroundColor: Colors.darkGray }}
+          onBlur={handleBlur("text")}
+          onChangeText={handleChange("text")}
+        />
+        <Pressable
+          disabled={!isValid}
+          onPress={() => handleSubmit()}
+        >
+          <PaperPlaneTiltIcon color={isValid ? Colors.primary : Colors.gray} />
+        </Pressable>
+      </KeyboardStickyView>
+    </View>
   );
 }
