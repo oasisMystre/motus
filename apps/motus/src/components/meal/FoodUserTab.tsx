@@ -4,7 +4,6 @@ import { format } from "util";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { MaterialIcons } from "@expo/vector-icons";
 import type { mealSelectSchema } from "@motus/server";
 import { ActivityIndicator, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,6 +13,7 @@ import Button from "../Button";
 import { MealItem } from "./MealItem";
 import { Colors } from "../../constants";
 import { useSearch } from "../SearchInput";
+import IcMeal from "../../assets/hot-meal";
 import CreateFoodModal from "./CreateFoodModal";
 import { useTRPC } from "../../providers/TRPCProvider";
 import { MealConfirmDeletion } from "./MealConfirmDeletion";
@@ -92,18 +92,19 @@ export default function FoodUserTab({
               );
 
             return (
-              <View className="flex-1 items-center justify-center">
-                <MaterialIcons
-                  name="set-meal"
-                  size={32}
-                  color="white"
+              <View className="flex-1 items-center justify-center space-y-4">
+                <IcMeal
+                  width={72}
+                  height={72}
                 />
-                <Text className="text-lg text-white font-poppins-medium">
-                  No Created Meal
-                </Text>
-                <Text className="text-white text-sm text-white/75 font-poppins">
-                  Created Meals will be found here.
-                </Text>
+                <View>
+                  <Text className="text-lg text-white font-poppins-medium">
+                    No Created Meal
+                  </Text>
+                  <Text className="text-white text-sm text-white/75 font-poppins">
+                    Created Meals will be found here.
+                  </Text>
+                </View>
               </View>
             );
           }}

@@ -29,7 +29,7 @@ import { useTanstackStore } from "../../../../hooks/useTanstackStore";
 import TimerSheet from "../../../../components/bottom-sheets/TimerSheet";
 import { ListHeader, ListItem } from "../../../../components/start-routine";
 import PostRoutineModal from "../../../../components/modals/PostRoutineModal";
-import AddExerciseModal from "../../../../components/modals/AddExerciseModal";
+import AddExerciseModal from "../../../../components/exercises/ExerciseModal";
 import type { WorkoutLog } from "../../../../components/modals/PostRoutineModal";
 import ExerciseMenuModal from "../../../../components/create-routine/ExerciseMenuModal";
 
@@ -103,11 +103,6 @@ export default function StartRoutineScreen() {
   > | null>(null);
 
   const routine = useRoutine(id)!;
-  const { update } = useTanstackStore(
-    queryClient,
-    trpc.routine.list.queryKey(),
-    (routine) => routine.id,
-  );
 
   const exercises = useMemo(
     () =>
@@ -167,7 +162,7 @@ export default function StartRoutineScreen() {
 
     setFieldValue("sets", completedSets);
     setFieldValue("volume.value", totalVolume);
-  }, [values.metadata.exercises]);
+  }, [values.metadata.exercises, setFieldValue]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -188,7 +183,7 @@ export default function StartRoutineScreen() {
     });
 
     return () => navigation.setOptions({ headerRight: undefined });
-  }, [isValid, isSubmitting]);
+  }, [isValid, isSubmitting, handleSubmit]);
 
   const removeExercise = useCallback(
     (id: string) => {
@@ -198,7 +193,7 @@ export default function StartRoutineScreen() {
 
       setFieldValue("metadata.exercises", exercises);
     },
-    [values.metadata.exercises, update, setFieldValue],
+    [values.metadata.exercises, setFieldValue],
   );
 
   const addExercises = useCallback(
@@ -219,7 +214,7 @@ export default function StartRoutineScreen() {
 
       setFieldValue("metadata.exercises", exercises);
     },
-    [update, setFieldValue],
+    [setFieldValue],
   );
 
   const addSet = useCallback(
@@ -237,8 +232,13 @@ export default function StartRoutineScreen() {
           }),
         );
 
-        const updatedSets = [...exercise?.sets, newSet];
-        setFieldValue(format("metadata.exercises.%d.sets", index), updatedSets);
+        if (exercise?.sets) {
+          const updatedSets = [...exercise.sets, newSet];
+          setFieldValue(
+            format("metadata.exercises.%d.sets", index),
+            updatedSets,
+          );
+        }
       }
     },
     [values.metadata.exercises, setFieldValue],

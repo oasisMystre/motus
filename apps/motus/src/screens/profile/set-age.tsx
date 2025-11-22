@@ -1,6 +1,6 @@
 import type z from "zod";
 import moment from "moment";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFormikContext } from "formik";
 import { useTranslation } from "react-i18next";
 import type { userSelectSchema } from "@motus/server";
@@ -23,11 +23,11 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
   const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
   const { width } = useDimensions("window");
+  const [rawDate, setRawDate] = useState<Date>(new Date());
 
   const { values, handleBlur, setFieldValue } =
-    useFormikContext<Partial<z.infer<typeof userSelectSchema>>>();
-
-  const isValid = useMemo(() => values.profile?.age, [values]);
+    useFormikContext<z.infer<typeof userSelectSchema>>();
+  const isValid = useMemo(() => values.profile.age, [values]);
 
   return (
     <KeyboardAwareScrollView
@@ -51,10 +51,20 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
             inputAttrs={{
               placeholder: "18",
               keyboardType: "numeric",
-              value: values.profile?.age!,
+              value: moment(moment())
+                .diff(moment(values.profile.age), "year")
+                .toString(),
               onBlur: handleBlur("profile.age"),
               onChangeText(text) {
-                setFieldValue("profile.age", parseFloat(text));
+                const year = parseFloat(text);
+                if (!Number.isNaN(year)) {
+                  setFieldValue("profile.age", parseFloat(text));
+                  setRawDate(
+                    moment({ day: rawDate.getDay(), month: rawDate.getMonth() })
+                      .subtract(parseFloat(text), "year")
+                      .toDate(),
+                  );
+                }
               },
               className: "py-4 px-2 rounded-md",
               focusStyle: { borderColor: Colors.primary },
@@ -70,10 +80,10 @@ export function SetAgeScreen({ goBack, next }: SetAgeScreenProps) {
             themeVariant="dark"
             accentColor={Colors.primary}
             style={{ backgroundColor: "transparent" }}
-            value={moment().subtract(values.profile?.age, "years").toDate()}
-            onChange={(_, date) =>
-              setFieldValue("profile.age", moment().diff(moment(date), "year"))
-            }
+            value={rawDate}
+            onChange={(_, date) => {
+              if (date) setFieldValue("profile.age", date);
+            }}
           />
         )}
       </View>

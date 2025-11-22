@@ -1,4 +1,3 @@
-import assert from "assert";
 import moment from "moment";
 import { format } from "util";
 import { useFormik } from "formik";
@@ -106,7 +105,10 @@ export default function ProfileScreen() {
       },
       {
         title: "Age",
-        value: format("%d years", values.profile.age),
+        value: format(
+          "%d years",
+          moment().diff(moment(values.profile.age), "years"),
+        ),
         onPress: () => setDateInput(true),
       },
       {
@@ -167,6 +169,8 @@ export default function ProfileScreen() {
       values.profile.steps,
       values.profile.height,
       values.profile.weight,
+      setFieldValue,
+      handleBlur,
     ],
   );
 
@@ -235,10 +239,8 @@ export default function ProfileScreen() {
       {dateInput && (
         <DateTimePicker
           mode="date"
-          value={moment().subtract(values.profile.age!, "year").toDate()}
-          onChange={(_, date) =>
-            setFieldValue("profile.age", moment().diff(moment(date), "year"))
-          }
+          value={values.profile.age!}
+          onChange={(_, date) => setFieldValue("profile.age", date)}
           modalAttrs={{
             onClose() {
               setDateInput(false);
@@ -311,7 +313,7 @@ const ProfileEditItem = ({ item }: { item: EditItem }) => {
             else onFocus();
           }}
         >
-          {item.ends && item.ends.text && (
+          {item.ends?.text && (
             <Text className="text-white">&nbsp;{item.ends?.text}</Text>
           )}
           <PencilSimpleIcon

@@ -87,7 +87,6 @@ export const userRouter = router({
       }
 
       const result = await query.execute();
-      console.log(result);
       return result;
     }),
   analytic: publicProcedure

@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Color from "color";
 import { useMemo, useState } from "react";
 import type { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, TextInput, type TextStyle, View } from "react-native";
+import { Text, TextInput, type TextStyle, View } from "react-native";
 
 import { Colors } from "../constants";
 

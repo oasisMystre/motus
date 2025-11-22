@@ -33,7 +33,7 @@ export default function LogMealScreen() {
 
   useEffect(() => {
     if (data) dispatch(logActions.setMealLogs(data));
-  }, [isSuccess, data]);
+  }, [data]);
 
   return (
     <>

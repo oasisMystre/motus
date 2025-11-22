@@ -1,8 +1,48 @@
 import { inArray, type SQL } from "drizzle-orm";
 
 import type { Database } from "../../db";
-import { exercises } from "../../db/schema";
+import { exercises, type routines } from "../../db/schema";
 import { getExercisesWhere } from "../exercises/exercise.controller";
+
+export const expandRoutines = async <
+  T extends Pick<typeof routines.$inferSelect, "id" | "metadata">,
+>(
+  db: Omit<Database, "$client">,
+  routines: T[],
+) => {
+  const allExercises = await getExercisesWhere(
+    db,
+    inArray(
+      exercises.id,
+      routines.flatMap((routine) =>
+        routine.metadata.exercises.map((exercise) => exercise.id),
+      ),
+    ),
+  );
+
+  const exercisesMap = new Map(allExercises.map((value) => [value.id, value]));
+
+  return routines.map((routine) => {
+    const exercises: ((typeof routine.metadata.exercises)[number] &
+      (typeof allExercises)[number])[] = [];
+    for (const value of routine.metadata.exercises) {
+      const exercise = exercisesMap.get(value.id);
+      if (exercise) {
+        exercises.push({
+          ...value,
+          ...exercise,
+        });
+      }
+    }
+    return {
+      ...routine,
+      metadata: {
+        ...routine.metadata,
+        exercises,
+      },
+    };
+  });
+};
 
 export const getRoutinesWhere = async <T extends SQL | undefined>(
   db: Database,
@@ -24,26 +64,10 @@ export const getRoutinesWhere = async <T extends SQL | undefined>(
     })
     .execute();
 
-  const allExercises = await getExercisesWhere(
-    db,
-    inArray(
-      exercises.id,
-      allRoutines.flatMap((routine) =>
-        routine.metadata.exercises.map((exercise) => exercise.id),
-      ),
-    ),
+  const response = await expandRoutines(db, allRoutines);
+  console.dir(
+    response.map((r) => r.metadata.exercises),
+    { depth: null },
   );
-
-  return allRoutines.map((routine) => {
-    return {
-      ...routine,
-      metadata: {
-        ...routine.metadata,
-        exercises: routine.metadata.exercises.map((exercise) => ({
-          ...exercise,
-          ...allExercises.find((value) => value.id === exercise.id)!,
-        })),
-      },
-    };
-  });
+  return response;
 };

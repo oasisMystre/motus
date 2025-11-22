@@ -16,7 +16,6 @@ import { withZodSchema } from "../../../utils";
 import useDimensions from "../../../hooks/useDimensions";
 import { useFirebase, useLoading } from "../../../providers";
 import { useTRPCClient } from "../../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../../store";
 import {
   SetNameScreen,
   SetGenderScreen,
@@ -45,7 +44,6 @@ export default function ProfileScreen() {
   const { width } = useDimensions("window");
   const scrollX = useRef(new Animated.Value(0));
 
-  const dispatch = useAppDispatch();
   const { user, setUser } = useFirebase();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,7 +63,12 @@ export default function ProfileScreen() {
 
   return (
     <Formik
-      initialValues={{ ...user }}
+      initialValues={{
+        ...user,
+        profile: user.profile
+          ? { age: new Date(), ...user.profile }
+          : { age: new Date(), steps: 3_000 },
+      }}
       validate={withZodSchema(userInsertSchema.partial())}
       onSubmit={async (values) => {
         return loading.promise(

@@ -46,7 +46,7 @@ export default function LogoutWorkoutScreen() {
 
   useEffect(() => {
     if (data) dispatch(logActions.setWorkouts(data));
-  }, [data]);
+  }, [data, dispatch]);
 
   useEffect(() => {
     if (workouts.length > 0) {

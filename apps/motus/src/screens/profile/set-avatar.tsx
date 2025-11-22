@@ -27,6 +27,7 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
   const [asset, setAsset] = useState<string | null>(null);
 
   const {
+    errors,
     isValid,
     isSubmitting,
     values,

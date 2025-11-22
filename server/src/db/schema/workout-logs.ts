@@ -12,6 +12,7 @@ type WorkoutLog = {
   weight: number;
   reps: number;
   duration: number;
+  exercises: string[];
 };
 
 export const workoutLogs = pgTable("workout-logs", {

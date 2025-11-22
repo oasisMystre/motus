@@ -32,14 +32,11 @@ export default function AppStateProvider({
       setRender(true);
       hideAsync();
     };
-
     if (state === "firebase.auth.initialized") {
       if (user) fetchData().catch(Sentry.captureException).finally(render);
       else render();
     }
   }, [state, user]);
-
-  useEffect(() => {}, [user]);
 
   if (render) return children;
 }

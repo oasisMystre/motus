@@ -1,11 +1,11 @@
 import type z from "zod";
 import { useFormikContext } from "formik";
 import { CoffeeIcon } from "phosphor-react-native";
+import { useEffect, useMemo, useState } from "react";
 import type { mealSelectSchema } from "@motus/server";
-import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View, ScrollView } from "react-native";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   KeyboardAwareScrollView,
@@ -141,11 +141,11 @@ export default function AddMealScreen() {
       ),
     });
     return () => navigation.setOptions({ header: false });
-  }, [navigation]);
+  }, [navigation, screenTitle]);
 
   useEffect(() => {
     setFieldValue("metadata", info);
-  }, [info]);
+  }, [info, setFieldValue]);
 
   return (
     <>

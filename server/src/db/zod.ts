@@ -61,7 +61,7 @@ export const profileSchema = z.object({
   weight: z
     .object({ unit: z.enum(["kg", "ibs"]), value: z.number() })
     .optional(),
-  age: z.number().optional(),
+  age: z.date().optional(),
   location: z.number().optional(),
   steps: z.coerce.number(),
   goals: goalSchema.optional(),
@@ -71,12 +71,14 @@ export const userInsertSchema = createInsertSchema(users, {
   profile: profileSchema,
 });
 export const userSelectSchema = createSelectSchema(users, {
-  profile: profileSchema,
+  profile: profileSchema.omit({ age: true }).extend({
+    age: z.union([z.string().transform((value) => new Date(value)), z.date()]),
+  }),
 });
 export const userExtendSelectSchema = userSelectSchema.extend({
+  mealsCount: z.number(),
   workoutsCount: z.number(),
   routinesCount: z.number(),
-  mealsCount: z.number(),
   followingCount: z.number(),
   followersCount: z.number(),
 });
@@ -235,9 +237,10 @@ export const postInsertSchema = createInsertSchema(posts, {
   metadata: postMetadataSchema.nullish(),
 });
 export const postSelectSchema = createSelectSchema(posts, {
-  metadata: postMetadataSchema.nullish(),
-  log: routineLogSelectSchema.optional(),
   user: minimalUserSchema,
+  metadata: postMetadataSchema.nullish(),
+  mealLog: mealLogSelectSchema.nullish(),
+  routineLog: routineLogSelectSchema.nullable(),
 });
 
 export const postLikeSelectSchema = createSelectSchema(postLikes, {
@@ -254,9 +257,11 @@ export const commentLikeInsertSchema = createInsertSchema(commentLikes);
 export const postExtendedSelectSchema = postSelectSchema.extend({
   liked: z.boolean(),
   likeCount: z.number(),
+  isFollowing: z.boolean(),
   commentCount: z.number(),
   peekLikes: z.array(postLikeSelectSchema),
   peekComments: z.array(commentSelectSchema),
+  routine: routineSelectSchema.omit({ previous: true }).nullish(),
 });
 
 export const paginationSchema = z.object({

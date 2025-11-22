@@ -27,35 +27,7 @@ export function MessageObject({ message: { content } }: { message: IMessage }) {
             padding: 6,
             backgroundColor: Colors.background[8],
           }}
-          onPress={() => {
-            if (content.type === "add-routine")
-              router.push({
-                pathname: "/(tabs)/(log)/(create-workout)/(create-routine)",
-                params: { id: content.data.id, action: "edit" },
-              });
-            else if (content.type === "log-routine")
-              router.push({
-                pathname: "/(tabs)/(log)/(create-workout)/start-routine",
-                params: { id: content.data.id, action: "edit" },
-              });
-            else if (content.type === "add-meal")
-              router.push({
-                pathname:
-                  "/(tabs)/(log)/(log-meal)/(add-meal)/(add-food)/(create-food)",
-                params: { id: content.data.id, action: "edit" },
-              });
-            else if (content.type === "log-meal")
-              router.push({
-                pathname: "/(tabs)/(log)/(log-meal)",
-                params: { id: content.data.id, action: "edit" },
-              });
-            else if (content.type === "log-workout")
-              router.push({
-                pathname:
-                  "/(tabs)/(log)/(create-workout)/(log-workout)/log-workout",
-                params: { id: content.data.id, action: "edit" },
-              });
-          }}
+          onPress={() => {}}
         >
           <ArrowUpRightIcon
             size={18}

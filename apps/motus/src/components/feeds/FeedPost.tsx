@@ -40,10 +40,13 @@ export function FeedPost({ post, user }: FeedPostProps) {
 
   const details = useMemo(
     () => [
-      { name: "Time", value: ms(post.log!.metadata.duration) },
+      { name: "Time", value: ms(post.routineLog!.metadata.duration) },
       {
         name: "Volume",
-        value: format("%d%s", ...Object.values(post.log!.metadata.volume)),
+        value: format(
+          "%d%s",
+          ...Object.values(post.routineLog!.metadata.volume),
+        ),
       },
     ],
     [post],
@@ -111,9 +114,12 @@ export function FeedPost({ post, user }: FeedPostProps) {
         </View>
         {canFollow && (
           <Button
-            text="Follow"
+            text={post.isFollowing ? "Follow" : "Unfollow"}
             submitting={isPendingFollowing}
-            style={{ paddingVertical: 4 }}
+            style={{
+              paddingVertical: 4,
+              backgroundColor: post.isFollowing ? Colors.primary : Colors.grey,
+            }}
             onPress={() =>
               followUser.mutateAsync({
                 following: post.user.id,
@@ -131,10 +137,30 @@ export function FeedPost({ post, user }: FeedPostProps) {
             {details.map((detail, index) => (
               <View key={index}>
                 <Text style={style.subtitle}>{detail.name}</Text>
-                <Text style={style.text}>{detail.value}</Text>
+                <Text
+                  style={style.text}
+                  className="text-lg"
+                >
+                  {detail.value}
+                </Text>
               </View>
             ))}
           </View>
+          {post.routine && (
+            <View className="flex-col">
+              {post.routine.metadata.exercises.map((exercise) => (
+                <View className="flex-row items-center gap-x-2">
+                  <Avatar
+                    url={exercise.image}
+                    style={{ width: 40, height: 40 }}
+                  />
+                  <Text className="text-white text-lg font-poppins">
+                    {exercise.name}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
         {post.images && post.images.length > 0 && (
           <View className="relative">

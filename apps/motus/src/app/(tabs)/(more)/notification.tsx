@@ -78,7 +78,7 @@ export default function NotificationSettingsScreen() {
     });
 
     return () => unsubscribe();
-  }, [navigation]);
+  }, [navigation, handleSubmit]);
 
   return (
     <FlatList

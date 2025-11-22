@@ -89,7 +89,7 @@ export default function AIScreen() {
       dispatch(messageActions.setMessages(data));
       scrollToBottom();
     }
-  }, [isSuccess, data]);
+  }, [data, dispatch, scrollToBottom]);
 
   return (
     <KeyboardStickyView className="flex-1 p-4 px-6">

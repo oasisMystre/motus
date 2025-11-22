@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { users } from "./users";
+import { mealLogs } from "./meal-logs";
 import { routineLogs } from "./routine-logs";
 
 type Metadata = {};
@@ -19,9 +20,8 @@ export const posts = pgTable("posts", {
   user: uuid()
     .references(() => users.id)
     .notNull(),
-  log: uuid()
-    .references(() => routineLogs.id, { onDelete: "cascade" })
-    .notNull(),
+  mealLog: uuid().references(() => mealLogs.id, { onDelete: "cascade" }),
+  routineLog: uuid().references(() => routineLogs.id, { onDelete: "cascade" }),
   images: text().array(),
   visibility: text({ enum: ["everyone", "private", "sensitive"] })
     .default("everyone")

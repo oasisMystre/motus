@@ -5,7 +5,6 @@ import { useFirebase } from "../providers";
 
 export default function App() {
   const { user, anonymousUser } = useFirebase();
-
   useEffect(() => {
     if (user) {
       if (
@@ -30,12 +29,10 @@ export default function App() {
         headerTitleAlign: "center",
       }}
     >
+      <Stack.Screen name="(auth)" />
       <Stack.Screen name="onboarding" />
       <Stack.Protected guard={Boolean(user?.profile)}>
         <Stack.Screen name="(tabs)" />
-      </Stack.Protected>
-      <Stack.Protected guard={Boolean(anonymousUser)}>
-        <Stack.Screen name="(auth)" />
       </Stack.Protected>
     </Stack>
   );

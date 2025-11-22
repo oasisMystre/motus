@@ -81,7 +81,7 @@ export default function LogWorkoutScreen() {
       "metadata.volume.value",
       values.metadata.reps * values.metadata.weight,
     );
-  }, [values.metadata.reps, values.metadata.weight]);
+  }, [values.metadata.reps, values.metadata.weight, setFieldValue]);
 
   return (
     <KeyboardView className="px-6">

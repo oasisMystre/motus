@@ -27,9 +27,9 @@ import KeyboardView from "../KeyboardView";
 import { useFirebase } from "../../providers";
 import { Colors } from "../../constants/colors";
 import MuscleListModal from "../modals/MuscleListModal";
-import EquipmentListModal from "../modals/EquipmentListModal";
 import { useTRPC } from "../../providers/TRPCProvider";
 import MultipleSelectInput from "../MultipleSelectInput";
+import EquipmentListModal from "../modals/EquipmentListModal";
 import { ExerciseTypes } from "../../constants/exercise-types";
 import { withZodSchema, uploadImageFromUri } from "../../utils";
 
@@ -73,7 +73,7 @@ export default function CreateExerciseModal({
     }),
   );
   const { mutateAsync: updateExerciseAsync } = useMutation(
-    trpc.exercise.create.mutationOptions({
+    trpc.exercise.update.mutationOptions({
       onSuccess(exercise) {
         queryClient.setQueryData(
           trpc.exercise.list.queryKey(),
@@ -113,6 +113,7 @@ export default function CreateExerciseModal({
     initialValues: {
       name: initialValues?.name ?? "",
       metadata: initialValues?.metadata ?? {},
+      equipment: initialValues?.equipment?.id,
       exercise_types: initialValues?.exercise_types ?? [],
       primary_muscle_group: initialValues?.primary_muscle_group.id,
       other_muscles: initialValues?.other_muscles.map((item) => item.id) ?? [],
@@ -124,7 +125,11 @@ export default function CreateExerciseModal({
           fileName: format("%s/%s.jpg", user?.uid, id),
         });
       }
-      if ("id" in values && values.id) return updateExerciseAsync(values);
+      if (initialValues)
+        return updateExerciseAsync({
+          ...values,
+          id: initialValues.id,
+        });
       else return mutateAsync({ ...values, id });
     },
   });

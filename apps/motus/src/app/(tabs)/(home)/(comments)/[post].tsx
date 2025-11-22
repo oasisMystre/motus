@@ -101,28 +101,33 @@ export default function PostCommentScreen() {
       <FlatList
         data={comments}
         style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1 }}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         keyExtractor={(comment) => comment.id}
         ListEmptyComponent={() => {
+          if (isFetching)
+            return (
+              <ActivityIndicator
+                color="white"
+                className="m-auto"
+              />
+            );
+
           return (
-            <View className="flex-1 items-center justify-center">
-              {isFetching ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <>
-                  <MaterialIcons
-                    name="inbox"
-                    size={32}
-                    color="white"
-                  />
-                  <Text className="text-lg text-white font-poppins-medium">
-                    No Comment Found
-                  </Text>
-                  <Text className="text-white text-white/75 font-poppins">
-                    New comments will be visible here.
-                  </Text>
-                </>
-              )}
+            <View className="flex-1 flex flex-col gap-y-2 items-center justify-center">
+              <MaterialIcons
+                name="inbox"
+                size={32}
+                color="white"
+              />
+              <View className='flex flex-col items-center justify-center'> 
+                <Text className="text-lg text-white font-poppins-medium">
+                  No Comment Found
+                </Text>
+                <Text className="text-sm text-white text-white/75 font-poppins">
+                  New comments will be visible here.
+                </Text>
+              </View>
             </View>
           );
         }}

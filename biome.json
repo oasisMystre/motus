@@ -21,7 +21,12 @@
       "recommended": true,
       "correctness": {
         "useHookAtTopLevel": "off",
-        "useExhaustiveDependencies": "info"
+        "useExhaustiveDependencies": "info",
+        "noUnusedVariables": {
+          "options": {
+            "ignoreRestSiblings": true
+          }
+        }
       },
       "complexity": {
         "noBannedTypes": "off"

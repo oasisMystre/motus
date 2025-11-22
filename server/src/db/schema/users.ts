@@ -18,7 +18,7 @@ type Profile = {
     unit: "ibs" | "kg";
     value: number;
   };
-  age: number;
+  age: Date;
   location: number;
   steps: number;
   goals: {
@@ -100,9 +100,11 @@ export const users = pgTable(
       .notNull(),
     emailVerified: boolean().default(false).notNull(),
   },
-  (column) => ({
-    unique_id_and_email: unique()
-      .on(column.uid, column.email)
-      .nullsNotDistinct(),
-  }),
+  (column) => [
+    {
+      unique_id_and_email: unique()
+        .on(column.uid, column.email)
+        .nullsNotDistinct(),
+    },
+  ],
 );

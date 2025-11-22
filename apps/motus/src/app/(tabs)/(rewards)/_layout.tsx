@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { View, Text } from "react-native";
-import { Link, Slot, usePathname, useSegments } from "expo-router";
+import { Link, Slot, useSegments } from "expo-router";
 
 export default function RewardsLayout() {
   const segments = useSegments();

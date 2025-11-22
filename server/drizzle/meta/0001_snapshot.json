@@ -1,6 +1,6 @@
 {
-  "id": "40145c9e-203f-45e3-9d3b-2260ecc21367",
-  "prevId": "ba66e2d7-efd2-4479-9127-923b3a6b2f57",
+  "id": "5f3acca3-e4ba-49a2-b768-d21aec186e71",
+  "prevId": "7172e353-6828-444b-b268-7a62c18c6beb",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -308,11 +308,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "log": {
-          "name": "log",
+        "mealLog": {
+          "name": "mealLog",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "routineLog": {
+          "name": "routineLog",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "images": {
           "name": "images",
@@ -364,11 +370,20 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "posts_log_routine-logs_id_fk": {
-          "name": "posts_log_routine-logs_id_fk",
+        "posts_mealLog_meal-logs_id_fk": {
+          "name": "posts_mealLog_meal-logs_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "meal-logs",
+          "columnsFrom": ["mealLog"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "posts_routineLog_routine-logs_id_fk": {
+          "name": "posts_routineLog_routine-logs_id_fk",
           "tableFrom": "posts",
           "tableTo": "routine-logs",
-          "columnsFrom": ["log"],
+          "columnsFrom": ["routineLog"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -474,11 +489,6 @@
           "name": "users_uid_unique",
           "nullsNotDistinct": false,
           "columns": ["uid"]
-        },
-        "users_uid_email_unique": {
-          "name": "users_uid_email_unique",
-          "nullsNotDistinct": true,
-          "columns": ["uid", "email"]
         }
       },
       "policies": {},

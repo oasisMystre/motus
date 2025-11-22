@@ -109,7 +109,7 @@ export default function PostRoutineModal({
     validate: withZodSchema(
       postInsertSchema.omit({
         user: true,
-        log: true,
+        routineLog: true,
         metadata: true,
       }),
     ),
@@ -123,6 +123,7 @@ export default function PostRoutineModal({
       visibility: "everyone" as const,
     },
     async onSubmit(values) {
+      console.log(values.metadata!.exercises.map((e) => e.sets));
       const [routine, log] = await Promise.all([
         trpcClient.routine.update.mutate({
           id: values.routine?.id,
@@ -151,7 +152,7 @@ export default function PostRoutineModal({
       const post = await trpcClient.post.create.mutate(
         postInsertSchema.omit({ user: true }).parse({
           ...values,
-          log: log.id,
+          routineLog: log.id,
         }),
       );
 

@@ -1,12 +1,11 @@
 import clsx from "clsx";
 import type z from "zod";
 import { format } from "util";
-import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { PlusIcon } from "phosphor-react-native";
+import { useMemo, useRef, useState } from "react";
 import type { exerciseSelectSchema } from "@motus/server";
-import { BarbellIcon, PlusIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
   Modal,
   Pressable,
@@ -21,11 +20,11 @@ import { BackButton } from "../Header";
 import SearchInput from "../SearchInput";
 import { Colors } from "../../constants";
 import KeyboardView from "../KeyboardView";
+import ExerciseListItem from "./ExerciseListItem";
 import { useTRPC } from "../../providers/TRPCProvider";
 import CreateExerciseModal from "./ExerciseCreateModal";
 import MuscleListModal from "../modals/MuscleListModal";
 import EquipmentListModal from "../modals/EquipmentListModal";
-import CrudListItemAction from "../CrudListItemAction";
 import { ExerciseConfirmDeletion } from "./ExerciseConfirmDeletion";
 
 type AddExerciseModalProps = {
@@ -147,101 +146,38 @@ export default function AddExerciseModal({
                 )}
               </>
             )}
-            renderItem={({ section: { custom, data }, item, index }) => {
-              let exercises = [...selectedValues];
+            renderItem={({ section: { custom, data }, item, index }) => (
+              <ExerciseListItem
+                index={index}
+                value={item}
+                custom={custom}
+                replace={replace}
+                size={data.length}
+                values={selectedValues}
+                onEdit={() => {
+                  setSelectedExercise(item);
+                  setShowCreateExerciseModal(true);
+                }}
+                onDelete={() => {
+                  setSelectedExercise(item);
+                  setShowDeleteExerciseModal(true);
+                }}
+                onPress={(event, selected) => {
+                  let exercises = [...selectedValues];
+                  if (replace) {
+                    onValueChange([item]);
+                    props.onRequestClose?.(event);
+                  }
+                  if (selected)
+                    exercises = exercises.filter(
+                      (exercise) => exercise.id !== item.id,
+                    );
+                  else exercises.push(item);
 
-              const selected = exercises.find(
-                (exercise) => exercise.id === item.id,
-              );
-              const exists = replace && selected;
-              if (exists) return null;
-
-              return (
-                <ReanimatedSwipeable
-                  enableTrackpadTwoFingerGesture
-                  renderRightActions={CrudListItemAction({
-                    onEdit() {
-                      setSelectedExercise(item);
-                      setShowCreateExerciseModal(true);
-                    },
-                    onDelete() {
-                      setSelectedExercise(item);
-                      setShowDeleteExerciseModal(true);
-                    },
-                  })}
-                  containerStyle={{ paddingHorizontal: 16 }}
-                >
-                  <Pressable
-                    className="flex-row gap-x-4 px-2 py-4 border-b"
-                    style={[
-                      {
-                        borderColor:
-                          data.length > 0 && index < data.length - 1
-                            ? Colors.border[1]
-                            : undefined,
-                      },
-                      selected &&
-                        !replace && [
-                          {
-                            borderStartWidth: 4,
-                            borderStartColor: Colors.primary,
-                          },
-                        ],
-                    ]}
-                    onPress={(event) => {
-                      if (replace) {
-                        onValueChange([item]);
-                        props.onRequestClose?.(event);
-                      }
-                      if (selected)
-                        exercises = exercises.filter(
-                          (exercise) => exercise.id !== item.id,
-                        );
-                      else exercises.push(item);
-
-                      setSelectedValues(exercises);
-                    }}
-                  >
-                    <View
-                      className="size-16 items-center justify-center rounded-full"
-                      style={{ backgroundColor: Colors.darkGray }}
-                    >
-                      <BarbellIcon
-                        size={32}
-                        color={Colors.grey}
-                        weight="duotone"
-                        style={{ transform: [{ rotate: "24deg" }] }}
-                      />
-                    </View>
-                    <View className="">
-                      <Text className="text-lg text-white font-poppins-medium">
-                        {item.name}
-                      </Text>
-                      <View className="flex-row items-center gap-x-2">
-                        {[item.primary_muscle_group, ...item.other_muscles].map(
-                          (muscle, index) => (
-                            <Text
-                              key={index}
-                              style={{ color: Colors.grey }}
-                            >
-                              {muscle.name}
-                            </Text>
-                          ),
-                        )}
-                        {custom && (
-                          <View
-                            className="px-2 py-1 rounded-md"
-                            style={{ backgroundColor: Colors.background[3] }}
-                          >
-                            <Text style={{ color: Colors.grey }}>Custom</Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  </Pressable>
-                </ReanimatedSwipeable>
-              );
-            }}
+                  setSelectedValues(exercises);
+                }}
+              />
+            )}
           />
           {!replace && (
             <View
@@ -280,7 +216,7 @@ export default function AddExerciseModal({
           visible={showDeleteExerciseModal}
           onRequestClose={() => {
             setSelectedExercise(undefined);
-            setShowCreateExerciseModal(false);
+            setShowDeleteExerciseModal(false);
           }}
         />
       )}

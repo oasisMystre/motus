@@ -2,8 +2,9 @@ import z from "zod";
 import { format } from "util";
 import { PlusIcon } from "phosphor-react-native";
 import { FormikContext, useFormik } from "formik";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useMemo, useState, useCallback, useLayoutEffect } from "react";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { type exerciseSelectSchema, routineInsertSchema } from "@motus/server";
 import {
@@ -13,7 +14,6 @@ import {
   View,
   FlatList,
 } from "react-native";
-import { useMemo, useState, useCallback, useLayoutEffect } from "react";
 
 import { Colors } from "../../../../../constants";
 import { withZodSchema } from "../../../../../utils";
@@ -26,7 +26,7 @@ import { ListHeader } from "../../../../../components/create-routine";
 import { useAppDispatch, useAppSelector } from "../../../../../store";
 import { useTanstackStore } from "../../../../../hooks/useTanstackStore";
 import TimerSheet from "../../../../../components/bottom-sheets/TimerSheet";
-import AddExerciseModal from "../../../../../components/modals/AddExerciseModal";
+import AddExerciseModal from "../../../../../components/exercises/ExerciseModal";
 import ExerciseMenuModal from "../../../../../components/create-routine/ExerciseMenuModal";
 
 function createInitialSet(exercise: z.infer<typeof exerciseSelectSchema>) {
@@ -170,7 +170,13 @@ export default function CreateRoutineScreen() {
           ),
       });
     else navigation.setOptions({ headerRight: undefined });
-  }, [values.metadata.exercises, isSubmitting, isValid]);
+  }, [
+    values.metadata.exercises,
+    isSubmitting,
+    isValid,
+    disabled,
+    handleSubmit,
+  ]);
 
   const addExercises = useCallback(
     (values: z.infer<typeof exerciseSelectSchema>[]) => {
@@ -194,9 +200,13 @@ export default function CreateRoutineScreen() {
             return [key, undefined];
           }),
         );
-
-        const updatedSets = [...exercise?.sets, newSet];
-        setFieldValue(format("metadata.exercises.%d.sets", index), updatedSets);
+        if (exercise?.sets) {
+          const updatedSets = [...exercise.sets, newSet];
+          setFieldValue(
+            format("metadata.exercises.%d.sets", index),
+            updatedSets,
+          );
+        }
       }
     },
     [values.metadata.exercises, setFieldValue],
@@ -215,100 +225,98 @@ export default function CreateRoutineScreen() {
   );
 
   return (
-    <>
-      <FormikContext value={formikContext}>
-        <KeyboardView className="px-6 absolute inset-0 z-0">
-          <View className="pt-4 gap-y-8">
-            <FlatList
-              data={values.metadata.exercises}
-              ListHeaderComponent={header}
-              keyExtractor={({ id }) => id}
-              showsVerticalScrollIndicator={false}
-              contentContainerClassName="gap-y-8 pb-8"
-              contentContainerStyle={{
-                gap: 32,
-                flexGrow: 1,
-                paddingBottom: bottom + 96,
-              }}
-              renderItem={({ item, index }) => (
-                <ListItem
-                  item={item}
-                  index={index}
-                  addSet={addSet}
-                  errors={errors as any}
-                  removeSet={removeSet}
-                  onFieldChange={setFieldValue}
-                  setRestTimer={setTimerFieldName}
-                  onMenu={() => setExercise(item)}
-                />
-              )}
-              ListFooterComponent={() => (
-                <Button
-                  text="Add Exercise"
-                  icon={
-                    <PlusIcon
-                      size={18}
-                      color="white"
-                    />
-                  }
-                  onPress={() => setShowAddExerciseModal(true)}
-                />
-              )}
-            />
-          </View>
-        </KeyboardView>
-        {timerFieldName && (
-          <TimerSheet
-            style={{ zIndex: 1000 }}
-            onClose={() => setTimerFieldName(null)}
-            onChange={(value) => setFieldValue(timerFieldName, value)}
-          />
-        )}
-        {exercise && (
-          <ExerciseMenuModal
-            exercise={exercise}
-            onClose={() => setExercise(null)}
-            replaceExercise={(exercise) => {
-              setReplaceExercise(exercise);
-              setTimeout(() => setShowAddExerciseModal(true));
+    <FormikContext value={formikContext}>
+      <KeyboardView className="px-6 absolute inset-0 z-0">
+        <View className="pt-4 gap-y-8">
+          <FlatList
+            data={values.metadata.exercises}
+            ListHeaderComponent={header}
+            keyExtractor={({ id }) => id}
+            showsVerticalScrollIndicator={false}
+            contentContainerClassName="gap-y-8 pb-8"
+            contentContainerStyle={{
+              gap: 32,
+              flexGrow: 1,
+              paddingBottom: bottom + 96,
             }}
-            removeExercise={(id) => {
-              const exercises = values.metadata.exercises.filter(
-                (exercise) => exercise.id !== id,
-              );
-              setFieldValue("metadata.exercises", exercises);
-              dispatch(formActions.removeCreateWorkoutExercise({ id }));
-            }}
+            renderItem={({ item, index }) => (
+              <ListItem
+                item={item}
+                index={index}
+                addSet={addSet}
+                errors={errors as any}
+                removeSet={removeSet}
+                onFieldChange={setFieldValue}
+                setRestTimer={setTimerFieldName}
+                onMenu={() => setExercise(item)}
+              />
+            )}
+            ListFooterComponent={() => (
+              <Button
+                text="Add Exercise"
+                icon={
+                  <PlusIcon
+                    size={18}
+                    color="white"
+                  />
+                }
+                onPress={() => setShowAddExerciseModal(true)}
+              />
+            )}
           />
-        )}
-        <AddExerciseModal
-          replace={Boolean(replaceExercise)}
-          visible={showAddExerciseModal}
-          values={exercises}
-          onRequestClose={() => {
-            setReplaceExercise(null);
-            setShowAddExerciseModal(false);
+        </View>
+      </KeyboardView>
+      {timerFieldName && (
+        <TimerSheet
+          style={{ zIndex: 1000 }}
+          onClose={() => setTimerFieldName(null)}
+          onChange={(value) => setFieldValue(timerFieldName, value)}
+        />
+      )}
+      {exercise && (
+        <ExerciseMenuModal
+          exercise={exercise}
+          onClose={() => setExercise(null)}
+          replaceExercise={(exercise) => {
+            setReplaceExercise(exercise);
+            setTimeout(() => setShowAddExerciseModal(true));
           }}
-          onValueChange={(addedExercises) => {
-            if (replaceExercise) {
-              const [exercise] = addedExercises;
-              const exercises = [...values.metadata.exercises] as ReturnType<
-                typeof createInitialSet
-              >[];
-              const index = exercises.findIndex(
-                (item) => item.id === replaceExercise.id,
-              );
-              if (index > -1) {
-                exercises[index] = createInitialSet(exercise);
-                setFieldValue("metadata.exercises", exercises);
-              }
-              return;
-            }
-
-            return addExercises(addedExercises);
+          removeExercise={(id) => {
+            const exercises = values.metadata.exercises.filter(
+              (exercise) => exercise.id !== id,
+            );
+            setFieldValue("metadata.exercises", exercises);
+            dispatch(formActions.removeCreateWorkoutExercise({ id }));
           }}
         />
-      </FormikContext>
-    </>
+      )}
+      <AddExerciseModal
+        replace={Boolean(replaceExercise)}
+        visible={showAddExerciseModal}
+        values={exercises}
+        onRequestClose={() => {
+          setReplaceExercise(null);
+          setShowAddExerciseModal(false);
+        }}
+        onValueChange={(addedExercises) => {
+          if (replaceExercise) {
+            const [exercise] = addedExercises;
+            const exercises = [...values.metadata.exercises] as ReturnType<
+              typeof createInitialSet
+            >[];
+            const index = exercises.findIndex(
+              (item) => item.id === replaceExercise.id,
+            );
+            if (index > -1) {
+              exercises[index] = createInitialSet(exercise);
+              setFieldValue("metadata.exercises", exercises);
+            }
+            return;
+          }
+
+          return addExercises(addedExercises);
+        }}
+      />
+    </FormikContext>
   );
 }

@@ -1,6 +1,6 @@
 import { v7 as uuid } from "uuid";
 import { useTranslation } from "react-i18next";
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -63,7 +63,7 @@ export default function OnboardingCarousel() {
 
   const showActionButton = useMemo(
     () => currentIndex >= onboardingStories.length - 1,
-    [currentIndex],
+    [currentIndex, onboardingStories.length],
   );
 
   return (

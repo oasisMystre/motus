@@ -1,8 +1,10 @@
 import clsx from "clsx";
 import Color from "color";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { type Pressable, Text, View } from "react-native";
-import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import ReanimatedSwipeable, {
+  type SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import { Colors } from "../../constants";
 import CheckboxInput from "../CheckboxInput";
@@ -27,7 +29,17 @@ export function MealItem({
   hideActions,
   ...props
 }: MealItemProps) {
-  const actionFn = useMemo(() => CrudListItemAction({ onDelete, onEdit }), []);
+  const swipeableRef = useRef<SwipeableMethods>(null);
+  const actionFn = useMemo(
+    () =>
+      CrudListItemAction({
+        onEdit,
+        onDelete,
+        ref: swipeableRef,
+        className: "h-16",
+      }),
+    [onDelete, onEdit],
+  );
   const child = useMemo(
     () => (
       <View
@@ -63,6 +75,7 @@ export function MealItem({
   if (hideActions) return child;
   return (
     <ReanimatedSwipeable
+      ref={swipeableRef}
       enableTrackpadTwoFingerGesture
       renderRightActions={actionFn}
       containerStyle={{ paddingHorizontal: 16 }}

@@ -127,13 +127,8 @@ export const postRouter = router({
     .output(z.array(postExtendedSelectSchema))
     .query(async ({ ctx, input }) => {
       let where: SQL<unknown> | undefined;
-      const id =
-        input && input.filter && input.filter.user
-          ? input.filter.user
-          : ctx.user.id;
-
-      if (input && input.filter && input.filter.user)
-        where = eq(posts.user, input.filter.user);
+      const id = input?.filter?.user ? input.filter.user : ctx.user.id;
+      if (input?.filter?.user) where = eq(posts.user, input.filter.user);
 
       return getPostsWhere(
         ctx.drizzle,

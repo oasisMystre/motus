@@ -102,7 +102,7 @@ export default function CreateWorkoutScreen() {
         )}
       </View>
     ),
-    [t, routines, routine, isPending],
+    [t, routines, isPending, mutateAsync],
   );
 
   return (
