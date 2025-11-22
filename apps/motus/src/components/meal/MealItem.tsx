@@ -70,7 +70,7 @@ export function MealItem({
         />
       </View>
     ),
-    [],
+    [selected, props.className, props.onPress, subtitle],
   );
   if (hideActions) return child;
   return (

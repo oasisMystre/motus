@@ -26,8 +26,12 @@ export const convertProductToMeal = (
       product.product_name!,
     metadata: {
       portionSize: {
-        value: parseFloat(product.serving_quantity!),
-        unit: product.serving_quantity_unit! as "g",
+        value: parseFloat(
+          product.serving_quantity ?? product.product_quantity ?? "0",
+        ),
+        unit: (product.serving_quantity_unit ??
+          product.product_quantity_unit ??
+          "g") as "g",
       },
       nutriments: Object.fromEntries(
         Object.entries(product.nutriments!)

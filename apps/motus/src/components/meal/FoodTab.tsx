@@ -19,16 +19,13 @@ import {
   FlatList,
 } from "react-native";
 
-import Button from "../Button";
 import { MealItem } from ".";
+import Button from "../Button";
 import { Colors } from "../../constants";
-import { openFoodFact } from "../../utils";
-import type KeyboardView from "../KeyboardView";
 import { useSearch } from "../SearchInput";
-import CameraModal from "../modals/CameraModal";
+import MealScanModal from "./MealScanModal";
+import type KeyboardView from "../KeyboardView";
 import { useTRPC } from "../../providers/TRPCProvider";
-import { useSnackbar, useLoading } from "../../providers";
-import { withLoading } from "../../providers/LoadingProvider";
 
 type AddFoodModalProps = {
   values: z.infer<typeof mealSelectSchema>[];
@@ -36,7 +33,7 @@ type AddFoodModalProps = {
   onChange: (values: z.infer<typeof mealSelectSchema>[]) => void;
 } & React.ComponentProps<typeof KeyboardView>;
 
-export default withLoading(function FoodTab({
+export default (function FoodTab({
   onChange,
   values,
   onRequestClose,
@@ -45,8 +42,6 @@ export default withLoading(function FoodTab({
   const trpc = useTRPC();
   const { value } = useSearch();
   const { t } = useTranslation();
-  const snackbar = useSnackbar();
-  const loading = useLoading();
   const { bottom } = useSafeAreaInsets();
   const [selectedMeals, setSelectedMeals] = useState<Product[]>([]);
   const [showCamera, setShowCamera] = useState<"scan" | "picture" | null>(null);
@@ -63,21 +58,6 @@ export default withLoading(function FoodTab({
   const { isPending, mutateAsync } = useMutation(
     trpc.meal.create_atomic.mutationOptions(),
   );
-
-  const { mutateAsync: fetchProductFn, ...fetchProductArgs } = useMutation({
-    mutationFn: async (barcode: string) => {
-      const response = await openFoodFact.getProductV2(barcode);
-      const result = response.data?.product as unknown as Product | undefined;
-
-      if (result) return addMeals(result);
-      return null;
-    },
-    onSuccess(product) {
-      if (product)
-        return snackbar.success({ text: "Product found and added to meals." });
-      else return snackbar.error({ text: "No product found" });
-    },
-  });
 
   const { data } = useQuery({
     queryKey: ["meals", value],
@@ -170,10 +150,10 @@ export default withLoading(function FoodTab({
                     title={item.product_name}
                     subtitle={format(
                       "%d%s %d%s",
-                      energy,
-                      energyUnit,
-                      portionSize.value,
-                      portionSize.unit,
+                      energy ?? 0,
+                      energyUnit ?? "kcall",
+                      portionSize.value ?? 0,
+                      portionSize.unit ?? "ml",
                     )}
                     selected={selected}
                     onPress={() => {
@@ -209,18 +189,12 @@ export default withLoading(function FoodTab({
         </View>
       </View>
       {showCamera && (
-        <CameraModal
+        <MealScanModal
+          visible={Boolean(showCamera)}
           onRequestClose={() => setShowCamera(null)}
-          onScanned={async (result) => {
-            const barcode = result.data;
-            setShowCamera(null);
-            if (!fetchProductArgs.isPending) {
-              await loading.promise(fetchProductFn(barcode), {
-                title: "Fetching product",
-                subtitle: "This might take a moment...",
-              });
-              onRequestClose?.();
-            }
+          onChange={(event, meals) => {
+            onChange(meals);
+            onRequestClose?.(event);
           }}
         />
       )}

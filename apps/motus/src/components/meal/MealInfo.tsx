@@ -46,7 +46,7 @@ export function MealInfo({ info, energy }: MealInfoProps) {
   }[];
 
   return (
-    <View className="flex-row gap-x-8 items-center">
+    <View className="flex-row gap-x-4 items-center">
       <View
         className="items-center justify-center"
         style={{ width: 96, height: 96 }}

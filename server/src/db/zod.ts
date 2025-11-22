@@ -72,7 +72,9 @@ export const userInsertSchema = createInsertSchema(users, {
 });
 export const userSelectSchema = createSelectSchema(users, {
   profile: profileSchema.omit({ age: true }).extend({
-    age: z.union([z.string().transform((value) => new Date(value)), z.date()]),
+    age: z
+      .union([z.string().transform((value) => new Date(value)), z.date()])
+      .optional(),
   }),
 });
 export const userExtendSelectSchema = userSelectSchema.extend({
@@ -92,7 +94,7 @@ export const followSelectSchema = createSelectSchema(follows, {
 const mealMetadataSchema = z.object({
   portionSize: z.object({
     value: z.number(),
-    unit: z.enum(["kg", "g", "cup", "litre", "bag", "sachet"]),
+    unit: z.enum(["kg", "g", "cup", "litre", "bag", "ml", "sachet"]),
   }),
   nutriments: z.record(
     z.string(),

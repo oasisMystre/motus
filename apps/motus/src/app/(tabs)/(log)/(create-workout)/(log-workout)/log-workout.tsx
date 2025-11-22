@@ -4,11 +4,14 @@ import { useFormik } from "formik";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { TimerIcon } from "phosphor-react-native";
-import { StyleSheet, View, Text } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { workoutLogInsertSchema } from "@motus/server";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import {
+  KeyboardAwareScrollView,
+  KeyboardStickyView,
+} from "react-native-keyboard-controller";
 
 import { Colors } from "../../../../../constants";
 import Input from "../../../../../components/Input";
@@ -90,7 +93,7 @@ export default function LogWorkoutScreen() {
         contentContainerClassName="flex-1 gap-y-8"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 flex-col gap-y-8">
+        <ScrollView className="flex-1 flex-col gap-y-8">
           <Input
             error={touched.name && errors.name}
             label={t("log.create_workout.exercise_name_input.label")}
@@ -238,7 +241,7 @@ export default function LogWorkoutScreen() {
               style: [style.input, { height: 156, width: "100%" }],
             }}
           />
-        </View>
+        </ScrollView>
         <Button
           disabled={disabled}
           submitting={isSubmitting}

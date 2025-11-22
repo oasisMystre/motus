@@ -10,7 +10,11 @@ type CameraModalProps = {
   onScanned: (code: BarcodeScanningResult) => void;
 } & React.ComponentProps<typeof ModalDialog>;
 
-export default function CameraModal({ onScanned, ...props }: CameraModalProps) {
+export default function CameraModal({
+  children,
+  onScanned,
+  ...props
+}: React.PropsWithChildren<CameraModalProps>) {
   const { top } = useSafeAreaInsets();
   const { height } = useDimensions("window");
 
@@ -32,17 +36,20 @@ export default function CameraModal({ onScanned, ...props }: CameraModalProps) {
         className="absolute inset-0"
         style={{ paddingTop: top, paddingHorizontal: 16 }}
       >
-        <Pressable
-          onPress={(event) => props.onRequestClose?.(event)}
-          className="bg-primary size-10 items-center justify-center rounded-full rounded-full"
-        >
-          <MaterialIcons
-            name="expand-more"
-            size={32}
-            color="white"
-            style={{ alignSelf: "center" }}
-          />
-        </Pressable>
+        <View className="flex flex-row">
+          <Pressable
+            onPress={(event) => props.onRequestClose?.(event)}
+            className="bg-primary size-10 items-center justify-center rounded-full rounded-full"
+          >
+            <MaterialIcons
+              name="expand-more"
+              size={32}
+              color="white"
+              style={{ alignSelf: "center" }}
+            />
+          </Pressable>
+        </View>
+        {children}
       </View>
     </ModalDialog>
   );

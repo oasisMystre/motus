@@ -4,7 +4,7 @@ import { users } from "./users";
 type Metadata = {
   portionSize: {
     value: number;
-    unit: "kg" | "g" | "cup" | "litre" | "bag" | "sachet";
+    unit: "kg" | "g" | "cup" | "litre" | "bag" | "ml"| "sachet";
   };
   nutriments: Record<
     string,

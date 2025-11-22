@@ -38,7 +38,8 @@ CREATE TABLE "postLikes" (
 CREATE TABLE "posts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user" uuid NOT NULL,
-	"log" uuid NOT NULL,
+	"mealLog" uuid,
+	"routineLog" uuid,
 	"images" text[],
 	"visibility" text DEFAULT 'everyone' NOT NULL,
 	"title" text NOT NULL,
@@ -63,8 +64,7 @@ CREATE TABLE "users" (
 	"emailVerified" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "email" UNIQUE NULLS NOT DISTINCT("email"),
 	CONSTRAINT "username" UNIQUE NULLS NOT DISTINCT("username"),
-	CONSTRAINT "users_uid_unique" UNIQUE("uid"),
-	CONSTRAINT "users_uid_email_unique" UNIQUE NULLS NOT DISTINCT("uid","email")
+	CONSTRAINT "users_uid_unique" UNIQUE("uid")
 );
 --> statement-breakpoint
 CREATE TABLE "rewardType" (
@@ -202,7 +202,8 @@ ALTER TABLE "comments" ADD CONSTRAINT "comment_parent_fk" FOREIGN KEY ("parent")
 ALTER TABLE "postLikes" ADD CONSTRAINT "postLikes_post_posts_id_fk" FOREIGN KEY ("post") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "postLikes" ADD CONSTRAINT "postLikes_user_users_id_fk" FOREIGN KEY ("user") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "posts" ADD CONSTRAINT "posts_user_users_id_fk" FOREIGN KEY ("user") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "posts" ADD CONSTRAINT "posts_log_routine-logs_id_fk" FOREIGN KEY ("log") REFERENCES "public"."routine-logs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "posts" ADD CONSTRAINT "posts_mealLog_meal-logs_id_fk" FOREIGN KEY ("mealLog") REFERENCES "public"."meal-logs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "posts" ADD CONSTRAINT "posts_routineLog_routine-logs_id_fk" FOREIGN KEY ("routineLog") REFERENCES "public"."routine-logs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rewards" ADD CONSTRAINT "rewards_type_rewardType_id_fk" FOREIGN KEY ("type") REFERENCES "public"."rewardType"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rewards" ADD CONSTRAINT "rewards_user_users_id_fk" FOREIGN KEY ("user") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "streaks" ADD CONSTRAINT "streaks_user_users_id_fk" FOREIGN KEY ("user") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

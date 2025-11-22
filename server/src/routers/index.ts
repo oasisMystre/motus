@@ -30,7 +30,7 @@ export const appRouter = router({
   message: messageRouter,
   exercise: exerciseRouter,
   equipment: equipmentRouter,
-  nottication: notificationRouter,
+  notification: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

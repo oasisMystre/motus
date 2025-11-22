@@ -62,7 +62,12 @@ export function FeedPost({ post, user }: FeedPostProps) {
   );
   const { isPending: isPendingFollowing, ...followUser } = useMutation(
     trpc.follow.create.mutationOptions({
-      onSuccess() {},
+      onSuccess(data) {
+        update({
+          ...post,
+          isFollowing: data.isFollowing,
+        });
+      },
     }),
   );
 
@@ -114,15 +119,16 @@ export function FeedPost({ post, user }: FeedPostProps) {
         </View>
         {canFollow && (
           <Button
-            text={post.isFollowing ? "Follow" : "Unfollow"}
+            text={post.isFollowing ? "Unfollow" : "Follow"}
             submitting={isPendingFollowing}
             style={{
               paddingVertical: 4,
-              backgroundColor: post.isFollowing ? Colors.primary : Colors.grey,
+              backgroundColor: post.isFollowing ? Colors.grey : Colors.primary,
             }}
             onPress={() =>
               followUser.mutateAsync({
                 following: post.user.id,
+                isFollowing: !post.isFollowing,
               })
             }
           />
@@ -149,7 +155,10 @@ export function FeedPost({ post, user }: FeedPostProps) {
           {post.routine && (
             <View className="flex-col">
               {post.routine.metadata.exercises.map((exercise) => (
-                <View className="flex-row items-center gap-x-2">
+                <View
+                  key={exercise.id}
+                  className="flex-row items-center gap-x-2"
+                >
                   <Avatar
                     url={exercise.image}
                     style={{ width: 40, height: 40 }}

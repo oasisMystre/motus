@@ -269,12 +269,14 @@ export default function AddMealScreen() {
           </View>
         </ScrollView>
       </KeyboardAwareScrollView>
-      <AddFoodModal
-        visible={showAddFoodModal}
-        values={values.meals}
-        onChange={(values) => setFieldValue("meals", values)}
-        onRequestClose={() => setShowAddFoodModal(false)}
-      />
+      {showAddFoodModal && (
+        <AddFoodModal
+          visible={showAddFoodModal}
+          values={values.meals}
+          onChange={(values) => setFieldValue("meals", values)}
+          onRequestClose={() => setShowAddFoodModal(false)}
+        />
+      )}
       <KeyboardToolbar />
     </>
   );

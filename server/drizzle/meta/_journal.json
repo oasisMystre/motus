@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763710198986,
-      "tag": "0000_curvy_sentry",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763766621749,
-      "tag": "0001_warm_blonde_phantom",
+      "when": 1763815493452,
+      "tag": "0000_pretty_caretaker",
       "breakpoints": true
     }
   ]

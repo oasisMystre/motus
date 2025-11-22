@@ -120,7 +120,7 @@ export default function PostCommentScreen() {
                 size={32}
                 color="white"
               />
-              <View className='flex flex-col items-center justify-center'> 
+              <View className="flex flex-col items-center justify-center">
                 <Text className="text-lg text-white font-poppins-medium">
                   No Comment Found
                 </Text>
