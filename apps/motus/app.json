@@ -203,9 +203,7 @@
           "launchMode": "most-recent"
         }
       ],
-      "expo-web-browser",
-      "react-native-share"
-    ],
+      "expo-web-browser"    ],
     "experiments": {
       "typedRoutes": true
     },
