@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { run } from "@openai/agents";
 
 import { messages } from "../../db/schema";
-import { __srcdir } from "../../instances";
 import { publicProcedure, router } from "../../trpc";
 import {
   messageInsertSchema,

@@ -1,6 +1,5 @@
 import type z from "zod";
 import { useMemo, useState } from "react";
-import { useNavigation } from "expo-router";
 import type { mealSelectSchema } from "@motus/server";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {

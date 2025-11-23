@@ -1,15 +1,17 @@
 import z from "zod";
+import { v4 } from "uuid";
 import { Formik } from "formik";
 import { useMemo } from "react";
 import { mealLogInsertSchema, mealSelectSchema } from "@motus/server";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
-import { withZodSchema } from "../../../../../utils";
 import { useAppDispatch } from "../../../../../store";
 import { useMeal } from "../../../../../hooks/useMeal";
-import { BackButton } from "../../../../../components/Header";
 import { logActions } from "../../../../../store/log";
+import { useFirebase } from "../../../../../providers";
+import { BackButton } from "../../../../../components/Header";
 import { useTRPCClient } from "../../../../../providers/TRPCProvider";
+import { uploadImageFromUri, withZodSchema } from "../../../../../utils";
 
 const mealFormSchema = mealLogInsertSchema
   .omit({ user: true, meals: true })
@@ -20,6 +22,9 @@ const mealFormSchema = mealLogInsertSchema
 export default function LogMealLayout() {
   const trpc = useTRPCClient();
   const dispatch = useAppDispatch();
+  const {
+    firebase: { storage },
+  } = useFirebase();
   const { id, action } = useLocalSearchParams<{
     id?: string;
     action?: "edit" | "duplicate";
@@ -64,6 +69,11 @@ export default function LogMealLayout() {
       validate={withZodSchema(mealFormSchema)}
       initialValues={initialValues}
       onSubmit={async (value, { resetForm }) => {
+        value.id = id ?? v4();
+        if (value.image)
+          value.image = await uploadImageFromUri(storage, value.image, {
+            fileName: value.id,
+          });
         if (action === "edit" && id)
           await trpc.log.meal.update
             .mutate({

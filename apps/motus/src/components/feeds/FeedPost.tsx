@@ -153,16 +153,12 @@ export function FeedPost({ post, user }: FeedPostProps) {
             ))}
           </View>
           {post.routine && (
-            <View className="flex-col">
+            <View className="flex-row flex-wrap gap-2">
               {post.routine.metadata.exercises.map((exercise) => (
                 <View
                   key={exercise.id}
-                  className="flex-row items-center gap-x-2"
+                  className="flex-row items-center bg-stone-900 px-2 rounded-md"
                 >
-                  <Avatar
-                    url={exercise.image}
-                    style={{ width: 40, height: 40 }}
-                  />
                   <Text className="text-white text-lg font-poppins">
                     {exercise.name}
                   </Text>

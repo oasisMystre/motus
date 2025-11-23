@@ -65,7 +65,7 @@ export const Dot = ({ delay, duration, ...props }: DotProps) => {
         false,
       ),
     );
-  }, [delay, duration, translation]);
+  }, [delay, duration, translation, opacity]);
 
   const style = useAnimatedStyle(
     () => ({

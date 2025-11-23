@@ -25,7 +25,6 @@ import Button from "../../../../components/Button";
 import useRoutine from "../../../../hooks/useRoutine";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
-import { useTanstackStore } from "../../../../hooks/useTanstackStore";
 import TimerSheet from "../../../../components/bottom-sheets/TimerSheet";
 import { ListHeader, ListItem } from "../../../../components/start-routine";
 import PostRoutineModal from "../../../../components/modals/PostRoutineModal";

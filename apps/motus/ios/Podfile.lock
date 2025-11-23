@@ -3243,6 +3243,30 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-menu (2.0.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-mmkv (3.3.3):
     - DoubleConversion
     - glog
@@ -4182,6 +4206,7 @@ DEPENDENCIES:
   - react-native-background-timer (from `../../../node_modules/react-native-background-timer`)
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
   - react-native-keyboard-controller (from `../../../node_modules/react-native-keyboard-controller`)
+  - "react-native-menu (from `../../../node_modules/@react-native-menu/menu`)"
   - react-native-mmkv (from `../../../node_modules/react-native-mmkv`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-skia (from `../../../node_modules/@shopify/react-native-skia`)"
@@ -4432,6 +4457,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-get-random-values"
   react-native-keyboard-controller:
     :path: "../../../node_modules/react-native-keyboard-controller"
+  react-native-menu:
+    :path: "../../../node_modules/@react-native-menu/menu"
   react-native-mmkv:
     :path: "../../../node_modules/react-native-mmkv"
   react-native-safe-area-context:
@@ -4641,6 +4668,7 @@ SPEC CHECKSUMS:
   react-native-background-timer: 17ea5e06803401a379ebf1f20505b793ac44d0fe
   react-native-get-random-values: 6c7200cf5a74bd450b902acf76b115cc579d16a1
   react-native-keyboard-controller: 2275c13d3d18c82e5c547bc9a7321170aa04f7e1
+  react-native-menu: 757aaee2b86bf86492cedecfcdccdeaa6f380416
   react-native-mmkv: ba925d593fba7b54ff07f7a05afcfb04e5c34795
   react-native-safe-area-context: 6cec90ce53951d3b52dc73e873323a4a7662fc0c
   react-native-skia: 67a00952fa3e4feedff33cbcbe687c6e9cf9522b

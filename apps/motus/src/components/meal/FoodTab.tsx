@@ -11,6 +11,7 @@ import type { Product } from "@openfoodfacts/openfoodfacts-nodejs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { mealInsertSchema, mealSelectSchema } from "@motus/server";
 import { convertProductToMeal, searchFood } from "@motus/openfoodfacts";
+import { useCameraPermissions, type PermissionResponse } from "expo-camera";
 import {
   ActivityIndicator,
   Pressable,
@@ -43,6 +44,7 @@ export default (function FoodTab({
   const { value } = useSearch();
   const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
+  const [permission, requestPermission] = useCameraPermissions();
   const [selectedMeals, setSelectedMeals] = useState<Product[]>([]);
   const [showCamera, setShowCamera] = useState<"scan" | "picture" | null>(null);
 
@@ -73,6 +75,13 @@ export default (function FoodTab({
       return [...values, ...onlineMeals] as z.infer<typeof mealSelectSchema>[];
     },
     [mutateAsync],
+  );
+
+  const onShowCamera = useCallback(
+    (action: "picture" | "scan", response?: PermissionResponse) => {
+      if (permission?.granted || response?.granted) setShowCamera(action);
+    },
+    [permission, setShowCamera],
   );
 
   return (
@@ -106,7 +115,14 @@ export default (function FoodTab({
                     style={{
                       backgroundColor: Color("white").alpha(0.05).hexa(),
                     }}
-                    onPress={() => setShowCamera(action.type)}
+                    onPress={() => {
+                      if (permission?.granted)
+                        return setShowCamera(action.type);
+
+                      return requestPermission().then((response) =>
+                        onShowCamera(action.type, response),
+                      );
+                    }}
                   >
                     <View className="size-12 bg-primary rounded-full">
                       <action.icon

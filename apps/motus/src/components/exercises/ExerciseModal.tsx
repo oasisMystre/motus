@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import type z from "zod";
 import { format } from "util";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon } from "phosphor-react-native";
-import { useMemo, useRef, useState } from "react";
 import type { exerciseSelectSchema } from "@motus/server";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from "react-native";
 
 import Button from "../Button";
@@ -21,9 +22,11 @@ import SearchInput from "../SearchInput";
 import { Colors } from "../../constants";
 import KeyboardView from "../KeyboardView";
 import ExerciseListItem from "./ExerciseListItem";
+import CrudListItemMenu from "../CrudListItemMenu";
 import { useTRPC } from "../../providers/TRPCProvider";
 import CreateExerciseModal from "./ExerciseCreateModal";
 import MuscleListModal from "../modals/MuscleListModal";
+import SubscriptionModal from "../modals/SubscriptionModal";
 import EquipmentListModal from "../modals/EquipmentListModal";
 import { ExerciseConfirmDeletion } from "./ExerciseConfirmDeletion";
 
@@ -44,13 +47,17 @@ export default function AddExerciseModal({
   const [showMuscles, setShowShowMuscles] = useState(false);
   const [showEquipments, setShowEquipments] = useState(false);
   const [selectedValues, setSelectedValues] = useState(values);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showCreateExerciseModal, setShowCreateExerciseModal] = useState(false);
   const [showDeleteExerciseModal, setShowDeleteExerciseModal] = useState(false);
+  const [menuFocusedItem, setMenuFocusedItem] = useState<
+    z.infer<typeof exerciseSelectSchema> | undefined
+  >(undefined);
   const [selectedExercise, setSelectedExercise] = useState<
     z.infer<typeof exerciseSelectSchema> | undefined
   >(undefined);
 
-  const { data } = useQuery(trpc.exercise.list.queryOptions());
+  const { data, isFetching } = useQuery(trpc.exercise.list.queryOptions());
 
   const sections = useMemo(
     () => [
@@ -125,6 +132,16 @@ export default function AddExerciseModal({
             stickyHeaderHiddenOnScroll
             keyExtractor={({ id }) => id}
             stickySectionHeadersEnabled={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+            ListEmptyComponent={() => {
+              if (isFetching)
+                return (
+                  <ActivityIndicator
+                    color="white"
+                    size={32}
+                  />
+                );
+            }}
             renderSectionHeader={({ section: { title, custom, data } }) => (
               <>
                 {data.length > 0 && (
@@ -136,7 +153,7 @@ export default function AddExerciseModal({
                       {title} {custom && format("(%d/%d)", data.length, 5)}
                     </Text>
                     {custom && (
-                      <Pressable>
+                      <Pressable onPress={() => setShowSubscriptionModal(true)}>
                         <Text className="text-primary font-poppins-medium">
                           Unlock more
                         </Text>
@@ -154,14 +171,7 @@ export default function AddExerciseModal({
                 replace={replace}
                 size={data.length}
                 values={selectedValues}
-                onEdit={() => {
-                  setSelectedExercise(item);
-                  setShowCreateExerciseModal(true);
-                }}
-                onDelete={() => {
-                  setSelectedExercise(item);
-                  setShowDeleteExerciseModal(true);
-                }}
+                onMenu={() => setMenuFocusedItem(item)}
                 onPress={(event, selected) => {
                   let exercises = [...selectedValues];
                   if (replace) {
@@ -202,6 +212,10 @@ export default function AddExerciseModal({
           )}
         </View>
       </KeyboardView>
+      <SubscriptionModal
+        visible={showSubscriptionModal}
+        onRequestClose={() => setShowSubscriptionModal(false)}
+      />
       <EquipmentListModal
         visible={showEquipments}
         onRequestClose={() => setShowEquipments(false)}
@@ -227,6 +241,27 @@ export default function AddExerciseModal({
           onRequestClose={() => {
             setSelectedExercise(undefined);
             setShowCreateExerciseModal(false);
+          }}
+        />
+      )}
+      {menuFocusedItem && (
+        <CrudListItemMenu
+          onClose={() => setMenuFocusedItem(undefined)}
+          onAction={(action) => {
+            switch (action) {
+              case "edit": {
+                setSelectedExercise(menuFocusedItem);
+                setShowCreateExerciseModal(true);
+                break;
+              }
+              case "delete": {
+                setSelectedExercise(menuFocusedItem);
+                setShowDeleteExerciseModal(true);
+                break;
+              }
+            }
+
+            setMenuFocusedItem(undefined);
           }}
         />
       )}

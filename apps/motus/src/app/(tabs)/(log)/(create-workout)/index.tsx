@@ -114,7 +114,13 @@ export default function CreateWorkoutScreen() {
         keyExtractor={(workout) => workout.id}
         style={{ paddingHorizontal: 16, paddingTop: 16 }}
         ListEmptyComponent={() => {
-          if (isFetching) return <ActivityIndicator color="white" />;
+          if (isFetching)
+            return (
+              <ActivityIndicator
+                color="white"
+                size={32}
+              />
+            );
           return null;
         }}
         renderItem={({ item }) => (

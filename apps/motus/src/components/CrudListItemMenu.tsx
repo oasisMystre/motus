@@ -1,9 +1,6 @@
-import type z from "zod";
-import clsx from "clsx";
-import type { exerciseSelectSchema } from "@motus/server";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ArrowClockwiseIcon, type Icon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { type Icon, NotePencilIcon } from "phosphor-react-native";
 import {
   Pressable,
   type StyleProp,
@@ -17,33 +14,25 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 
-import { Colors } from "../../constants";
+import { Colors } from "../constants";
 
-export default function ExerciseMenuModal({
-  exercise,
-  removeExercise,
-  replaceExercise,
+export default function CrudListItemMenu({
+  onAction,
   ...props
 }: Omit<React.ComponentProps<typeof BottomSheet>, "children"> & {
-  exercise: z.infer<typeof exerciseSelectSchema>;
-  removeExercise: (id: string) => void;
-  replaceExercise: (value: z.infer<typeof exerciseSelectSchema>) => void;
+  onAction: (action: "edit" | "delete") => void;
 }) {
   const { bottom } = useSafeAreaInsets();
-
   const menuItems: {
     icon?: Icon;
     name: string;
-    onPress?: () => void;
+    onPress: () => void;
     textStyle?: StyleProp<TextStyle>;
   }[] = [
     {
-      icon: ArrowClockwiseIcon,
-      name: "Replace Exercise",
-      onPress() {
-        replaceExercise(exercise);
-        props.onClose?.();
-      },
+      icon: NotePencilIcon,
+      name: "Edit",
+      onPress: () => onAction("edit"),
     },
     {
       icon: (props) => (
@@ -53,12 +42,9 @@ export default function ExerciseMenuModal({
           color={Colors.red[2]}
         />
       ),
-      name: "Remove Exercise",
+      name: "Delete",
       textStyle: { color: Colors.red[2] },
-      onPress() {
-        removeExercise(exercise.id);
-        props.onClose?.();
-      },
+      onPress: () => onAction("delete"),
     },
   ];
 
@@ -66,6 +52,7 @@ export default function ExerciseMenuModal({
     <BottomSheet
       enablePanDownToClose
       enableOverDrag={false}
+      snapPoints={["20%"]}
       backdropComponent={(props) => (
         <BottomSheetBackdrop
           {...props}
@@ -84,12 +71,9 @@ export default function ExerciseMenuModal({
           ItemSeparatorComponent={() => (
             <View style={{ height: 0.5, backgroundColor: Colors.border[1] }} />
           )}
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <Pressable
-              className={clsx(
-                "flex-row items-center gap-x-2 p-4",
-                index === menuItems.length - 1 && "pb-16",
-              )}
+              className="flex-row items-center gap-x-2 p-4"
               onPress={item.onPress}
             >
               {item.icon && (

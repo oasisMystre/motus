@@ -15,6 +15,7 @@ import { Colors } from "../../constants";
 import { useSearch } from "../SearchInput";
 import IcMeal from "../../assets/hot-meal";
 import CreateFoodModal from "./CreateFoodModal";
+import CrudListItemMenu from "../CrudListItemMenu";
 import { useTRPC } from "../../providers/TRPCProvider";
 import { MealConfirmDeletion } from "./MealConfirmDeletion";
 
@@ -38,6 +39,9 @@ export default function FoodUserTab({
   const [selectedMeals, setSelectedMeals] = useState<
     z.infer<typeof mealSelectSchema>[]
   >([]);
+  const [menuFocusedItem, setMenuFocusedItem] = useState<
+    z.infer<typeof mealSelectSchema> | undefined
+  >(undefined);
   const [selectedMeal, setSelectedMeal] = useState<
     z.infer<typeof mealSelectSchema> | undefined
   >(undefined);
@@ -121,6 +125,7 @@ export default function FoodUserTab({
               <MealItem
                 selected={selected}
                 title={item.name}
+                onMenu={() => setMenuFocusedItem(item)}
                 subtitle={format(
                   "%d%s %d%s",
                   energy?.value || "0",
@@ -128,14 +133,6 @@ export default function FoodUserTab({
                   portionSize.value,
                   portionSize.unit,
                 )}
-                onEdit={() => {
-                  setSelectedMeal(item);
-                  setShowCreateFoodModal(true);
-                }}
-                onDelete={() => {
-                  setSelectedMeal(item);
-                  setShowDeleteFoodModal(true);
-                }}
                 onPress={() => {
                   if (selected)
                     setSelectedMeals((meals) =>
@@ -176,6 +173,27 @@ export default function FoodUserTab({
           meal={selectedMeal}
           visible={showDeleteFoodModal}
           onRequestClose={() => setShowDeleteFoodModal(false)}
+        />
+      )}
+      {menuFocusedItem && (
+        <CrudListItemMenu
+          onClose={() => setMenuFocusedItem(undefined)}
+          onAction={(action) => {
+            switch (action) {
+              case "edit": {
+                setSelectedMeal(menuFocusedItem);
+                setShowCreateFoodModal(true);
+                break;
+              }
+              case "delete": {
+                setSelectedMeal(menuFocusedItem);
+                setShowDeleteFoodModal(true);
+                break;
+              }
+            }
+
+            setMenuFocusedItem(undefined);
+          }}
         />
       )}
     </>

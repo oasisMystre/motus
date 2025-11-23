@@ -45,7 +45,7 @@ export function WorkoutLogItemMenu({
         },
       });
     },
-    [dispatch, props.onClose, router],
+    [workout.id, props.onClose],
   );
 
   const menuItems: {

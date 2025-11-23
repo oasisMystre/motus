@@ -95,7 +95,7 @@ export default function AddNutrimentModal({
       }),
     }),
     async onSubmit(values, { resetForm }) {
-      let data;
+      let data: z.infer<typeof mealSelectSchema>;
       if ("id" in values) data = await editMealAsync(values);
       else data = await mutateAsync(values);
 

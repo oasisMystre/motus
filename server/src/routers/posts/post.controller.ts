@@ -12,7 +12,7 @@ import {
 
 import type { Database } from "../../db";
 import { coalesce } from "../../db/custom-value";
-import { postExtendedSelectSchema, type userSelectSchema } from "../../db/zod";
+import type { userSelectSchema } from "../../db/zod";
 import { expandRoutines } from "../routines/routine.controller";
 import {
   comments,
@@ -24,7 +24,6 @@ import {
   routines,
   mealLogs,
   meals,
-  exercises,
 } from "../../db/schema";
 
 export const getPostsWhere = async <T extends SQL<unknown> | undefined>(
@@ -106,7 +105,7 @@ export const getPostsWhere = async <T extends SQL<unknown> | undefined>(
                 and(
                   eq(postLikes.post, post.id),
                   eq(postLikes.liked, true),
-                  options && options.owner
+                  options?.owner
                     ? not(eq(postLikes.user, options.owner))
                     : undefined,
                 ),

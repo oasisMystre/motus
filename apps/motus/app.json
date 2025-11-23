@@ -144,9 +144,27 @@
       "@react-native-firebase/auth",
       "@react-native-firebase/crashlytics",
       [
+        "react-native-share",
+        {
+          "ios": ["fb", "instagram", "twitter", "tiktoksharesdk"],
+          "android": [
+            "com.facebook.katana",
+            "com.instagram.android",
+            "com.twitter.android"
+          ],
+          "enableBase64ShareAndroid": true
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you upload avatars, customize equiments, exercise images and share them with your friends."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ],
       [
@@ -185,7 +203,8 @@
           "launchMode": "most-recent"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "react-native-share"
     ],
     "experiments": {
       "typedRoutes": true

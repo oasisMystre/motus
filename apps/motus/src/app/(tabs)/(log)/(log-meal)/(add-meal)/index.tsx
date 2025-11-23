@@ -23,7 +23,6 @@ import AddFoodModal from "../../../../../components/meal/AddFoodModal";
 export default function AddMealScreen() {
   const navigation = useNavigation();
   const { bottom } = useSafeAreaInsets();
-  const [file, setFile] = useState<string>();
   const { showPortionSize } = useLocalSearchParams();
   const [showAddFoodModal, setShowAddFoodModal] = useState(false);
   const { action } = useLocalSearchParams<{ action?: "edit" | "duplicate" }>();
@@ -136,7 +135,7 @@ export default function AddMealScreen() {
         <MealHeader
           title={screenTitle}
           navigation={navigation}
-          onImage={(file) => setFile(file.uri)}
+          onImage={(file) => setFieldValue("image", file.uri)}
         />
       ),
     });

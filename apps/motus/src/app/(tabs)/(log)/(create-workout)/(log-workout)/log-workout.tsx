@@ -8,10 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { workoutLogInsertSchema } from "@motus/server";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import {
-  KeyboardAwareScrollView,
-  KeyboardStickyView,
-} from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Colors } from "../../../../../constants";
 import Input from "../../../../../components/Input";

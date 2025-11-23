@@ -1,18 +1,16 @@
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
-  Platform,
   Pressable,
-  type StyleProp,
   Text,
   View,
   type ViewStyle,
+  type StyleProp,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CircularBackButton } from "../Header";
 import { LinearGradientTextLayerBackground } from "..";
-import clsx from "clsx";
 
 type InfoScreenProps = {
   title: string;
