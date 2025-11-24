@@ -114,7 +114,7 @@ export class McpClient {
   ) {
     const isConnected = await this.connect();
     let instructions = readFileSync(
-      path.join((await import("../instances")).__srcdir, "src/mcp/prompt.txt"),
+      path.join((await import("../instances")).__srcdir, "server/src/mcp/prompt.txt"),
       "utf-8",
     );
     if (context) instructions = instructions.replace("%user_context%", context);
