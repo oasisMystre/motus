@@ -96,12 +96,12 @@ export default function FoodUserTab({
               );
 
             return (
-              <View className="flex-1 items-center justify-center space-y-4">
+              <View className="flex-1 flex flex-col items-center justify-center space-y-4">
                 <IcMeal
                   width={72}
                   height={72}
                 />
-                <View>
+                <View className='flex flex-col items-center justify-center'>
                   <Text className="text-lg text-white font-poppins-medium">
                     No Created Meal
                   </Text>

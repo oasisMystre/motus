@@ -67,6 +67,7 @@ export function MealScanResult({
             <MealItem
               selected={selected}
               title={item.name}
+              hideActions
               subtitle={format(
                 "%d%s %d%s",
                 energy?.value ?? "0",

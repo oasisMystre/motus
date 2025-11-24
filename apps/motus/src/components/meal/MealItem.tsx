@@ -26,7 +26,7 @@ export function MealItem({
   return (
     <View
       className={clsx(
-        "h-16 flex-row items-center p-2 rounded-lg",
+        "flex-row items-center gap-x-2 p-2 rounded-lg",
         props.className,
       )}
       style={[
