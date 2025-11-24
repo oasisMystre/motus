@@ -8,7 +8,7 @@ type Metadata = {
   };
   nutriments: Record<
     string,
-    { value: number; unit: "g" | "mg" | "%" | "cal" | "kcal" }
+    { value: number; unit: "g" | "mg" | "%" | "cal" | "kcal" | "kJ" }
   >;
 };
 

@@ -100,7 +100,7 @@ const mealMetadataSchema = z.object({
     z.string(),
     z.object({
       value: z.number(),
-      unit: z.enum(["g", "mg", "%", "cal", "kcal"]),
+      unit: z.enum(["g", "mg", "%", "cal", "kcal", "kJ"]),
     }),
   ),
 });
