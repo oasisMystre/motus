@@ -68,21 +68,18 @@ export const profileSchema = z.object({
 });
 
 export const userInsertSchema = createInsertSchema(users, {
-  profile: profileSchema
-    .extend({
-      age: z
-        .union([z.string().transform((value) => new Date(value)), z.date()])
-        .optional(),
-    }),
+  profile: profileSchema.extend({
+    age: z
+      .union([z.string().transform((value) => new Date(value)), z.date()])
+      .optional(),
+  }),
 });
 export const userSelectSchema = createSelectSchema(users, {
-  profile: profileSchema.omit({ age: true })
-    .extend({
-      age: z
-        .union([z.string().transform((value) => new Date(value)), z.date()])
-        .optional(),
-    })
-  ,
+  profile: profileSchema.omit({ age: true }).extend({
+    age: z
+      .union([z.string().transform((value) => new Date(value)), z.date()])
+      .optional(),
+  }),
 });
 export const userExtendSelectSchema = userSelectSchema.extend({
   mealsCount: z.number(),

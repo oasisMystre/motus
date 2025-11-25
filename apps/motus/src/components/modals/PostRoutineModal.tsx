@@ -123,7 +123,6 @@ export default function PostRoutineModal({
       visibility: "everyone" as const,
     },
     async onSubmit(values) {
-      console.log(values.metadata!.exercises.map((e) => e.sets));
       const [routine, log] = await Promise.all([
         trpcClient.routine.update.mutate({
           id: values.routine?.id,

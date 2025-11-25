@@ -13,7 +13,7 @@ export default function DeleteAccountModal(
   props: React.ComponentProps<typeof ModalDialog>,
 ) {
   const trpc = useTRPC();
-  const { firebase } = useFirebase();
+  const { firebase, setUser } = useFirebase();
   const { mutateAsync } = useMutation(trpc.user.delete.mutationOptions());
 
   return (
@@ -52,9 +52,10 @@ export default function DeleteAccountModal(
             className="flex-1"
             onPress={(event) => {
               mutateAsync().then(() => {
-                signOut(firebase.auth).then(() =>
-                  props.onRequestClose?.(event),
-                );
+                signOut(firebase.auth).then(() => {
+                  setUser(null);
+                  props.onRequestClose?.(event);
+                });
               });
             }}
           />

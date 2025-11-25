@@ -18,8 +18,8 @@ import { useSnackbar, useFirebase } from "../../providers";
 export default function LoginScreen() {
   const snackbar = useSnackbar();
   const { t } = useTranslation();
-  const { firebase } = useFirebase();
   const { bottom } = useSafeAreaInsets();
+  const { firebase, signIn } = useFirebase();
 
   const {
     values,
@@ -45,9 +45,11 @@ export default function LoginScreen() {
         firebase.auth,
         values.email.trim(),
         values.password,
-      ).catch((error) =>
-        snackbar.error({ text: getFirebaseErrorMessage(error, t) }),
-      );
+      )
+        .then((credential) => signIn(credential.user))
+        .catch((error) =>
+          snackbar.error({ text: getFirebaseErrorMessage(error, t) }),
+        );
     },
   });
 

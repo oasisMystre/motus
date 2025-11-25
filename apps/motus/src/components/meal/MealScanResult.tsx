@@ -2,8 +2,8 @@ import type z from "zod";
 import { format } from "util";
 import { useState } from "react";
 import { FlatList } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { mealInsertSchema, mealSelectSchema } from "@motus/server";
 import {
   Pressable,
@@ -15,8 +15,8 @@ import {
 import Button from "../Button";
 import { MealItem } from "./MealItem";
 import { Colors } from "../../constants";
+import { getEnergy } from "../../utils/get-energy";
 import { useTRPC } from "../../providers/TRPCProvider";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type MealScanResultProps = {
   meals: z.infer<typeof mealInsertSchema>[];
@@ -60,7 +60,7 @@ export function MealScanResult({
             selectedMeals.find((meal) => meal.id === item.id),
           );
 
-          const energy = item.metadata.nutriments["energy-kcal"];
+          const energy = getEnergy(item);
           const portionSize = item.metadata.portionSize;
 
           return (
@@ -70,8 +70,8 @@ export function MealScanResult({
               hideActions
               subtitle={format(
                 "%d%s %d%s",
-                energy?.value ?? "0",
-                energy?.unit ?? "kcal",
+                energy.value ?? "0",
+                energy.unit ?? "kcal",
                 portionSize.value ?? 0,
                 portionSize.unit ?? "ml",
               )}

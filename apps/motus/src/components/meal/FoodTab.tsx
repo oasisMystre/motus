@@ -3,8 +3,8 @@ import type z from "zod";
 import Color from "color";
 import { format } from "util";
 import { useTranslation } from "react-i18next";
-import type { NativeSyntheticEvent } from "react-native";
 import { useCallback, useMemo, useState } from "react";
+import type { NativeSyntheticEvent } from "react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { BarcodeIcon, ScanIcon } from "phosphor-react-native";
 import type { Product } from "@openfoodfacts/openfoodfacts-nodejs";
@@ -26,6 +26,7 @@ import { Colors } from "../../constants";
 import { useSearch } from "../SearchInput";
 import MealScanModal from "./MealScanModal";
 import type KeyboardView from "../KeyboardView";
+import { getEnergy } from "../../utils/get-energy";
 import { useTRPC } from "../../providers/TRPCProvider";
 
 type AddFoodModalProps = {
@@ -151,8 +152,7 @@ export default (function FoodTab({
               selectedMeals.find((meal) => meal.id === item.id),
             );
 
-            const energy = item.nutriments?.["energy-kcal"];
-            const energyUnit = item.nutriments?.energy_unit;
+            const energy = getEnergy(item);
             const portionSize = {
               value: item.serving_quantity,
               unit: item.serving_quantity_unit,
@@ -166,8 +166,8 @@ export default (function FoodTab({
                     title={item.product_name}
                     subtitle={format(
                       "%d%s %d%s",
-                      energy ?? 0,
-                      energyUnit ?? "kcall",
+                      energy.value,
+                      energy.unit,
                       portionSize.value ?? 0,
                       portionSize.unit ?? "ml",
                     )}

@@ -1,5 +1,5 @@
 export const nutriments = [
-  { name: "Enerygy", key: "energy-kcal", unit: "kcal", required: true },
+  { name: "Energy", key: "energy-kcal", unit: "kcal", required: true },
   { name: "Total Fat", key: "fat", unit: "g", required: false },
   { name: "Saturated Fat", key: "saturated-fat", unit: "g", required: false },
   {

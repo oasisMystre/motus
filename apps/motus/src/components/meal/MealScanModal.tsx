@@ -34,7 +34,7 @@ export default withSnackbar(function MealScanModal({
   const snackbar = useSnackbar();
   const { top } = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const [barcode, setBarcode] = useState<string | undefined>(undefined);
+  const [barcode, setBarcode] = useState<string | undefined>("06731906");
 
   const queryKey = useMemo(() => ["meal", barcode], [barcode]);
 

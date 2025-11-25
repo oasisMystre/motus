@@ -120,7 +120,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.motus",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": []
     },
     "web": {
       "bundler": "metro",
@@ -203,7 +203,8 @@
           "launchMode": "most-recent"
         }
       ],
-      "expo-web-browser"    ],
+      "expo-web-browser"
+    ],
     "experiments": {
       "typedRoutes": true
     },

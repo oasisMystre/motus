@@ -6,11 +6,13 @@ import Button from "../Button";
 import ModalDialog from "./ModalDialog";
 import { Colors } from "../../constants";
 import { useFirebase } from "../../providers";
+import { useUser } from "../../hooks/useUser";
 
 export default function LogoutModal(
   props: React.ComponentProps<typeof ModalDialog>,
 ) {
   const { firebase } = useFirebase();
+  const { setUser, setAnonymousUser } = useFirebase();
 
   return (
     <ModalDialog
@@ -47,7 +49,10 @@ export default function LogoutModal(
             text="Yes"
             className="flex-1"
             onPress={(event) =>
-              signOut(firebase.auth).then(() => props.onRequestClose?.(event))
+              signOut(firebase.auth).then(() => {
+                setUser(null);
+                props.onRequestClose?.(event);
+              })
             }
           />
         </View>

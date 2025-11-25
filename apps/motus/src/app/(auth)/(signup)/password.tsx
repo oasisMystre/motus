@@ -21,7 +21,7 @@ export default function PasswordScreen() {
   const loading = useLoading();
   const snackbar = useSnackbar();
   const { t } = useTranslation();
-  const { firebase } = useFirebase();
+  const { firebase, signIn } = useFirebase();
   const { bottom } = useSafeAreaInsets();
 
   const dispath = useAppDispatch();
@@ -86,13 +86,11 @@ export default function PasswordScreen() {
       dispath(formActions.updateSignupForm(values));
       if (signup?.email) {
         return loading.promise(
-          createUserWithEmailAndPassword(
-            auth,
-            signup.email!,
-            values.password!,
-          ).catch((error) =>
-            snackbar.error({ text: getFirebaseErrorMessage(error, t) }),
-          ),
+          createUserWithEmailAndPassword(auth, signup.email!, values.password!)
+            .then((credential) => signIn(credential.user))
+            .catch((error) =>
+              snackbar.error({ text: getFirebaseErrorMessage(error, t) }),
+            ),
           {
             subtitle: "Get things ready...",
           },

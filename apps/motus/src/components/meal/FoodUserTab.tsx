@@ -15,6 +15,7 @@ import { Colors } from "../../constants";
 import { useSearch } from "../SearchInput";
 import IcMeal from "../../assets/hot-meal";
 import CreateFoodModal from "./CreateFoodModal";
+import { getEnergy } from "../../utils/get-energy";
 import CrudListItemMenu from "../CrudListItemMenu";
 import { useTRPC } from "../../providers/TRPCProvider";
 import { MealConfirmDeletion } from "./MealConfirmDeletion";
@@ -101,7 +102,7 @@ export default function FoodUserTab({
                   width={72}
                   height={72}
                 />
-                <View className='flex flex-col items-center justify-center'>
+                <View className="flex flex-col items-center justify-center">
                   <Text className="text-lg text-white font-poppins-medium">
                     No Created Meal
                   </Text>
@@ -118,7 +119,7 @@ export default function FoodUserTab({
               selectedMeals.find((meal) => meal.id === item.id),
             );
 
-            const energy = item.metadata.nutriments["energy-kcal"];
+            const energy = getEnergy(item);
             const portionSize = item.metadata.portionSize;
 
             return (
@@ -128,8 +129,8 @@ export default function FoodUserTab({
                 onMenu={() => setMenuFocusedItem(item)}
                 subtitle={format(
                   "%d%s %d%s",
-                  energy?.value || "0",
-                  energy?.unit || "kcal",
+                  energy.value,
+                  energy.unit,
                   portionSize.value,
                   portionSize.unit,
                 )}

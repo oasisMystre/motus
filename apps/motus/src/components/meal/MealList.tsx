@@ -5,6 +5,7 @@ import { View, Text } from "react-native";
 import type { mealSelectSchema } from "@motus/server";
 
 import { Colors } from "../../constants";
+import { getEnergy } from "../../utils/get-energy";
 
 type MealListProps = {
   meals: z.infer<typeof mealSelectSchema>[];
@@ -14,7 +15,7 @@ export function MealList({ meals }: MealListProps) {
   return (
     <View>
       {meals.map((meal, index) => {
-        const energy = meal.metadata.nutriments["energy-kcal"];
+        const energy = getEnergy(meal);
         const portionSize = meal.metadata.portionSize;
 
         return (
@@ -49,7 +50,7 @@ export function MealList({ meals }: MealListProps) {
               className="font-poppins"
               style={{ color: Colors.grey }}
             >
-              {format("%d %s", energy?.value ?? 0, energy?.unit ?? "g")}
+              {format("%d %s", energy.value, energy?.unit)}
             </Text>
           </View>
         );

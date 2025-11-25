@@ -19,6 +19,7 @@ import RadioInput from "../../../../../components/RadioInput";
 import { MealHeader, MealInfo, MealList } from "../../../../../components/meal";
 
 import AddFoodModal from "../../../../../components/meal/AddFoodModal";
+import { getMealInfo } from "../../../../../utils/get-meal-info";
 
 export default function AddMealScreen() {
   const navigation = useNavigation();
@@ -100,35 +101,7 @@ export default function AddMealScreen() {
     [isValid, isSubmitting],
   );
 
-  const info = useMemo(() => {
-    const getValue = (key: string) =>
-      values.meals.reduce(
-        (acc, meal) => {
-          const value = meal.metadata.nutriments[key];
-          if (value) {
-            const _value = parseFloat(
-              meal.metadata.nutriments[key].value?.toString() ?? "0",
-            );
-            return {
-              unit: meal.metadata.nutriments[key].unit,
-              value: acc.value + (Number.isNaN(_value) ? 0 : _value),
-            };
-          }
-          return acc;
-        },
-        { unit: "g", value: 0 },
-      );
-
-    const fats = getValue("fats");
-    const proteins = getValue("proteins");
-    const energy = getValue("energy-kcal");
-    const carbohydrates = getValue("carbohydrates");
-
-    const info = { proteins, fats, carbohydrates, energy };
-
-    return info;
-  }, [values.meals]);
-
+  const info = useMemo(() => getMealInfo(...values.meals), [values.meals]);
   useEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -201,12 +174,7 @@ export default function AddMealScreen() {
                 }}
               />
             )}
-            {values.meals.length > 0 && (
-              <MealInfo
-                info={info}
-                energy={info.energy}
-              />
-            )}
+            {values.meals.length > 0 && <MealInfo info={info} />}
             <View>
               <Text
                 className="text-lg font-poppins"
