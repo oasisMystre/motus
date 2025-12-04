@@ -75,12 +75,7 @@ export default function SensorProvider({ children }: React.PropsWithChildren) {
             toast.error({ text: "🔴 Please enable motion detection." });
         });
     }
-  }, [
-    toast,
-    setPedometerAvailable,
-    setPedometerAvailable,
-    setPeromissionGranted,
-  ]);
+  }, [toast]);
 
   const syncFn = useCallback(
     async (steps: number, start: Date, end: Date) => {
@@ -102,7 +97,7 @@ export default function SensorProvider({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     setUp();
-  }, []);
+  }, [setUp]);
 
   useEffect(() => {
     if (pedometerAvailable) {
@@ -117,11 +112,11 @@ export default function SensorProvider({ children }: React.PropsWithChildren) {
 
       return () => subscription.remove();
     }
-  }, [pedometerAvailable, permissionGranted]);
+  }, [pedometerAvailable, start, end]);
 
   useEffect(() => {
     if (user) sync(currentSteps, start, end);
-  }, [user, start, end, currentSteps]);
+  }, [user, start, end, currentSteps, sync]);
 
   return (
     <SensorContext.Provider value={{ currentSteps }}>

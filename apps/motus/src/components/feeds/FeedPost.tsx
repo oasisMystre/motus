@@ -85,7 +85,7 @@ export function FeedPost({ post, user }: FeedPostProps) {
     };
     update({ ...post, ...changes });
     return mutatePostLike(changes);
-  }, [postLike]);
+  }, [post, update, mutatePostLike]);
 
   const onPressPagination = (index: number) => {
     slideRef.current?.scrollTo({

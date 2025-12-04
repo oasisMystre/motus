@@ -1,12 +1,14 @@
+import z from "zod/v3";
+import { zodResponseFormat } from "openai/helpers/zod";
 import { describe, beforeAll, test, afterAll } from "bun:test";
 import {
   MCPServerStreamableHttp,
-  run,
   setDefaultOpenAIKey,
   setTracingExportApiKey,
 } from "@openai/agents";
 
 import { getEnv } from "../src/env";
+import { openai } from "../src/instances";
 import { McpClient } from "../src/mcp/client";
 
 setDefaultOpenAIKey(getEnv("OPEN_API_KEY"));
@@ -31,15 +33,35 @@ describe("mcp", () => {
   });
 
   test("get tokens", async () => {
-    const agent = await client.createAgent(
+    const _agent = await client.createAgent(
       undefined,
       "4e3a430c-022a-45a2-ab1c-24bae2dc48eb",
     );
 
-    const response = await run(
-      agent,
-      '{"user": "4e3a430c-022a-45a2-ab1c-24bae2dc48eb",",questions":{"weight":[{"question":"What are your reasons for wanting to gain weight","answer":[{"name":"Gain muscle for general fitness"}]},{"question":"What is your weekly goal","answer":[{"name":"Loss 0.5kg per week"}]}]}} update-goal',
-    );
-    console.log(response.finalOutput, { depth: null });
+    const prompt =
+      "Identify the food/meal ingredients or name in the image. Return ONLY a JSON array of meal/food names. Strict JSON, no markdown.";
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      response_format: zodResponseFormat(
+        z.object({ meals: z.array(z.string()) }),
+        "meals",
+      ),
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                url: `https://pqhonwobj3.ufs.sh/f/wyD68i2cCLs0hNlOCdtg0SARkXUEZH4CfVwBrl1Q6iD8T7ec`,
+                detail: "auto",
+              },
+            },
+          ],
+        },
+      ],
+    });
+
   });
 });

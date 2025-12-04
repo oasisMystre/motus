@@ -51,7 +51,7 @@ export default function ProfileScreen() {
   const scrollTo = useCallback(
     (index: number) =>
       courosel.current?.scrollTo({ x: width * index, animated: true }),
-    [],
+    [width],
   );
 
   return (

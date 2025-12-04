@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
   Text,
-  View,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -119,33 +118,31 @@ export default function SnackbarProvider({
         success: (options) => showSnackbar("success", options),
       }}
     >
-      <>
-        {current && (
-          <Animated.View
+      {current && (
+        <Animated.View
+          className={clsx(
+            "absolute top-0 inset-x-0 z-50 p-4",
+            current.className,
+          )}
+          style={[
+            { paddingTop: insets.top + 8, zIndex: 9999 },
+            animatedStyle,
+            current.style,
+          ]}
+        >
+          <Text
             className={clsx(
-              "absolute top-0 inset-x-0 z-50 p-4",
-              current.className,
+              "font-poppins first-letter:capitalize",
+              current.textAttrs?.className,
             )}
-            style={[
-              { paddingTop: insets.top + 8, zIndex: 9999 },
-              animatedStyle,
-              current.style,
-            ]}
+            style={current.textAttrs?.style}
           >
-            <Text
-              className={clsx(
-                "font-poppins first-letter:capitalize",
-                current.textAttrs?.className,
-              )}
-              style={current.textAttrs?.style}
-            >
-              {current.text.trim().slice(0, 1).toLocaleUpperCase() +
-                current.text.slice(1)}
-            </Text>
-          </Animated.View>
-        )}
-        {children}
-      </>
+            {current.text.trim().slice(0, 1).toLocaleUpperCase() +
+              current.text.slice(1)}
+          </Text>
+        </Animated.View>
+      )}
+      {children}
     </SnackbarContext.Provider>
   );
 }

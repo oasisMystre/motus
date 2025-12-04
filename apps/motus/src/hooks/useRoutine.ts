@@ -10,7 +10,7 @@ export default function useRoutine(id: string) {
   const cache = useMemo(() => {
     const data = queryClient.getQueryData(trpc.routine.list.queryKey());
     return data?.find((data) => data.id === id);
-  }, [queryClient, trpc]);
+  }, [queryClient, trpc, id]);
 
   const { update } = useTanstackStore(
     queryClient,
@@ -23,7 +23,7 @@ export default function useRoutine(id: string) {
 
   useEffect(() => {
     if (data) return update(data);
-  }, [data]);
+  }, [data, update]);
 
   return data;
 }

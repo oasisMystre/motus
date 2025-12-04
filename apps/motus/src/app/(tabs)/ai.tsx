@@ -12,6 +12,7 @@ import {
   TextInput,
   View,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 
 import { Colors } from "../../constants";
@@ -24,7 +25,7 @@ import { messageActions, messageSelectors } from "../../store/message";
 export default function AIScreen() {
   const trpc = useTRPC();
   const listRef = useRef<FlatList>(null);
-  const { isSuccess, data, refetch, isRefetching } = useQuery(
+  const { data, refetch, isRefetching, isFetching } = useQuery(
     trpc.message.list.queryOptions(),
   );
 
@@ -110,9 +111,18 @@ export default function AIScreen() {
           justifyContent: "flex-end",
           paddingVertical: 16,
         }}
-        ListEmptyComponent={() => (
-          <EmptyState onMessage={(content) => sendMessage({ content })} />
-        )}
+        ListEmptyComponent={() => {
+          if (isFetching)
+            return (
+              <ActivityIndicator
+                color="white"
+                className="m-auto"
+              />
+            );
+          return (
+            <EmptyState onMessage={(content) => sendMessage({ content })} />
+          );
+        }}
         scrollEnabled
         renderItem={({ item, index }) => {
           const previousMessage = messages[index - 1];

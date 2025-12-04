@@ -1,10 +1,6 @@
-import type z from "zod";
 import { useCallback } from "react";
-import type { routineSelectSchema } from "@motus/server";
 import type { InferDataFromTag, QueryClient } from "@tanstack/react-query";
 import type { TRPCQueryKeyWithoutPrefix } from "@trpc/tanstack-react-query";
-
-import { useTRPC } from "../providers/TRPCProvider";
 
 export const useTanstackStore = <
   K extends TRPCQueryKeyWithoutPrefix,
@@ -17,8 +13,6 @@ export const useTanstackStore = <
   key: K,
   getId?: Fn,
 ) => {
-  const trpc = useTRPC();
-
   const add = useCallback(
     (data: T) => {
       queryClient.setQueryData(key, (previousData): any => {
@@ -56,7 +50,7 @@ export const useTanstackStore = <
         return previousData;
       });
     },
-    [queryClient, key],
+    [queryClient, key, getId],
   );
 
   const remove = useCallback(
@@ -72,7 +66,7 @@ export const useTanstackStore = <
         return previousData;
       });
     },
-    [queryClient, key],
+    [queryClient, key, getId],
   );
 
   return { add, update, remove };

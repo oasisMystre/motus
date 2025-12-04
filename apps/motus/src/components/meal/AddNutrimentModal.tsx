@@ -68,7 +68,6 @@ export default function AddNutrimentModal({
     (meal) => meal.id,
   );
   const {
-    errors,
     values,
     isValid,
     isSubmitting,
@@ -110,7 +109,7 @@ export default function AddNutrimentModal({
       resetForm();
       props.onRequestClose?.(event);
     },
-    [props.onRequestClose],
+    [props.onRequestClose, resetForm],
   );
 
   return (
@@ -155,7 +154,7 @@ export default function AddNutrimentModal({
             <View style={{ height: 1, backgroundColor: Colors.darkGray }} />
           )}
           renderItem={({ item }) => {
-            const value = values.metadata.nutriments[item.key];
+            const nutriment = values.metadata.nutriments[item.key];
 
             return (
               <View className="flex-row items-center  py-2">
@@ -165,19 +164,21 @@ export default function AddNutrimentModal({
                 <TextInput
                   inputMode="numeric"
                   keyboardType="number-pad"
-                  value={value.value?.toString()}
+                  value={nutriment ? nutriment.value.toString() : undefined}
                   cursorColor={Colors.primary}
                   selectionColor={Colors.primary}
                   placeholderTextColor={Colors.grey}
                   selectionHandleColor={Colors.primary}
                   className="flex-1 text-right py-2 font-poppins text-white"
                   placeholder={item.required ? "Required" : "Optional"}
-                  onChangeText={(value) => {
+                  onChangeText={(raw) => {
                     const fieldName = format(
                       "metadata.nutriments.%s",
                       item.key,
                     );
-                    setFieldValue(fieldName, { value, unit: item.unit });
+                    const value = parseFloat(raw);
+                    if (!Number.isNaN(value))
+                      setFieldValue(fieldName, { value, unit: item.unit });
                   }}
                 />
               </View>

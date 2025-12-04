@@ -146,7 +146,7 @@ export default function CreateRoutineScreen() {
     return () => {
       dispatch(formActions.resetWorkoutForm());
     };
-  }, [navigation, action]);
+  }, [navigation, action, dispatch]);
 
   useLayoutEffect(() => {
     if (values.metadata.exercises.length > 0)
@@ -171,11 +171,12 @@ export default function CreateRoutineScreen() {
       });
     else navigation.setOptions({ headerRight: undefined });
   }, [
-    values.metadata.exercises,
-    isSubmitting,
     isValid,
     disabled,
+    navigation,
+    isSubmitting,
     handleSubmit,
+    values.metadata.exercises,
   ]);
 
   const addExercises = useCallback(
@@ -183,7 +184,7 @@ export default function CreateRoutineScreen() {
       const exercises = values.map(createInitialSet);
       setFieldValue("metadata.exercises", exercises);
     },
-    [],
+    [setFieldValue],
   );
 
   const addSet = useCallback(

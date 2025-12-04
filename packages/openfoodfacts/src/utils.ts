@@ -50,6 +50,7 @@ export const convertProductToMeal = (
 
               if (unit && value) return [key, { unit, value }];
             }
+            return undefined;
           })
           .filter((value) => !!value),
       ),

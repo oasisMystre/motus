@@ -1,5 +1,4 @@
 import { writeFileSync } from "fs";
-import { and, eq, isNull } from "drizzle-orm";
 
 import rewardList from "./seed/rewards.json";
 import muscleList from "./seed/muscles.json";
@@ -9,14 +8,7 @@ import equipmentList from "./seed/equipments.json";
 import { db } from "../src/instances";
 import type { Database } from "../src/db";
 import { exerciseInsertSchema } from "../src/external";
-import { getRoutinesWhere } from "../src/routers/routines/routine.controller";
-import {
-  equipments,
-  exercises,
-  muscles,
-  rewardTypes,
-  routines,
-} from "../src/db/schema";
+import { equipments, exercises, muscles, rewardTypes } from "../src/db/schema";
 
 async function main(db: Database) {
   const dbMuscles = await db

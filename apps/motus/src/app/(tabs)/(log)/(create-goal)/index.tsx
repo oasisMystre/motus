@@ -67,7 +67,7 @@ export default function CreateGoalScreen() {
           className="bg-black"
           title="Great Work"
           subtitle="Creating a personalised plan for you..."
-          children={
+          child={
             status === "successful" && (
               <>
                 <DumbBell />

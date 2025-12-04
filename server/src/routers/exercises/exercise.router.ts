@@ -1,7 +1,7 @@
 import z from "zod";
 import { format } from "util";
 import { TRPCError } from "@trpc/server";
-import { and, eq, ilike, isNull, or, type SQL } from "drizzle-orm";
+import { and, eq, ilike, inArray, isNull, or, type SQL } from "drizzle-orm";
 
 import { publicProcedure, router } from "../../trpc";
 import { getExercisesWhere } from "./exercise.controller";
@@ -43,8 +43,8 @@ export const exerciseRouter = router({
           search: z.string().optional(),
           filter: z
             .object({
-              muscle: muscleSelectSchema.shape.id.optional(),
-              equipment: equipmentSelectSchema.shape.id.optional(),
+              muscles: z.array(muscleSelectSchema.shape.id).optional(),
+              equipments: z.array(equipmentSelectSchema.shape.id).optional(),
             })
             .optional(),
         })
@@ -63,10 +63,10 @@ export const exerciseRouter = router({
         if (input.filter) {
           const innerWhere = [];
 
-          if (input.filter.muscle)
-            innerWhere.push(eq(muscles.id, input.filter.muscle));
-          if (input.filter.equipment)
-            innerWhere.push(eq(equipments.id, input.filter.equipment));
+          if (input.filter.muscles)
+            innerWhere.push(inArray(muscles.id, input.filter.muscles));
+          if (input.filter.equipments)
+            innerWhere.push(inArray(equipments.id, input.filter.equipments));
           where.push(and(...innerWhere));
         }
         if (input.search) {

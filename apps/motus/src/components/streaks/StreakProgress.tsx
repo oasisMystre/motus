@@ -1,10 +1,8 @@
-import assert from "assert";
+import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useAppSelector } from "../../store";
 import CircleProgressBar from "../../assets/circle-progress-bar";
-import { useMemo } from "react";
 
 type StreakProgressProps = {
   goalSteps: number;

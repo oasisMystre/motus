@@ -40,7 +40,7 @@ export default function AddFoodModal({
     [],
   );
 
-  const CurrentTab = useMemo(() => tabs[selectedIndex], [selectedIndex]);
+  const CurrentTab = useMemo(() => tabs[selectedIndex], [tabs, selectedIndex]);
 
   return (
     <SnackbarProvider>

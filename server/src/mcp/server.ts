@@ -121,7 +121,7 @@ export const createMcpServer = () => {
   );
 
   server.registerTool(
-    "search-food",
+    "get-foods",
     {
       title: "Search food",
       description:
@@ -230,18 +230,21 @@ export const createMcpServer = () => {
               value: z.number(),
               unit: z.enum(["kg", "ibs"]),
             })
+            .describe("calculated user weekly weight loss or gain goal")
             .optional(),
           goalWeight: z
             .object({
               value: z.number(),
               unit: z.enum(["kg", "ibs"]),
             })
+            .describe("user weight loss or gain target goal")
             .optional(),
           currentWeight: z
             .object({
               value: z.number(),
               unit: z.enum(["kg", "ibs"]),
             })
+            .describe("current user weight")
             .optional(),
           startingWeight: z
             .object({
@@ -249,6 +252,7 @@ export const createMcpServer = () => {
               date: z.number(),
               unit: z.enum(["kg", "ibs"]),
             })
+            .describe("user starting weight")
             .optional(),
           activityLevel: z
             .enum([
@@ -257,6 +261,7 @@ export const createMcpServer = () => {
               "active",
               "very-active",
             ])
+            .describe("user activity level")
             .optional(),
         }),
       },
@@ -284,6 +289,23 @@ export const createMcpServer = () => {
       }
 
       throw new McpError(404, "user not found");
+    },
+  );
+
+  server.registerTool(
+    "search-food",
+    {
+      title: "Search food or meal with openfoodfact",
+      description: "Return a list of meal search result",
+      inputSchema: {
+        query: z
+          .array(z.string())
+          .describe("List of meal or food name to get from openfoodfact"),
+      },
+    },
+    async (args) => {
+      const response = await searchFood(args.query.join(","));
+      return jsonOutput(response.products.map(convertProductToMeal));
     },
   );
 

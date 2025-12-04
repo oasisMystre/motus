@@ -1,4 +1,5 @@
-import z from "zod";
+import type z from "zod/v3";
+import z4 from "zod";
 import { format } from "util";
 import { eq } from "drizzle-orm";
 import { run } from "@openai/agents";
@@ -10,11 +11,12 @@ import {
   messageSelectSchema,
   paginationSchema,
 } from "../../external";
+import type { agentOutputSchema } from "../../mcp/schema";
 
 export const messageRouter = router({
   create: publicProcedure
     .input(messageInsertSchema.omit({ user: true, role: true }))
-    .output(z.array(messageSelectSchema))
+    .output(z4.array(messageSelectSchema))
     .mutation(async ({ ctx, input }) => {
       let context = [
         {
@@ -36,11 +38,15 @@ export const messageRouter = router({
           content: context.content,
         })),
       );
+      const finalOutput = response.finalOutput as z.infer<
+        typeof agentOutputSchema
+      >;
 
       return ctx.drizzle
         .insert(messages)
         .values([
           {
+            id: input.id,
             role: "user",
             user: ctx.user.id,
             content: { type: "text", data: input.content },
@@ -48,7 +54,7 @@ export const messageRouter = router({
           {
             role: "assistant",
             user: ctx.user.id,
-            content: { type: "text", data: response.finalOutput as string },
+            content: { type: "text", data: finalOutput.summary! },
           },
         ])
         .returning()

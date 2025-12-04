@@ -22,15 +22,12 @@ export const useComment = (post: string) => {
     ...trpc.post.comment.list.queryOptions({ filter: { post } }),
   });
 
-  const addComment = useCallback(
-    (comment: Comment) => {
-      setComments((comments) => [
-        ...comments,
-        { ...comment, sent: true, failed: false },
-      ]);
-    },
-    [setComments],
-  );
+  const addComment = useCallback((comment: Comment) => {
+    setComments((comments) => [
+      ...comments,
+      { ...comment, sent: true, failed: false },
+    ]);
+  }, []);
   const updateComment = useCallback(
     ({ id, changes }: { id: string; changes: Partial<Comment> }) => {
       setComments((comments) => {
@@ -42,7 +39,7 @@ export const useComment = (post: string) => {
         return comments;
       });
     },
-    [setComments],
+    [],
   );
 
   useEffect(() => {

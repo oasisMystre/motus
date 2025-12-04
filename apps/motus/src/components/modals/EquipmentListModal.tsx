@@ -6,7 +6,7 @@ import { Pressable, Text, View, FlatList } from "react-native";
 
 import ModalDialog from "./ModalDialog";
 import { Colors } from "../../constants";
-import { useTRPC, useTRPCClient } from "../../providers/TRPCProvider";
+import { useTRPC } from "../../providers/TRPCProvider";
 
 type EquipmentListModalProps = {
   values?: z.infer<typeof equipmentSelectSchema>[];

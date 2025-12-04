@@ -4,8 +4,12 @@ import { format } from "util";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon } from "phosphor-react-native";
-import type { exerciseSelectSchema } from "@motus/server";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type {
+  muscleSelectSchema,
+  equipmentSelectSchema,
+  exerciseSelectSchema,
+} from "@motus/server";
 import {
   Modal,
   Pressable,
@@ -44,12 +48,19 @@ export default function AddExerciseModal({
 }: AddExerciseModalProps) {
   const trpc = useTRPC();
   const { bottom, top } = useSafeAreaInsets();
+  const [search, setSearch] = useState<string | undefined>();
   const [showMuscles, setShowShowMuscles] = useState(false);
   const [showEquipments, setShowEquipments] = useState(false);
   const [selectedValues, setSelectedValues] = useState(values);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showCreateExerciseModal, setShowCreateExerciseModal] = useState(false);
   const [showDeleteExerciseModal, setShowDeleteExerciseModal] = useState(false);
+  const [selectedMuscles, setSelectedMuscles] = useState<
+    z.infer<typeof muscleSelectSchema>[] | undefined
+  >();
+  const [selectedEquipments, setSelectedEquipments] = useState<
+    z.infer<typeof equipmentSelectSchema>[] | undefined
+  >(undefined);
   const [menuFocusedItem, setMenuFocusedItem] = useState<
     z.infer<typeof exerciseSelectSchema> | undefined
   >(undefined);
@@ -57,18 +68,29 @@ export default function AddExerciseModal({
     z.infer<typeof exerciseSelectSchema> | undefined
   >(undefined);
 
-  const { data, isFetching } = useQuery(trpc.exercise.list.queryOptions());
+  const { data, isFetching, isRefetching } = useQuery(
+    trpc.exercise.list.queryOptions({
+      search,
+      filter: {
+        muscles: selectedMuscles?.map((muscle) => muscle.id),
+        equipments: selectedEquipments?.map((equipment) => equipment.id),
+      },
+    }),
+  );
 
   const sections = useMemo(
-    () => [
-      {
-        title: "Custom Exercises",
-        custom: true,
-        data: data ? data.custom : [],
-      },
-      { title: "Exercises", data: data ? data.default : [] },
-    ],
-    [data],
+    () =>
+      isFetching
+        ? []
+        : [
+            {
+              title: "Custom Exercises",
+              custom: true,
+              data: data ? data.custom : [],
+            },
+            { title: "Exercises", data: data ? data.default : [] },
+          ],
+    [data, isFetching],
   );
 
   return (
@@ -109,6 +131,10 @@ export default function AddExerciseModal({
               <SearchInput
                 inputAttrs={{
                   placeholder: "Search Exercises",
+                  onChangeText: (value) => {
+                    if (value.trim().length > 0) setSearch(value);
+                    else setSearch(undefined);
+                  },
                 }}
               />
               <View className="flex-row gap-x-8">
@@ -217,12 +243,24 @@ export default function AddExerciseModal({
         onRequestClose={() => setShowSubscriptionModal(false)}
       />
       <EquipmentListModal
+        values={selectedEquipments}
         visible={showEquipments}
         onRequestClose={() => setShowEquipments(false)}
+        onValueChange={(values) =>
+          values.length > 0
+            ? setSelectedEquipments(values)
+            : setSelectedEquipments(undefined)
+        }
       />
       <MuscleListModal
+        values={selectedMuscles}
         visible={showMuscles}
         onRequestClose={() => setShowShowMuscles(false)}
+        onValueChange={(values) =>
+          values.length > 0
+            ? setSelectedMuscles(values)
+            : setSelectedMuscles(undefined)
+        }
       />
       {selectedExercise && (
         <ExerciseConfirmDeletion

@@ -17,7 +17,6 @@ import { uploadImageFromUri } from "../../../../utils";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
 import DateTimePicker from "../../../../components/DateTimePicker";
-import { useAppDispatch } from "../../../../store";
 import { UnitSheet } from "../../../../components/bottom-sheets/UnitSheet";
 import { ChoiceSheet } from "../../../../components/bottom-sheets/ChoiceSheet";
 
@@ -31,7 +30,6 @@ type EditItem = {
   onPress?: () => void;
   onChange?: (value: string) => void;
   path?: React.ComponentProps<typeof Link>["href"];
-  onBlur?: (event?: React.FocusEvent<any, Element>) => void;
 };
 
 export default function ProfileScreen() {
@@ -52,8 +50,6 @@ export default function ProfileScreen() {
     onValueChange: (unit: string, value: number) => void;
   } | null>(null);
 
-  const dispatch = useAppDispatch();
-
   const { mutateAsync } = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess(data) {
@@ -69,7 +65,6 @@ export default function ProfileScreen() {
     handleSubmit,
     setFieldValue,
     handleChange,
-    handleBlur,
   } = useFormik({
     initialValues: user,
     async onSubmit(values) {
@@ -92,7 +87,6 @@ export default function ProfileScreen() {
       {
         title: "Name",
         value: values.name,
-        onBlur: handleBlur("name"),
         onChange: handleChange("name"),
       },
 
@@ -114,7 +108,6 @@ export default function ProfileScreen() {
       {
         title: "Steps",
         value: values.profile.steps?.toString(),
-        onBlur: handleBlur("profile.steps"),
         onChange: (value) => setFieldValue("profile.steps", parseFloat(value)),
       },
       {
@@ -163,14 +156,14 @@ export default function ProfileScreen() {
       },
     ],
     [
+      setFieldValue,
+      handleChange,
       values.name,
       values.profile.age,
       values.profile.gender,
       values.profile.steps,
       values.profile.height,
       values.profile.weight,
-      setFieldValue,
-      handleBlur,
     ],
   );
 
@@ -266,19 +259,13 @@ export default function ProfileScreen() {
 
 const ProfileEditItem = ({ item }: { item: EditItem }) => {
   const inputRef = useRef<TextInput>(null);
-  const [editable, setEditable] = useState(false);
 
   const onFocus = () => {
-    setEditable(true);
     inputRef.current?.focus();
   };
 
   return (
-    <Pressable
-      className="flex-row py-2 items-center"
-      onBlur={() => setEditable(false)}
-      onPress={() => setEditable(true)}
-    >
+    <Pressable className="flex-row py-2 items-center">
       <Text
         className="flex-1 font-poppins"
         style={{ color: Colors.grey }}
@@ -292,15 +279,11 @@ const ProfileEditItem = ({ item }: { item: EditItem }) => {
         {item.onChange ? (
           <TextInput
             ref={inputRef}
-            editable={editable}
+            focusable
             pointerEvents={item.onPress && "none"}
             className="text-white font-poppins"
             value={item.value?.toString()}
             onChangeText={item.onChange}
-            onBlur={() => {
-              setEditable(false);
-              item.onBlur?.();
-            }}
           />
         ) : (
           <Text className="text-white font-poppins">{item.value}</Text>

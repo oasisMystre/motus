@@ -2,6 +2,7 @@ import path from "path";
 import { sleep } from "bun";
 import { readFileSync } from "fs";
 import { Agent, type MCPServerStreamableHttp } from "@openai/agents";
+import { agentOutputSchema } from "./schema";
 
 export class McpClientConnectionError extends Error {}
 
@@ -114,20 +115,20 @@ export class McpClient {
   ) {
     const isConnected = await this.connect();
     let instructions = readFileSync(
-      path.join(
-        (await import("../instances")).__srcdir,
-        "server/src/mcp/prompt.txt",
-      ),
+      path.join((await import("../instances")).__srcdir, "/src/mcp/prompt.txt"),
       "utf-8",
     );
     if (context) instructions = instructions.replace("%user_context%", context);
 
     if (isConnected || this.isConnected) {
       const agent = new Agent({
-        model: "gpt-4o-mini",
         ...params,
+        instructions,
         name: this.config.name,
+        model: "gpt-4o-mini",
         mcpServers: [this.server],
+        // @ts-expect-error zod type not satisfied
+        outputType: agentOutputSchema,
       });
 
       return agent;

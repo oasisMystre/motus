@@ -74,7 +74,7 @@ export default function LogWorkoutScreen() {
       minutes: parseFloat(time.minutes),
     };
     setFieldValue("metadata.duration", moment.duration(data).asMilliseconds());
-  }, [time]);
+  }, [time, setFieldValue]);
 
   useEffect(() => {
     setFieldValue(

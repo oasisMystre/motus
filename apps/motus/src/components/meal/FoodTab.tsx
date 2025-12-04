@@ -75,14 +75,14 @@ export default (function FoodTab({
       const onlineMeals = await mutateAsync(localMeals);
       return [...values, ...onlineMeals] as z.infer<typeof mealSelectSchema>[];
     },
-    [mutateAsync],
+    [mutateAsync, values],
   );
 
   const onShowCamera = useCallback(
     (action: "picture" | "scan", response?: PermissionResponse) => {
       if (permission?.granted || response?.granted) setShowCamera(action);
     },
-    [permission, setShowCamera],
+    [permission],
   );
 
   return (
@@ -206,6 +206,7 @@ export default (function FoodTab({
       </View>
       {showCamera && (
         <MealScanModal
+          type={showCamera}
           visible={Boolean(showCamera)}
           onRequestClose={() => setShowCamera(null)}
           onChange={(event, meals) => {

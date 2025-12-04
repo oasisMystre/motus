@@ -19,7 +19,6 @@ import { BackButton } from "../Header";
 import { Colors } from "../../constants";
 import AddNutrimentModal from "./AddNutrimentModal";
 import DropdownPicker from "../forms/DropdownPicker";
-import { nutriments } from "../../constants/nutriments";
 
 const PortionSizeUnits = ["kg", "g", "cup", "litre", "satchet"];
 
@@ -47,12 +46,7 @@ export default function CreateFoodModal({
           unit: "cup" as const,
           value: undefined as unknown as number,
         },
-        nutriments: Object.fromEntries(
-          nutriments.map((nutriment) => [
-            nutriment.key,
-            { value: undefined as unknown as number, unit: nutriment.unit },
-          ]),
-        ),
+        nutriments: {},
       },
     },
     validationSchema: object({
@@ -87,7 +81,7 @@ export default function CreateFoodModal({
       resetForm();
       props.onRequestClose?.(event);
     },
-    [props.onRequestClose],
+    [props.onRequestClose, resetForm],
   );
 
   return (

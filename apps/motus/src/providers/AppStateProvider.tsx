@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { hideAsync } from "expo-splash-screen";
 import * as Sentry from "@sentry/react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 
 import { useTRPC } from "./TRPCProvider";
 import { useFirebase } from "./FirebaseProvider";
@@ -15,17 +15,20 @@ export default function AppStateProvider({
 
   const [render, setRender] = useState(false);
 
-  const fetchData = async () =>
-    Promise.all([
-      queryClient.prefetchQuery(trpc.post.list.queryOptions()),
-      queryClient.prefetchQuery(trpc.muscle.list.queryOptions()),
-      queryClient.prefetchQuery(trpc.reward.list.queryOptions()),
-      queryClient.prefetchQuery(trpc.streak.list.queryOptions()),
-      queryClient.prefetchQuery(trpc.equipment.list.queryOptions()),
-      queryClient.prefetchQuery(trpc.exercise.list.queryOptions()),
-      queryClient.prefetchQuery(trpc.reward.aggregrate.queryOptions()),
-      queryClient.prefetchQuery(trpc.streak.aggregate.queryOptions()),
-    ]);
+  const fetchData = useCallback(
+    async () =>
+      Promise.all([
+        queryClient.prefetchQuery(trpc.post.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.muscle.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.reward.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.streak.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.equipment.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.exercise.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.reward.aggregrate.queryOptions()),
+        queryClient.prefetchQuery(trpc.streak.aggregate.queryOptions()),
+      ]),
+    [queryClient, trpc],
+  );
 
   useEffect(() => {
     const render = () => {
@@ -36,7 +39,7 @@ export default function AppStateProvider({
       if (user) fetchData().catch(Sentry.captureException).finally(render);
       else render();
     }
-  }, [state, user]);
+  }, [state, user, fetchData]);
 
   if (render) return children;
 }

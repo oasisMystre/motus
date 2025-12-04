@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import Color from "color";
-import { useMemo, useRef } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 

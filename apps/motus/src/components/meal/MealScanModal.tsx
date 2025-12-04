@@ -1,5 +1,5 @@
 import type z from "zod";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import type { mealSelectSchema } from "@motus/server";
@@ -19,8 +19,10 @@ import { Colors } from "../../constants";
 import { openFoodFact } from "../../utils";
 import { MealScanResult } from "./MealScanResult";
 import { withSnackbar, useSnackbar } from "../../providers/SnackbarProvider";
+import { useTRPCClient } from "../../providers/TRPCProvider";
 
 type MealScanModalProps = {
+  type: "scan" | "picture";
   onChange: (
     event: GestureResponderEvent,
     values: z.infer<typeof mealSelectSchema>[],
@@ -28,13 +30,16 @@ type MealScanModalProps = {
 } & React.ComponentProps<typeof Modal>;
 
 export default withSnackbar(function MealScanModal({
+  type,
   onChange,
   ...props
 }: MealScanModalProps) {
   const snackbar = useSnackbar();
-  const { top } = useSafeAreaInsets();
+  const trpcClient = useTRPCClient();
   const queryClient = useQueryClient();
-  const [barcode, setBarcode] = useState<string | undefined>("06731906");
+  const { top, bottom } = useSafeAreaInsets();
+  const cameraRef = useRef<CameraView | null>(null);
+  const [barcode, setBarcode] = useState<string | undefined>();
 
   const queryKey = useMemo(() => ["meal", barcode], [barcode]);
 
@@ -56,6 +61,22 @@ export default withSnackbar(function MealScanModal({
     },
   });
 
+  const takePicture = async () => {
+    const response = await cameraRef.current?.takePictureAsync({
+      quality: 0.2,
+      base64: true,
+      skipProcessing: true,
+    });
+
+    if (response?.base64) {
+      const meals = await trpcClient.mcp.scanMeal.mutate({
+        image: response?.base64,
+      });
+    }
+
+    return [];
+  };
+
   return (
     <Modal
       {...props}
@@ -63,6 +84,7 @@ export default withSnackbar(function MealScanModal({
       backdropColor={Colors.backgroundColor}
     >
       <CameraView
+        ref={cameraRef}
         style={{ flex: 1 }}
         barcodeScannerSettings={{
           barcodeTypes: ["ean13", "ean8", "upc_a", "upc_e"],
@@ -105,6 +127,18 @@ export default withSnackbar(function MealScanModal({
               queryClient.setQueryData(queryKey, undefined);
             }}
           />
+        )}
+        {type === "picture" && (
+          <Pressable className="mx-auto relative flex items-center justify-center ">
+            <View
+              className="absolute size-24 rounded-full bg-primary/50"
+              style={{ marginBottom: bottom }}
+            />
+            <View
+              className="size-16 rounded-full bg-primary"
+              style={{ marginBottom: bottom }}
+            />
+          </Pressable>
         )}
       </View>
     </Modal>

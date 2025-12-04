@@ -51,8 +51,6 @@ export const exerciseRelations = relations(exercises, ({ one }) => ({
   }),
 }));
 
-export const rewardTypeRelations = relations(rewardTypes, ({ many }) => ({}));
-
 export const rewardRelations = relations(rewards, ({ one }) => ({
   user: one(users, { fields: [rewards.user], references: [users.id] }),
   type: one(rewardTypes, {

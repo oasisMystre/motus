@@ -12,11 +12,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import {
-  ActivityIndicator,
   Text,
-  Pressable,
   View,
   FlatList,
+  Pressable,
+  ActivityIndicator,
 } from "react-native";
 
 import { Colors } from "../../../../constants";
@@ -182,7 +182,7 @@ export default function StartRoutineScreen() {
     });
 
     return () => navigation.setOptions({ headerRight: undefined });
-  }, [isValid, isSubmitting, handleSubmit]);
+  }, [navigation, isValid, isSubmitting, handleSubmit]);
 
   const removeExercise = useCallback(
     (id: string) => {

@@ -1,10 +1,10 @@
 import type z from "zod";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import type { mealLogSelectSchema } from "@motus/server";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { type Icon, NotePencilIcon, ShareIcon } from "phosphor-react-native";
+import { type Icon, NotePencilIcon } from "phosphor-react-native";
 import {
   Pressable,
   type StyleProp,
@@ -43,7 +43,7 @@ export function MealLogItemMenu({
         },
       });
     },
-    [dispatch, props.onClose, router],
+    [props.onClose, meal.id],
   );
 
   const menuItems: {

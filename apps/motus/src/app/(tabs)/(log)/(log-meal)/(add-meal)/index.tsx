@@ -18,8 +18,8 @@ import Button from "../../../../../components/Button";
 import RadioInput from "../../../../../components/RadioInput";
 import { MealHeader, MealInfo, MealList } from "../../../../../components/meal";
 
-import AddFoodModal from "../../../../../components/meal/AddFoodModal";
 import { getMealInfo } from "../../../../../utils/get-meal-info";
+import AddFoodModal from "../../../../../components/meal/AddFoodModal";
 
 export default function AddMealScreen() {
   const navigation = useNavigation();
@@ -96,12 +96,12 @@ export default function AddMealScreen() {
     metadata: {};
   }>();
 
+  const info = useMemo(() => getMealInfo(...values.meals), [values.meals]);
   const disabled = useMemo(
     () => !isValid || isSubmitting,
     [isValid, isSubmitting],
   );
 
-  const info = useMemo(() => getMealInfo(...values.meals), [values.meals]);
   useEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -113,7 +113,7 @@ export default function AddMealScreen() {
       ),
     });
     return () => navigation.setOptions({ header: false });
-  }, [navigation, screenTitle]);
+  }, [navigation, screenTitle, setFieldValue]);
 
   useEffect(() => {
     setFieldValue("metadata", info);

@@ -57,7 +57,7 @@ export const mealLogRouter = router({
     .query(({ ctx, input }) => {
       const where: (SQL | undefined)[] = [];
 
-      if (input && input.search) {
+      if (input?.search) {
         const innerWhere: SQL[] = [];
         innerWhere.push(ilike(mealLogs.name, format("%%%s%%", input.search)));
 

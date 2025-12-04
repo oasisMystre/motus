@@ -42,6 +42,7 @@ export default function PostCommentScreen() {
   const { mutate } = useMutation(
     trpc.post.comment.create.mutationOptions({
       onSuccess(data) {
+        const commentCount = comments.length + 1;
         updateComment({
           id: data.id,
           changes: { ...data, sent: true, failed: false },
@@ -51,7 +52,7 @@ export default function PostCommentScreen() {
         if (postData)
           updatePost({
             ...postData,
-            commentCount: comments.length + 1,
+            commentCount,
           });
       },
       onError(_, data) {

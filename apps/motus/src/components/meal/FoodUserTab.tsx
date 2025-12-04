@@ -60,7 +60,7 @@ export default function FoodUserTab({
         <FlatList
           data={data}
           style={{ flex: 1 }}
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 16 }}
           refreshControl={
             <RefreshControl
               onRefresh={refetch}
@@ -71,10 +71,7 @@ export default function FoodUserTab({
             />
           }
           ListHeaderComponent={() => (
-            <View
-              className="gap-y-8 mb-2"
-              style={{ paddingHorizontal: 16 }}
-            >
+            <View className="gap-y-8 mb-2">
               <Button
                 text={t("log.log_meal.create_food_action")}
                 onPress={() => setShowCreateFoodModal(true)}
@@ -154,8 +151,9 @@ export default function FoodUserTab({
             props.onRequestClose?.();
           }}
           style={{
-            opacity: selectedMeals.length > 0 ? 1 : 0,
+            marginHorizontal: 16,
             marginBottom: bottom,
+            opacity: selectedMeals.length > 0 ? 1 : 0,
           }}
         />
       </View>

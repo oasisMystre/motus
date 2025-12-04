@@ -2,9 +2,9 @@ import clsx from "clsx";
 import type z from "zod";
 import { v4 } from "uuid";
 import { format } from "util";
+import { useMemo, useState } from "react";
 import { isString, useFormik } from "formik";
 import { CameraIcon } from "phosphor-react-native";
-import { useEffect, useMemo, useState } from "react";
 import { launchImageLibraryAsync } from "expo-image-picker";
 import { getStorage } from "@react-native-firebase/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -142,13 +142,13 @@ export default function CreateExerciseModal({
       if (value) return [value];
     }
     return [];
-  }, [values.equipment]);
+  }, [values.equipment, equipments]);
   const otherMuscles = useMemo(
     () =>
       values.other_muscles.map(
         (id) => muscles.find((muscle) => muscle.id === id)!,
       ),
-    [values.other_muscles],
+    [values.other_muscles, muscles],
   );
   const primaryMuscleGroups = useMemo(() => {
     const value = muscles.find(
@@ -156,190 +156,182 @@ export default function CreateExerciseModal({
     );
     if (value) return [value];
     return [];
-  }, [values.primary_muscle_group]);
-
-  useEffect(() => {
-    return () => resetForm();
-  }, [props.visible]);
+  }, [values.primary_muscle_group, muscles]);
 
   return (
-    <>
-      <Modal
-        {...props}
-        animationType="slide"
-        backdropColor={Colors.backgroundColor}
+    <Modal
+      {...props}
+      animationType="slide"
+      backdropColor={Colors.backgroundColor}
+    >
+      <KeyboardView
+        className={clsx("flex-1", props.className)}
+        style={{
+          paddingTop: top,
+          paddingHorizontal: 16,
+          backgroundColor: Colors.backgroundColor,
+        }}
       >
-        <KeyboardView
-          className={clsx("flex-1", props.className)}
-          style={{
-            paddingTop: top,
-            paddingHorizontal: 16,
-            backgroundColor: Colors.backgroundColor,
-          }}
-        >
-          <View className="flex-1 gap-y-8">
-            <View className="flex flex-row items-center justify-between">
-              <Pressable>
-                <BackButton
-                  canGoBack
-                  navigation={{
-                    goBack: (event) => {
-                      if (event) props.onRequestClose?.(event);
-                    },
-                  }}
-                />
-              </Pressable>
-              <Text className="text-white text-lg font-poppins-semibold">
-                {initialValues ? "Edit Exercise" : "Create Exercise"}
-              </Text>
-              <Pressable
-                disabled={!isValid && isSubmitting}
-                onPress={() => handleSubmit()}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text
-                    style={{ color: isValid ? Colors.primary : Colors.grey }}
-                  >
-                    Save
-                  </Text>
-                )}
-              </Pressable>
-            </View>
-            <Pressable
-              className="self-center size-28 border rounded-full"
-              style={{ borderColor: Colors.gray }}
-              onPress={async () => {
-                const result = await launchImageLibraryAsync({
-                  mediaTypes: "images",
-                });
-                const assets = result.assets;
-                if (assets && assets.length > 0) {
-                  setImage(assets[0].uri);
-                } else setImage(null);
-              }}
-            >
-              <Avatar
-                url={image}
-                style={{ width: "100%", height: "100%", borderRadius: "100%" }}
-              />
-              <View className="size-12 absolute -right-4 bottom-4 items-center justify-center bg-primary rounded-full">
-                <CameraIcon color="white" />
-              </View>
-            </Pressable>
-            <View className="gap-y-8">
-              <Input
-                label="Exercise name"
-                error={touched.name && errors.name}
-                inputAttrs={{
-                  value: values.name,
-                  placeholder: "Aerobics",
-                  onBlur: handleBlur("name"),
-                  onChangeText: (value) => {
-                    handleChange("name")(value);
-                    setTouched({ name: true });
+        <View className="flex-1 gap-y-8">
+          <View className="flex flex-row items-center justify-between">
+            <Pressable>
+              <BackButton
+                canGoBack
+                navigation={{
+                  goBack: (event) => {
+                    if (event) props.onRequestClose?.(event);
                   },
                 }}
               />
-              <SelectInput
-                label="Equipment"
-                values={selectedEquipments}
-                inputAttrs={{ placeholder: "Select" }}
-                onPress={() => setShowEquipments(true)}
-                error={touched.equipment && errors?.equipment}
-                onValueChange={([value]) => {
-                  setFieldValue("equipment", value?.id);
-                  setTouched({ metadata: { equipment: true } });
-                }}
-              />
-              <SelectInput
-                label="Primary Muscle Group"
-                values={primaryMuscleGroups}
-                inputAttrs={{ placeholder: "Select" }}
-                onPress={() => setShowPrimaryMuscle(true)}
-                error={
-                  touched.primary_muscle_group && errors.primary_muscle_group
-                }
-                onValueChange={([value]) => {
-                  setTouched({
-                    metadata: { primary_muscle_group: true },
-                  });
-                  setFieldValue("primary_muscle_group", value?.id);
-                }}
-              />
-              <SelectInput
-                label="Other Muscles (Optional)"
-                values={otherMuscles}
-                inputAttrs={{ placeholder: "Select" }}
-                onPress={() => setShowMuscles(true)}
-                error={
-                  touched.other_muscles &&
-                  isString(errors.other_muscles) &&
-                  errors.other_muscles
-                }
-                onValueChange={(values) => {
-                  setFieldValue(
-                    "other_muscles",
-                    values.map((value) => value.id),
-                  );
-                  setTouched({
-                    metadata: { other_muscles: true },
-                  });
-                }}
-              />
-              <MultipleSelectInput
-                label="Exercise Type"
-                inputAttrs={{ placeholder: "Select" }}
-                options={Object.keys(ExerciseTypes).map((name) => ({
-                  label: name,
-                  value: name,
-                }))}
-                values={values.exercise_types}
-                onValueChange={(values) => {
-                  setFieldValue("exercise_types", values);
-                  setTouched({ metadata: { exercise_type: true } });
-                }}
-                error={
-                  touched.exercise_types &&
-                  isString(errors.exercise_types) &&
-                  errors?.exercise_types
-                }
-              />
-            </View>
+            </Pressable>
+            <Text className="text-white text-lg font-poppins-semibold">
+              {initialValues ? "Edit Exercise" : "Create Exercise"}
+            </Text>
+            <Pressable
+              disabled={!isValid && isSubmitting}
+              onPress={() => handleSubmit()}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={{ color: isValid ? Colors.primary : Colors.grey }}>
+                  Save
+                </Text>
+              )}
+            </Pressable>
           </View>
-        </KeyboardView>
-        <MuscleListModal
-          visible={showMuscles}
-          values={otherMuscles}
-          onDismiss={() => handleBlur("other_muscles")}
-          onRequestClose={() => setShowMuscles(false)}
-          onValueChange={(values) =>
-            setFieldValue(
-              "other_muscles",
-              values.map((value) => value.id),
-            )
-          }
-        />
-        <MuscleListModal
-          checkType="single"
-          visible={showPrimaryMuscle}
-          values={primaryMuscleGroups}
-          onRequestClose={() => setShowPrimaryMuscle(false)}
-          onDismiss={() => handleBlur("primary_muscle_group")}
-          onValueChange={([value]) =>
-            setFieldValue("primary_muscle_group", value.id)
-          }
-        />
-        <EquipmentListModal
-          checkType="single"
-          visible={showEquipments}
-          values={selectedEquipments}
-          onDismiss={() => handleBlur("equipment")}
-          onRequestClose={() => setShowEquipments(false)}
-          onValueChange={([value]) => setFieldValue("equipment", value.id)}
-        />
-      </Modal>
-    </>
+          <Pressable
+            className="self-center size-28 border rounded-full"
+            style={{ borderColor: Colors.gray }}
+            onPress={async () => {
+              const result = await launchImageLibraryAsync({
+                mediaTypes: "images",
+              });
+              const assets = result.assets;
+              if (assets && assets.length > 0) {
+                setImage(assets[0].uri);
+              } else setImage(null);
+            }}
+          >
+            <Avatar
+              url={image}
+              style={{ width: "100%", height: "100%", borderRadius: "100%" }}
+            />
+            <View className="size-12 absolute -right-4 bottom-4 items-center justify-center bg-primary rounded-full">
+              <CameraIcon color="white" />
+            </View>
+          </Pressable>
+          <View className="gap-y-8">
+            <Input
+              label="Exercise name"
+              error={touched.name && errors.name}
+              inputAttrs={{
+                value: values.name,
+                placeholder: "Aerobics",
+                onBlur: handleBlur("name"),
+                onChangeText: (value) => {
+                  handleChange("name")(value);
+                  setTouched({ name: true });
+                },
+              }}
+            />
+            <SelectInput
+              label="Equipment"
+              values={selectedEquipments}
+              inputAttrs={{ placeholder: "Select" }}
+              onPress={() => setShowEquipments(true)}
+              error={touched.equipment && errors?.equipment}
+              onValueChange={([value]) => {
+                setFieldValue("equipment", value?.id);
+                setTouched({ metadata: { equipment: true } });
+              }}
+            />
+            <SelectInput
+              label="Primary Muscle Group"
+              values={primaryMuscleGroups}
+              inputAttrs={{ placeholder: "Select" }}
+              onPress={() => setShowPrimaryMuscle(true)}
+              error={
+                touched.primary_muscle_group && errors.primary_muscle_group
+              }
+              onValueChange={([value]) => {
+                setTouched({
+                  metadata: { primary_muscle_group: true },
+                });
+                setFieldValue("primary_muscle_group", value?.id);
+              }}
+            />
+            <SelectInput
+              label="Other Muscles (Optional)"
+              values={otherMuscles}
+              inputAttrs={{ placeholder: "Select" }}
+              onPress={() => setShowMuscles(true)}
+              error={
+                touched.other_muscles &&
+                isString(errors.other_muscles) &&
+                errors.other_muscles
+              }
+              onValueChange={(values) => {
+                setFieldValue(
+                  "other_muscles",
+                  values.map((value) => value.id),
+                );
+                setTouched({
+                  metadata: { other_muscles: true },
+                });
+              }}
+            />
+            <MultipleSelectInput
+              label="Exercise Type"
+              inputAttrs={{ placeholder: "Select" }}
+              options={Object.keys(ExerciseTypes).map((name) => ({
+                label: name,
+                value: name,
+              }))}
+              values={values.exercise_types}
+              onValueChange={(values) => {
+                setFieldValue("exercise_types", values);
+                setTouched({ metadata: { exercise_type: true } });
+              }}
+              error={
+                touched.exercise_types &&
+                isString(errors.exercise_types) &&
+                errors?.exercise_types
+              }
+            />
+          </View>
+        </View>
+      </KeyboardView>
+      <MuscleListModal
+        visible={showMuscles}
+        values={otherMuscles}
+        onDismiss={() => handleBlur("other_muscles")}
+        onRequestClose={() => setShowMuscles(false)}
+        onValueChange={(values) =>
+          setFieldValue(
+            "other_muscles",
+            values.map((value) => value.id),
+          )
+        }
+      />
+      <MuscleListModal
+        checkType="single"
+        visible={showPrimaryMuscle}
+        values={primaryMuscleGroups}
+        onRequestClose={() => setShowPrimaryMuscle(false)}
+        onDismiss={() => handleBlur("primary_muscle_group")}
+        onValueChange={([value]) =>
+          setFieldValue("primary_muscle_group", value.id)
+        }
+      />
+      <EquipmentListModal
+        checkType="single"
+        visible={showEquipments}
+        values={selectedEquipments}
+        onDismiss={() => handleBlur("equipment")}
+        onRequestClose={() => setShowEquipments(false)}
+        onValueChange={([value]) => setFieldValue("equipment", value.id)}
+      />
+    </Modal>
   );
 }

@@ -65,9 +65,5 @@ export const getRoutinesWhere = async <T extends SQL | undefined>(
     .execute();
 
   const response = await expandRoutines(db, allRoutines);
-  console.dir(
-    response.map((r) => r.metadata.exercises),
-    { depth: null },
-  );
   return response;
 };
