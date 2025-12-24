@@ -5,6 +5,7 @@ import { run } from "@openai/agents";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { convertProductToMeal, searchFood } from "@motus/openfoodfacts";
 
+import { mealSelectSchema } from "../../db/zod";
 import { publicProcedure, router } from "../../trpc";
 
 const mealOutputSchema = z.object({ meals: z.array(z.string()) });
@@ -20,6 +21,7 @@ export const mcpRouter = router({
     }),
   scanMeal: publicProcedure
     .input(z4.object({ image: z4.base64() }))
+    .output(z4.array(mealSelectSchema))
     .mutation(async ({ ctx, input }) => {
       const prompt =
         "Identify the food/meal ingredients or name in the image. Return ONLY a JSON array of meal/food names. Strict JSON, no markdown.";
@@ -46,15 +48,20 @@ export const mcpRouter = router({
       const meals = Array.from(
         new Set(
           response.choices.flatMap((choice) => {
-            const content = mealOutputSchema.safeParse(choice.message.content);
+            const content = mealOutputSchema.safeParse(
+              JSON.parse(choice.message.content!),
+            );
             if (content.data) return content.data.meals;
             return [];
           }),
         ),
       );
 
-      return (await searchFood(meals.join(","))).products.map(
+      const result = (await searchFood(meals.join(","))).products.map(
         convertProductToMeal,
-      );
+      ) as unknown as z4.infer<typeof mealSelectSchema>[];
+
+      console.log(result, { depth: null });
+      return result;
     }),
 });

@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: motus
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: motus
+  namespace: motus
+  labels:
+    app: motus
+    type: server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: motus
+  template:
+    metadata:
+      labels:
+        app: motus
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: motus
+          image: registry.rhiva.fun/motus/server:latest
+          command: ["bun"]
+          args: ["server/index.ts"]
+          envFrom:
+            - secretRef:
+                name: motus-secrets
+          resources:
+            requests:
+              cpu: "0.25"
+              memory: "512Mi"
+            limits:
+              cpu: "0.5"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: motus
+  namespace: motus
+spec:
+  type: ClusterIP
+  selector:
+    app: motus
+  ports:
+    - port: 80
+      targetPort: 8000
+---
+apiVersion: autoscaling/v2 
+kind: HorizontalPodAutoscaler 
+metadata:
+  name: motus
+  namespace: motus 
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment 
+    name: motus 
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu 
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: motus
+  namespace: motus
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: zerossl
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: motus-tls
+      hosts:
+        - motus.grambot.xyz
+  rules:
+    - host: motus.grambot.xyz
+      http:
+       paths:
+         - path: /
+           pathType: Prefix
+           backend:
+             service:
+               name: motus
+               port:
+                 number: 80

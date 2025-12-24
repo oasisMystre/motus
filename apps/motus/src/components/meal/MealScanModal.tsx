@@ -1,16 +1,17 @@
 import type z from "zod";
-import { useMemo, useRef, useState } from "react";
 import { CameraView } from "expo-camera";
+import { useMemo, useRef, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import type { mealSelectSchema } from "@motus/server";
 import { convertProductToMeal } from "@motus/openfoodfacts";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Product } from "@openfoodfacts/openfoodfacts-nodejs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   Pressable,
   View,
   Modal,
+  ActivityIndicator,
   type GestureResponderEvent,
 } from "react-native";
 
@@ -18,8 +19,8 @@ import Spinner from "../Spinner";
 import { Colors } from "../../constants";
 import { openFoodFact } from "../../utils";
 import { MealScanResult } from "./MealScanResult";
-import { withSnackbar, useSnackbar } from "../../providers/SnackbarProvider";
 import { useTRPCClient } from "../../providers/TRPCProvider";
+import { withSnackbar, useSnackbar } from "../../providers/SnackbarProvider";
 
 type MealScanModalProps = {
   type: "scan" | "picture";
@@ -61,21 +62,34 @@ export default withSnackbar(function MealScanModal({
     },
   });
 
-  const takePicture = async () => {
-    const response = await cameraRef.current?.takePictureAsync({
-      quality: 0.2,
-      base64: true,
-      skipProcessing: true,
-    });
-
-    if (response?.base64) {
-      const meals = await trpcClient.mcp.scanMeal.mutate({
-        image: response?.base64,
+  const { mutateAsync: takePicture, isPending } = useMutation({
+    mutationFn: async () => {
+      const response = await cameraRef.current?.takePictureAsync({
+        quality: 0.2,
+        base64: true,
+        skipProcessing: true,
       });
-    }
 
-    return [];
-  };
+      if (response?.base64) {
+        const meals = await trpcClient.mcp.scanMeal.mutate({
+          image: response?.base64,
+        });
+        if (meals.length > 0)
+          queryClient.setQueryData<z.infer<typeof mealSelectSchema>[]>(
+            queryKey,
+            meals,
+          );
+      } else
+        snackbar.error({
+          text: "No product found!",
+        });
+    },
+    onError() {
+      snackbar.error({
+        text: "Oops! can't identify meal.",
+      });
+    },
+  });
 
   return (
     <Modal
@@ -129,15 +143,26 @@ export default withSnackbar(function MealScanModal({
           />
         )}
         {type === "picture" && (
-          <Pressable className="mx-auto relative flex items-center justify-center ">
+          <Pressable
+            disabled={isPending}
+            className="mx-auto relative flex items-center justify-center"
+            onPress={() => takePicture()}
+          >
             <View
               className="absolute size-24 rounded-full bg-primary/50"
               style={{ marginBottom: bottom }}
             />
             <View
-              className="size-16 rounded-full bg-primary"
+              className="size-16 flex items-center justify-center rounded-full bg-primary"
               style={{ marginBottom: bottom }}
-            />
+            >
+              {isPending && (
+                <ActivityIndicator
+                  size={32}
+                  color="#FFFFFF"
+                />
+              )}
+            </View>
           </Pressable>
         )}
       </View>
