@@ -27,7 +27,7 @@ spec:
         - name: motus
           image: registry.rhiva.fun/motus/server:latest
           command: ["bun"]
-          args: ["server/index.ts"]
+          args: ["server/src/index.ts"]
           envFrom:
             - secretRef:
                 name: motus-secrets
