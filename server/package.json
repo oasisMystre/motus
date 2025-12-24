@@ -26,8 +26,7 @@
     "@types/lodash.merge": "^4.6.9",
     "@types/pg": "^8.15.6",
     "@types/ws": "^8.18.1",
-    "drizzle-kit": "^0.31.6",
-    "pm2": "^6.0.13"
+    "drizzle-kit": "^0.31.6"
   },
   "peerDependencies": {
     "typescript": "^5.8.3",

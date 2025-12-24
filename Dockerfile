@@ -37,10 +37,8 @@ WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/ .
 
-RUN bun add pm2 --global
 
 ENV HOST="0.0.0.0"
 ENV NODE_ENV=production
 
-CMD sh -c "bun x pm2-runtime start server/ecosystem.config.js"
-
+CMD sh -c ""
