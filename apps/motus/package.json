@@ -10,7 +10,8 @@
     "android": "expo run:android --device",
     "ios": "expo run:ios --device",
     "web": "expo start --web",
-    "publish": "eas build --platform all --profile preview"
+    "publish": "eas build --platform all --profile preview",
+    "publish:ios": "eas build --platform ios --profile preview"
   },
   "trustedDependencies": [
     "@openfoodfacts/openfoodfacts-nodejs"
