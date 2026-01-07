@@ -4,7 +4,12 @@ import { RedisStore } from "connect-redis";
 import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import { streamableHttp } from "fastify-mcp";
-import { initializeApp,  cert, getApps, type ServiceAccount  } from "firebase-admin/app";
+import {
+  initializeApp,
+  cert,
+  getApps,
+  type ServiceAccount,
+} from "firebase-admin/app";
 import {
   fastifyTRPCPlugin,
   type FastifyTRPCPluginOptions,
@@ -20,9 +25,7 @@ const apps = getApps();
 
 if (apps.length === 0) {
   const serviceAccount: ServiceAccount = JSON.parse(
-    Buffer.from(getEnv<string>("SERVICE_ACCOUNT"), "base64").toString(
-      "utf-8",
-    ),
+    Buffer.from(getEnv<string>("SERVICE_ACCOUNT"), "base64").toString("utf-8"),
   );
   initializeApp({
     credential: cert(serviceAccount),

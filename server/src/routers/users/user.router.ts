@@ -89,8 +89,29 @@ export const userRouter = router({
       const result = await query.execute();
       return result;
     }),
-  analytic: publicProcedure
-    .input(z.object())
-    .output(z.object({}))
-    .query(async () => ({})),
+  username_exists: publicProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        exists: z.boolean(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userList = ctx.drizzle
+        .select({
+          id: users.id,
+        })
+        .from(users)
+        .where(eq(users.username, input.username))
+        .limit(1)
+        .execute();
+
+      return {
+        exists: userList.length > 0,
+      };
+    }),
 });

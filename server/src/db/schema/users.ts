@@ -5,6 +5,7 @@ import {
   text,
   unique,
   uuid,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 type Profile = {
@@ -102,6 +103,7 @@ export const users = pgTable(
   },
   (column) => [
     {
+      username_idx: uniqueIndex("username_idx").on(column.username),
       unique_id_and_email: unique()
         .on(column.uid, column.email)
         .nullsNotDistinct(),

@@ -1,16 +1,19 @@
 import type z from "zod";
 import { useMemo } from "react";
 import { useFormikContext } from "formik";
+import { Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Pressable, Text, View } from "react-native";
+import { useMutation } from "@tanstack/react-query";
 import type { userSelectSchema } from "@motus/server";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Colors } from "../../constants";
 import Input from "../../components/Input";
+import Button from "../../components/Button";
 import useDimensions from "../../hooks/useDimensions";
 import { CircularBackButton } from "../../components/Header";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useTRPCClient } from "../../providers/TRPCProvider";
 
 type SetUsernameScreenProps = {
   goBack: () => void;
@@ -19,13 +22,25 @@ type SetUsernameScreenProps = {
 
 export function SetUsernameScreen({ goBack, next }: SetUsernameScreenProps) {
   const { t } = useTranslation();
+  const trpcClient = useTRPCClient();
   const { bottom } = useSafeAreaInsets();
   const { width } = useDimensions("window");
 
-  const { values, handleChange, handleBlur } =
+  const { values, handleChange, handleBlur, setFieldError } =
     useFormikContext<Partial<z.infer<typeof userSelectSchema>>>();
 
   const isValid = useMemo(() => values.username, [values]);
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationKey: ["username_exists", values.username],
+    mutationFn: async () =>
+      trpcClient.user.username_exists
+        .query({ username: values.username })
+        .then(({ exists }) => {
+          if (exists) setFieldError("username", "username already exists");
+          else next();
+        }),
+  });
 
   return (
     <KeyboardAwareScrollView
@@ -75,16 +90,14 @@ export function SetUsernameScreen({ goBack, next }: SetUsernameScreenProps) {
           canGoBack
           navigation={{ goBack }}
         />
-        <Pressable
-          disabled={!isValid}
-          onPress={next}
+        <Button
+          submitting={isPending}
+          onPress={mutateAsync}
+          text={t("auth.next_action")}
+          disabled={!isValid || isPending}
           className="flex-1 items-center justify-center p-4 rounded-md"
           style={{ backgroundColor: isValid ? Colors.primary : Colors.grey }}
-        >
-          <Text className="text-white font-poppins">
-            {t("auth.next_action")}
-          </Text>
-        </Pressable>
+        />
       </View>
     </KeyboardAwareScrollView>
   );
