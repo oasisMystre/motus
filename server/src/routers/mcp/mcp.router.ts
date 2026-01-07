@@ -61,7 +61,6 @@ export const mcpRouter = router({
         convertProductToMeal,
       ) as unknown as z4.infer<typeof mealSelectSchema>[];
 
-      console.log(result, { depth: null });
       return result;
     }),
 });
