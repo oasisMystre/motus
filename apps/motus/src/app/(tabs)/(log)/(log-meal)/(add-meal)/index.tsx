@@ -20,6 +20,8 @@ import { MealHeader, MealInfo, MealList } from "../../../../../components/meal";
 
 import { getMealInfo } from "../../../../../utils/get-meal-info";
 import AddFoodModal from "../../../../../components/meal/AddFoodModal";
+import EditMealEntry from "../../../../../components/meal/EditMealEntry";
+import { format } from "util";
 
 export default function AddMealScreen() {
   const navigation = useNavigation();
@@ -27,6 +29,9 @@ export default function AddMealScreen() {
   const { showPortionSize } = useLocalSearchParams();
   const [showAddFoodModal, setShowAddFoodModal] = useState(false);
   const { action } = useLocalSearchParams<{ action?: "edit" | "duplicate" }>();
+  const [selectedMeal, setSelectedMeal] = useState<
+    (z.infer<typeof mealSelectSchema> & { index: number }) | null
+  >(null);
 
   const screenTitle = useMemo(
     () => (action === "edit" ? "Edit Meal Log" : "Meal Log"),
@@ -215,7 +220,11 @@ export default function AddMealScreen() {
                 </Text>
               )}
             </View>
-            <MealList meals={values.meals} />
+            <MealList
+              meals={values.meals}
+              selected={selectedMeal}
+              onSelect={setSelectedMeal}
+            />
           </View>
           <View className=" gap-y-4">
             <Button
@@ -236,6 +245,18 @@ export default function AddMealScreen() {
           </View>
         </ScrollView>
       </KeyboardAwareScrollView>
+      {selectedMeal && (
+        <EditMealEntry
+          meal={selectedMeal}
+          onChange={(value) => {
+            setFieldValue(
+              format("meals.%d.metadata.portion", selectedMeal.index),
+              value,
+            );
+          }}
+          onClose={() => setSelectedMeal(null)}
+        />
+      )}
       {showAddFoodModal && (
         <AddFoodModal
           visible={showAddFoodModal}

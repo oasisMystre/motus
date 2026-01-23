@@ -19,7 +19,6 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
 import { MealLogConfirmDeletion } from "./MealLogConfirmDeletion";
 
 export function MealLogItemMenu({
@@ -28,7 +27,6 @@ export function MealLogItemMenu({
 }: Omit<React.ComponentProps<typeof BottomSheet>, "children"> & {
   meal: z.infer<typeof mealLogSelectSchema>;
 }) {
-  const dispatch = useAppDispatch();
   const { bottom } = useSafeAreaInsets();
   const [showDeleteMealLogModal, setShowDeleteMealLogModal] = useState(false);
   const onAction = useCallback(

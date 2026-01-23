@@ -61,7 +61,7 @@ export function MealScanResult({
           );
 
           const energy = getEnergy(item);
-          const portionSize = item.metadata.portionSize;
+          const portionSize = item.metadata.portion.size;
 
           return (
             <MealItem

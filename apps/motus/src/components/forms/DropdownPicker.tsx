@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import WheelPicker, {
   type PickerItem,
 } from "@quidone/react-native-wheel-picker";
@@ -13,6 +13,10 @@ export default memo(function DropdownPicker<T extends PickerItem<unknown>[]>({
   onValueChanged,
   ...props
 }: DropdownPickerProps<T>) {
+  useEffect(() => {
+    if (!value) onValueChanged?.({ index: 0, item: props.data[0] });
+  }, [value, props.data, onValueChanged]);
+
   return (
     <WheelPicker
       {...props}

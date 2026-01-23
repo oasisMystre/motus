@@ -1,6 +1,8 @@
 import type z from "zod";
 import type { mealSelectSchema } from "@motus/server";
 
+import { getEnergy } from "./get-energy";
+
 export function getMealInfo(
   ...meals: Pick<
     z.infer<typeof mealSelectSchema> | z.infer<typeof mealSelectSchema>,
@@ -25,7 +27,7 @@ export function getMealInfo(
 
   const result: Record<
     (typeof nutriments)[number]["value"] | "energy",
-    { value: number; unit: "g" | "kcal" }
+    { value: number; unit: "g" | "kcal" | "kJ" }
   > = {
     energy: { value: 0, unit: "kcal" },
     ...(Object.fromEntries(
@@ -38,24 +40,15 @@ export function getMealInfo(
 
   for (const meal of meals) {
     for (const nutriment of nutriments) {
-      const energy =
-        meal.metadata.nutriments["energy-kcal"] ??
-        meal.metadata.nutriments["energy-kj"] ??
-        meal.metadata.nutriments.energy ??
-        meal.metadata.nutriments.energy_value;
+      result.energy = getEnergy(meal);
 
       const [key] = nutriment.keys.filter(
         (key) => meal.metadata.nutriments[key],
       );
       if (key) {
         const value = meal.metadata.nutriments[key]?.value;
-        result[nutriment.value].value += value ?? 0;
-        const energyValue =
-          result[nutriment.value].value * nutriment.multiplier;
-        if (!energy) result.energy.value += energyValue;
-      } else if (energy) {
-        result.energy.value =
-          energy.unit === "kJ" ? energy.value / 4.184 : energy.value;
+        result[nutriment.value].value +=
+          (value ?? 0) * meal.metadata.portion.count;
       }
     }
   }

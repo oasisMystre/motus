@@ -35,7 +35,7 @@ export function SetUsernameScreen({ goBack, next }: SetUsernameScreenProps) {
     mutationKey: ["username_exists", values.username],
     mutationFn: async () =>
       trpcClient.user.username_exists
-        .query({ username: values.username })
+        .query({ username: values.username! })
         .then(({ exists }) => {
           if (exists) setFieldError("username", "username already exists");
           else next();
@@ -92,7 +92,7 @@ export function SetUsernameScreen({ goBack, next }: SetUsernameScreenProps) {
         />
         <Button
           submitting={isPending}
-          onPress={mutateAsync}
+          onPress={() => mutateAsync()}
           text={t("auth.next_action")}
           disabled={!isValid || isPending}
           className="flex-1 items-center justify-center p-4 rounded-md"

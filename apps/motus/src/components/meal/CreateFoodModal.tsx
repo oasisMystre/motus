@@ -42,9 +42,12 @@ export default function CreateFoodModal({
       name: undefined as unknown as string,
       brandName: undefined,
       metadata: {
-        portionSize: {
-          unit: "cup" as const,
-          value: undefined as unknown as number,
+        portion: {
+          count: 1,
+          size: {
+            unit: "cup" as const,
+            value: undefined as unknown as number,
+          },
         },
         nutriments: {},
       },
@@ -53,9 +56,12 @@ export default function CreateFoodModal({
       name: string().label("Food name").trim().min(1).required(),
       brandName: string().trim().min(1).optional(),
       metadata: object({
-        portionSize: object({
-          value: number().label("Portion size").required(),
-          unit: string().oneOf(["g", "kg", "litre", "cup", "satchet"]),
+        portion: object({
+          count: number(),
+          size: object({
+            value: number().label("Portion size").required(),
+            unit: string().oneOf(["g", "kg", "litre", "cup", "satchet"]),
+          }),
         }),
       }),
     }),
@@ -139,18 +145,18 @@ export default function CreateFoodModal({
               <Input
                 label="Portion Size"
                 error={
-                  touched.metadata?.portionSize?.value &&
-                  errors.metadata?.portionSize?.value
+                  touched.metadata?.portion?.size?.value &&
+                  errors.metadata?.portion?.size?.value
                 }
                 inputAttrs={{
                   style: style.input,
                   placeholder: "1 Cup",
-                  value: values.metadata.portionSize.value,
-                  onBlur: handleBlur("metadata.portionSize.value"),
+                  value: values.metadata.portion.size.value,
+                  onBlur: handleBlur("metadata.portion.size.value"),
                   onChangeText(value) {
                     const data = parseFloat(value);
                     if (!Number.isNaN(data))
-                      setFieldValue("metadata.portionSize.value", data);
+                      setFieldValue("metadata.portion.size.value", data);
                   },
                 }}
               />
@@ -161,9 +167,9 @@ export default function CreateFoodModal({
                 value: size,
                 lable: size,
               }))}
-              value={values.metadata.portionSize.unit}
+              value={values.metadata.portion.size.unit}
               onValueChanged={({ item }) =>
-                setFieldValue("metadata.portionSize.unit", item.value)
+                setFieldValue("metadata.portion.size.unit", item.value)
               }
             />
           </View>

@@ -96,9 +96,18 @@ export const followSelectSchema = createSelectSchema(follows, {
 });
 
 const mealMetadataSchema = z.object({
-  portionSize: z.object({
-    value: z.number(),
-    unit: z.enum(["kg", "g", "cup", "litre", "bag", "ml", "sachet"]),
+  portion: z.object({
+    size: z.object({
+      value: z.union([
+        z.number(),
+        z.string().transform((value) => parseFloat(value)),
+      ]),
+      unit: z.enum(["kg", "g", "cup", "litre", "bag", "ml", "sachet"]),
+    }),
+    count: z.union([
+      z.number(),
+      z.string().transform((value) => parseFloat(value)),
+    ]),
   }),
   nutriments: z.record(
     z.string(),

@@ -155,9 +155,12 @@ export const createMcpServer = () => {
         brandName: z.string().optional().describe("Meal brandName"),
         metadata: z
           .object({
-            portionSize: z.object({
-              value: z.number(),
-              unit: z.enum(["kg", "g", "cup", "litre", "bag", "sachet"]),
+            portion: z.object({
+              count: z.number(),
+              size:  z.object({
+                value: z.number(),
+                unit: z.enum(["kg", "g", "cup", "litre", "bag", "sachet"]),
+              }),
             }),
             nutriments: z
               .record(

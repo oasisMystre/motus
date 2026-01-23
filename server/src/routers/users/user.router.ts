@@ -101,7 +101,7 @@ export const userRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const userList = ctx.drizzle
+      const userList = await ctx.drizzle
         .select({
           id: users.id,
         })

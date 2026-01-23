@@ -117,7 +117,7 @@ export default function FoodUserTab({
             );
 
             const energy = getEnergy(item);
-            const portionSize = item.metadata.portionSize;
+            const portionSize = item.metadata.portion.size;
 
             return (
               <MealItem

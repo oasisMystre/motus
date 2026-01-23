@@ -15,7 +15,10 @@ export function getEnergyFromMeal(
     meal.metadata.nutriments.energy_value;
 
   if (defaultValue)
-    return defaultValue as unknown as { value: number; unit: "kJ" | "kcal" };
+    return {
+      ...defaultValue,
+      value: defaultValue.value * meal.metadata.portion.count,
+    } as unknown as { value: number; unit: "kJ" | "kcal" };
 
   const nutriments: {
     multiplier: number;
@@ -32,7 +35,7 @@ export function getEnergyFromMeal(
     return acc + (value ?? 0) * cur.multiplier;
   }, 0);
 
-  return { value, unit: "kcal" } as const;
+  return { value: value * meal.metadata.portion.count, unit: "kcal" } as const;
 }
 export function getEnergyFromProduct(product: Pick<Product, "nutriments">) {
   const defaultValue =

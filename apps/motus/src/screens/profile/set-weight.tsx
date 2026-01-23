@@ -28,7 +28,7 @@ export function SetWeightScreen({ goBack, next }: SetWeightScreenProps) {
     useFormikContext<Partial<z.infer<typeof userSelectSchema>>>();
 
   const isValid = useMemo(
-    () => values.profile?.height?.unit && values.profile.height.value,
+    () => values.profile?.weight?.unit && values.profile.weight.value,
     [values],
   );
 

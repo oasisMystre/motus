@@ -2,9 +2,12 @@ import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 type Metadata = {
-  portionSize: {
-    value: number;
-    unit: "kg" | "g" | "cup" | "litre" | "bag" | "ml" | "sachet";
+  portion: {
+    count: number;
+    size: {
+      value: number;
+      unit: "kg" | "g" | "cup" | "litre" | "bag" | "ml" | "sachet";
+    };
   };
   nutriments: Record<
     string,

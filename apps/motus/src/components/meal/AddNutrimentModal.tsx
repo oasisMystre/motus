@@ -32,9 +32,12 @@ type AddNutrimentModalProps = {
         name: string;
         brandName?: string;
         metadata: {
-          portionSize: {
-            value: number;
-            unit: "bag" | "cup" | "g" | "kg" | "litre" | "sachet";
+          portion: {
+            size: {
+              value: number;
+              unit: "bag" | "cup" | "g" | "kg" | "litre" | "sachet";
+            };
+            count: number;
           };
           nutriments: {
             [key: string]: {

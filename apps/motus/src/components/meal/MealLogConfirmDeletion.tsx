@@ -1,24 +1,29 @@
 import { Text, View } from "react-native";
-import { useMutation } from "@tanstack/react-query";
 import { BarbellIcon } from "phosphor-react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Button from "../Button";
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
-import { logActions } from "../../store/log";
 import ModalDialog from "../modals/ModalDialog";
 import { useTRPC } from "../../providers/TRPCProvider";
+import { useTanstackStore } from "../../hooks/useTanstackStore";
 
 export function MealLogConfirmDeletion({
   log,
   ...props
 }: React.ComponentProps<typeof ModalDialog> & { log: string }) {
   const trpc = useTRPC();
-  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
+  const { remove } = useTanstackStore(
+    queryClient,
+    trpc.log.meal.list.queryKey(),
+    (meal) => meal.id,
+  );
+
   const { isPending, mutateAsync } = useMutation(
     trpc.log.meal.delete.mutationOptions({
       onSuccess(_, { id }) {
-        dispatch(logActions.removeMealLog(id));
+        remove(id);
         props?.onRequestClose?.();
       },
     }),

@@ -1,10 +1,10 @@
-import type z from "zod";
 import clsx from "clsx";
+import type z from "zod";
 import { useState } from "react";
 import { Image } from "expo-image";
-import { useFormikContext } from "formik";
 import { useTranslation } from "react-i18next";
 import { ImageIcon } from "phosphor-react-native";
+import { isString, useFormikContext } from "formik";
 import { useMutation } from "@tanstack/react-query";
 import type { userSelectSchema } from "@motus/server";
 import { launchImageLibraryAsync } from "expo-image-picker";
@@ -35,7 +35,6 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
   } = useFirebase();
 
   const {
-    errors,
     isValid,
     isSubmitting,
     values,
@@ -47,7 +46,8 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
   const { mutateAsync, isPending } = useMutation({
     mutationKey: [asset],
     mutationFn: async () => {
-      if (asset) {
+      console.log(asset, "");
+      if (asset && isString(asset)) {
         setFieldValue(
           "profile.avatar",
           await uploadImageFromUri(storage, asset, {
@@ -55,7 +55,6 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
           }),
         );
       }
-
       setTimeout(() => handleSubmit(), 500);
     },
   });
@@ -130,7 +129,7 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
               return (
                 <Pressable
                   onPress={() => {
-                    setAsset(item.local);
+                    setAsset(selected ? null : item.local);
                     setFieldValue(
                       "profile.avatar",
                       selected ? undefined : item.url,
@@ -174,7 +173,7 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
         <Button
           submitting={isPending || isSubmitting}
           disabled={isSubmitting || !isValid || isPending}
-          onPress={mutateAsync}
+          onPress={() => mutateAsync()}
           text={t("auth.next_action")}
           className="flex-1 items-center justify-center p-4 rounded-md"
           style={{ backgroundColor: isValid ? Colors.primary : Colors.grey }}
