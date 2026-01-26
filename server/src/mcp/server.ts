@@ -157,7 +157,7 @@ export const createMcpServer = () => {
           .object({
             portion: z.object({
               count: z.number(),
-              size:  z.object({
+              size: z.object({
                 value: z.number(),
                 unit: z.enum(["kg", "g", "cup", "litre", "bag", "sachet"]),
               }),

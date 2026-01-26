@@ -68,7 +68,7 @@ export default function AddExerciseModal({
     z.infer<typeof exerciseSelectSchema> | undefined
   >(undefined);
 
-  const { data, isFetching, isRefetching } = useQuery(
+  const { data, isFetching } = useQuery(
     trpc.exercise.list.queryOptions({
       search,
       filter: {

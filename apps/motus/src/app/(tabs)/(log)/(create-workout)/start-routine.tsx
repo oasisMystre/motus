@@ -3,7 +3,6 @@ import ms from "pretty-ms";
 import { format } from "util";
 import { useFormik } from "formik";
 
-import { useQueryClient } from "@tanstack/react-query";
 import type { exerciseSelectSchema } from "@motus/server";
 import { array, boolean, number, object, string } from "yup";
 import { BarbellIcon, PlusIcon } from "phosphor-react-native";
@@ -23,7 +22,6 @@ import { Colors } from "../../../../constants";
 import useTimer from "../../../../hooks/useTimer";
 import Button from "../../../../components/Button";
 import useRoutine from "../../../../hooks/useRoutine";
-import { useTRPC } from "../../../../providers/TRPCProvider";
 import KeyboardView from "../../../../components/KeyboardView";
 import TimerSheet from "../../../../components/bottom-sheets/TimerSheet";
 import { ListHeader, ListItem } from "../../../../components/start-routine";
@@ -31,6 +29,7 @@ import PostRoutineModal from "../../../../components/modals/PostRoutineModal";
 import AddExerciseModal from "../../../../components/exercises/ExerciseModal";
 import type { WorkoutLog } from "../../../../components/modals/PostRoutineModal";
 import ExerciseMenuModal from "../../../../components/create-routine/ExerciseMenuModal";
+import CreateExerciseModal from "../../../../components/exercises/ExerciseCreateModal";
 
 const createInitialSet = (value: any) => {
   const { set, previous, ...rest } = value;
@@ -89,20 +88,20 @@ const validationSchema = object({
 });
 
 export default function StartRoutineScreen() {
-  const trpc = useTRPC();
   const navigation = useNavigation();
-  const queryClient = useQueryClient();
   const { bottom } = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [workoutLog, setWorkoutLog] = useState<WorkoutLog | null>(null);
   const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
   const [timerFieldName, setTimerFieldName] = useState<string | null>(null);
+  const [quickEdit, setQuickEdit] = useState<z.infer<
+    typeof exerciseSelectSchema
+  > | null>(null);
   const [exercise, setExercise] = useState<z.infer<
     typeof exerciseSelectSchema
   > | null>(null);
 
   const routine = useRoutine(id)!;
-
   const exercises = useMemo(
     () =>
       routine.metadata.exercises.map((exercise) => ({
@@ -314,6 +313,30 @@ export default function StartRoutineScreen() {
           )}
         />
       </KeyboardView>
+      {quickEdit && (
+        <CreateExerciseModal
+          visible={Boolean(quickEdit)}
+          initialValues={quickEdit}
+          onSubmit={(value) => {
+            const index = values.metadata.exercises.findIndex(
+              (exercise) => quickEdit.id === exercise.id,
+            );
+            const exercise = values.metadata.exercises[index];
+            exercise.sets = Array.from<(typeof exercise.sets)[number]>({
+              length: exercise.sets.length,
+            }).fill(
+              createInitialSet({
+                ...Object.fromEntries(
+                  value.exercise_types.map((key) => [key, undefined]),
+                ),
+                ...exercise.sets[0],
+              }),
+            );
+            setFieldValue(format("metadata.exercises.%d", index), exercise);
+          }}
+          onRequestClose={() => setQuickEdit(null)}
+        />
+      )}
       {timerFieldName && (
         <TimerSheet
           style={{ zIndex: 1000 }}
@@ -325,6 +348,7 @@ export default function StartRoutineScreen() {
         <ExerciseMenuModal
           exercise={exercise}
           removeExercise={removeExercise}
+          quickEditExercise={setQuickEdit}
           replaceExercise={() => setShowAddExerciseModal(true)}
           onClose={() => setExercise(null)}
         />

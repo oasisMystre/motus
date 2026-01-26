@@ -36,10 +36,12 @@ import { withZodSchema, uploadImageFromUri } from "../../utils";
 type CreateExerciseModalProps = {
   initialValues?: z.infer<typeof exerciseSelectSchema>;
   onRequestClose?: (event?: GestureResponderEvent) => void;
+  onSubmit?: (value: z.infer<typeof exerciseInsertSchema>) => void;
 } & React.ComponentProps<typeof Modal>;
 
 export default function CreateExerciseModal({
   initialValues,
+  onSubmit,
   ...props
 }: CreateExerciseModalProps) {
   const trpc = useTRPC();
@@ -100,7 +102,6 @@ export default function CreateExerciseModal({
     errors,
     setFieldValue,
     isValid,
-    resetForm,
     isSubmitting,
     handleSubmit,
     handleChange,
@@ -119,6 +120,12 @@ export default function CreateExerciseModal({
       other_muscles: initialValues?.other_muscles.map((item) => item.id) ?? [],
     } as unknown as z.infer<typeof exerciseInsertSchema>,
     async onSubmit(values) {
+      if (onSubmit) {
+        onSubmit(values);
+        props?.onRequestClose?.();
+        return;
+      }
+
       const id = values.id ?? v4();
       if (image) {
         values.image = await uploadImageFromUri(getStorage(), image, {
@@ -204,13 +211,15 @@ export default function CreateExerciseModal({
             className="self-center size-28 border rounded-full"
             style={{ borderColor: Colors.gray }}
             onPress={async () => {
-              const result = await launchImageLibraryAsync({
-                mediaTypes: "images",
-              });
-              const assets = result.assets;
-              if (assets && assets.length > 0) {
-                setImage(assets[0].uri);
-              } else setImage(null);
+              if (!onSubmit) {
+                const result = await launchImageLibraryAsync({
+                  mediaTypes: "images",
+                });
+                const assets = result.assets;
+                if (assets && assets.length > 0) {
+                  setImage(assets[0].uri);
+                } else setImage(null);
+              }
             }}
           >
             <Avatar
@@ -226,6 +235,7 @@ export default function CreateExerciseModal({
               label="Exercise name"
               error={touched.name && errors.name}
               inputAttrs={{
+                editable: !onSubmit,
                 value: values.name,
                 placeholder: "Aerobics",
                 onBlur: handleBlur("name"),
@@ -239,7 +249,9 @@ export default function CreateExerciseModal({
               label="Equipment"
               values={selectedEquipments}
               inputAttrs={{ placeholder: "Select" }}
-              onPress={() => setShowEquipments(true)}
+              onPress={() => {
+                if (!onSubmit) setShowEquipments(true);
+              }}
               error={touched.equipment && errors?.equipment}
               onValueChange={([value]) => {
                 setFieldValue("equipment", value?.id);
@@ -250,7 +262,9 @@ export default function CreateExerciseModal({
               label="Primary Muscle Group"
               values={primaryMuscleGroups}
               inputAttrs={{ placeholder: "Select" }}
-              onPress={() => setShowPrimaryMuscle(true)}
+              onPress={() => {
+                if (!onSubmit) setShowPrimaryMuscle(true);
+              }}
               error={
                 touched.primary_muscle_group && errors.primary_muscle_group
               }
@@ -265,7 +279,9 @@ export default function CreateExerciseModal({
               label="Other Muscles (Optional)"
               values={otherMuscles}
               inputAttrs={{ placeholder: "Select" }}
-              onPress={() => setShowMuscles(true)}
+              onPress={() => {
+                if (!onSubmit) setShowMuscles(true);
+              }}
               error={
                 touched.other_muscles &&
                 isString(errors.other_muscles) &&

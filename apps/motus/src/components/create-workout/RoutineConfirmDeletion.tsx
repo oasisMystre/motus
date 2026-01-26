@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Button from "../Button";
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
 import ModalDialog from "../modals/ModalDialog";
 import { useTRPC } from "../../providers/TRPCProvider";
 import { useTanstackStore } from "../../hooks/useTanstackStore";
@@ -15,7 +14,6 @@ export function RoutineConfirmDeletion({
 }: React.ComponentProps<typeof ModalDialog> & { routine: string }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
   const { remove } = useTanstackStore(
     queryClient,
     trpc.routine.list.queryKey(),
