@@ -1,6 +1,7 @@
 import { format } from "util";
 import { Formik } from "formik";
 import { Stack } from "expo-router";
+import { Platform } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 
 import { BackButton } from "../../../../components/Header";
@@ -15,10 +16,9 @@ export default function CreateGoalLayout() {
     <Formik
       initialValues={{}}
       onSubmit={async (data, { setStatus }) => {
+        setStatus("submitting");
         const message = format("%s update-goal", JSON.stringify(data));
-        return mutateAsync({ message })
-          .then(() => setStatus("successful"))
-          .catch(() => setStatus(undefined));
+        return mutateAsync({ message }).finally(() => setStatus("successful"));
       }}
     >
       {({ status, handleSubmit }) => (
@@ -27,6 +27,7 @@ export default function CreateGoalLayout() {
             screenOptions={({ navigation }) => ({
               title: "Goals",
               headerShown: false,
+              headerShadowVisible: false,
               animation: "slide_from_right",
               presentation: "fullScreenModal",
               headerLeft(props) {
@@ -53,30 +54,30 @@ export default function CreateGoalLayout() {
             <Stack.Screen name="step-0" />
             <Stack.Screen
               name="(meal)/index"
-              options={{ headerShown: true }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen name="(meal)/step-1" />
             <Stack.Screen
               name="(meal)/step-2"
-              options={{ headerShown: true }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen name="(meal)/step-3" />
             <Stack.Screen
               name="(meal)/step-4"
-              options={{ headerShown: true }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen
               name="(weight)/index"
-              options={{ headerShown: true }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen name="(weight)/step-1" />
             <Stack.Screen
               name="(weight)/step-2"
-              options={{ headerShown: true }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
             <Stack.Screen
               name="(activity)/index"
-              options={{ headerShown: true }}
+              options={{ headerShown: Platform.OS === "ios" }}
             />
           </Stack>
         </ScreenProvider>

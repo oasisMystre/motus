@@ -1,17 +1,21 @@
-import type z from "zod";
 import clsx from "clsx";
+import type z from "zod";
 import { useState } from "react";
 import { Image } from "expo-image";
-import { useFormikContext } from "formik";
-import { Octicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import type { userSelectSchema } from "@motus/server";
 import { ImageIcon } from "phosphor-react-native";
+import { isString, useFormikContext } from "formik";
+import { useMutation } from "@tanstack/react-query";
+import type { userSelectSchema } from "@motus/server";
 import { launchImageLibraryAsync } from "expo-image-picker";
+import { Octicons, MaterialIcons } from "@expo/vector-icons";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "../../constants";
+import Button from "../../components/Button";
+import { useFirebase } from "../../providers";
+import { uploadImageFromUri } from "../../utils";
 import useDimensions from "../../hooks/useDimensions";
 import { avatars } from "../../datasources/local/avatars";
 import { CircularBackButton } from "../../components/Header";
@@ -25,6 +29,10 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
   const { bottom } = useSafeAreaInsets();
   const { width } = useDimensions("window");
   const [asset, setAsset] = useState<string | null>(null);
+  const {
+    user,
+    firebase: { storage },
+  } = useFirebase();
 
   const {
     isValid,
@@ -34,6 +42,22 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
     handleSubmit,
     handleBlur,
   } = useFormikContext<Partial<z.infer<typeof userSelectSchema>>>();
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationKey: [asset],
+    mutationFn: async () => {
+      console.log(asset, "");
+      if (asset && isString(asset)) {
+        setFieldValue(
+          "profile.avatar",
+          await uploadImageFromUri(storage, asset, {
+            fileName: user.id,
+          }),
+        );
+      }
+      setTimeout(() => handleSubmit(), 500);
+    },
+  });
 
   return (
     <View
@@ -70,10 +94,15 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
             }}
           >
             <View className="size-32 bg-stone-50 rounded-full items-center justify-center">
-              {asset && (
+              {asset ? (
                 <Image
                   source={asset}
                   style={{ width: 128, height: 128, borderRadius: 100 }}
+                />
+              ) : (
+                <MaterialIcons
+                  name="person"
+                  size={64}
                 />
               )}
               <View className="absolute -bottom-4 right-0 bg-primary p-2 rounded-full">
@@ -100,7 +129,7 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
               return (
                 <Pressable
                   onPress={() => {
-                    setAsset(item.local);
+                    setAsset(selected ? null : item.local);
                     setFieldValue(
                       "profile.avatar",
                       selected ? undefined : item.url,
@@ -141,16 +170,14 @@ export function SetAvatarScreen({ goBack }: SetAvatarScreenProps) {
           canGoBack
           navigation={{ goBack }}
         />
-        <Pressable
-          disabled={isSubmitting && !isValid}
-          onPress={() => handleSubmit()}
+        <Button
+          submitting={isPending || isSubmitting}
+          disabled={isSubmitting || !isValid || isPending}
+          onPress={() => mutateAsync()}
+          text={t("auth.next_action")}
           className="flex-1 items-center justify-center p-4 rounded-md"
           style={{ backgroundColor: isValid ? Colors.primary : Colors.grey }}
-        >
-          <Text className="text-white font-poppins">
-            {t("auth.next_action")}
-          </Text>
-        </Pressable>
+        />
       </View>
     </View>
   );

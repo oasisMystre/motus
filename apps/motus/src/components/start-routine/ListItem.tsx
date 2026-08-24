@@ -105,7 +105,7 @@ export const ListItem = memo(
           <View className="gap-y-2">
             <View className="flex-row gap-x-4 px-2">
               {item.sets.slice(0, 1).map((set) =>
-                Object.entries(set).map(([key, value], index, entries) => {
+                Object.entries(set).map(([key, value], index) => {
                   return (
                     <TableHeaderTitle
                       key={index}
@@ -120,7 +120,7 @@ export const ListItem = memo(
             </View>
             <View>
               {item.sets.map((set, setIndex) => {
-                let error;
+                let error: string | undefined;
                 const exerciseErrors = errors.metadata?.exercises?.[itemIndex];
                 if (typeof exerciseErrors === "object")
                   error = exerciseErrors.sets?.[setIndex];
@@ -300,7 +300,7 @@ const TableCell = memo(
                     },
                     onPress: () => {
                       if (key === "previous")
-                        Object.entries(set).map(([key, value]) => {
+                        Object.entries(set).forEach(([key, value]) => {
                           onFieldChange(
                             format(
                               "metadata.exercises.%d.sets.%d.%s",

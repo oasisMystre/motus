@@ -6,14 +6,15 @@ import Spinner from "../Spinner";
 type LoadingScreenProps = {
   title?: string;
   subtitle?: string;
+  child?: React.ReactNode;
 } & React.ComponentProps<typeof Modal>;
 
 export default function LoadingScreen({
   title,
   subtitle,
-  children,
+  child,
   ...props
-}: React.PropsWithChildren<LoadingScreenProps>) {
+}: LoadingScreenProps) {
   return (
     <Modal {...props}>
       <View
@@ -22,8 +23,8 @@ export default function LoadingScreen({
           props.className,
         )}
       >
-        {children ? (
-          children
+        {child ? (
+          child
         ) : (
           <>
             <View>

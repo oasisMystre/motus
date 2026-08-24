@@ -5,10 +5,10 @@ import { format } from "util";
 import { Image } from "expo-image";
 import debounce from "lodash.debounce";
 import { Link, router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef } from "react";
 import { useSharedValue } from "react-native-reanimated";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { postExtendedSelectSchema, userSelectSchema } from "@motus/server";
 import Carousel, {
@@ -20,10 +20,9 @@ import Avatar from "../Avatar";
 import Button from "../Button";
 import { Colors } from "../../constants";
 import { CommentItem } from "./CommentItem";
-import { useAppDispatch } from "../../store";
-import { postActions } from "../../store/post";
 import useDimensions from "../../hooks/useDimensions";
 import { useTRPC } from "../../providers/TRPCProvider";
+import { useTanstackStore } from "../../hooks/useTanstackStore";
 
 type FeedPostProps = {
   user: z.infer<typeof userSelectSchema>;
@@ -32,7 +31,7 @@ type FeedPostProps = {
 
 export function FeedPost({ post, user }: FeedPostProps) {
   const trpc = useTRPC();
-  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const { width } = useDimensions("window");
   const slideProgress = useSharedValue(0);
   const slideRef = useRef<ICarouselInstance>(null);
@@ -41,17 +40,35 @@ export function FeedPost({ post, user }: FeedPostProps) {
 
   const details = useMemo(
     () => [
-      { name: "Time", value: ms(post.log!.metadata.duration) },
+      { name: "Time", value: ms(post.routineLog!.metadata.duration) },
       {
         name: "Volume",
-        value: format("%d%s", ...Object.values(post.log!.metadata.volume)),
+        value: format(
+          "%d%s",
+          ...Object.values(post.routineLog!.metadata.volume),
+        ),
       },
     ],
     [post],
   );
 
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.post.list.queryKey(),
+    (post) => post.id,
+  );
   const { isPending, ...postLike } = useMutation(
     trpc.post.like.mutationOptions(),
+  );
+  const { isPending: isPendingFollowing, ...followUser } = useMutation(
+    trpc.follow.create.mutationOptions({
+      onSuccess(data) {
+        update({
+          ...post,
+          isFollowing: data.isFollowing,
+        });
+      },
+    }),
   );
 
   const mutatePostLike = useMemo(
@@ -61,20 +78,14 @@ export function FeedPost({ post, user }: FeedPostProps) {
 
   const togglePostLike = useCallback(async () => {
     const liked = !post.liked;
-    const changes = { liked, post: post.id };
-
-    dispatch(
-      postActions.updateOne({
-        id: post.id,
-        changes: {
-          liked,
-          likeCount: liked ? post.likeCount + 1 : post.likeCount - 1,
-        },
-      }),
-    );
-
+    const changes = {
+      liked,
+      post: post.id,
+      likeCount: liked ? post.likeCount + 1 : post.likeCount - 1,
+    };
+    update({ ...post, ...changes });
     return mutatePostLike(changes);
-  }, [postLike]);
+  }, [post, update, mutatePostLike]);
 
   const onPressPagination = (index: number) => {
     slideRef.current?.scrollTo({
@@ -86,10 +97,12 @@ export function FeedPost({ post, user }: FeedPostProps) {
   return (
     <View className="gap-y-2">
       <View className="flex-row items-center gap-x-4 px-6">
-        <Avatar
-          url={post.user.profile.avatar}
-          style={{ width: 48, height: 48 }}
-        />
+        <Link href={`/(home)/${post.user.id}`}>
+          <Avatar
+            url={post.user.profile.avatar}
+            style={{ width: 40, height: 40 }}
+          />
+        </Link>
         <View className="flex-1">
           <Text
             className="!font-poppins-medium"
@@ -106,8 +119,18 @@ export function FeedPost({ post, user }: FeedPostProps) {
         </View>
         {canFollow && (
           <Button
-            text="Follow"
-            style={{ paddingVertical: 4 }}
+            text={post.isFollowing ? "Unfollow" : "Follow"}
+            submitting={isPendingFollowing}
+            style={{
+              paddingVertical: 4,
+              backgroundColor: post.isFollowing ? Colors.grey : Colors.primary,
+            }}
+            onPress={() =>
+              followUser.mutateAsync({
+                following: post.user.id,
+                isFollowing: !post.isFollowing,
+              })
+            }
           />
         )}
       </View>
@@ -120,22 +143,42 @@ export function FeedPost({ post, user }: FeedPostProps) {
             {details.map((detail, index) => (
               <View key={index}>
                 <Text style={style.subtitle}>{detail.name}</Text>
-                <Text style={style.text}>{detail.value}</Text>
+                <Text
+                  style={style.text}
+                  className="text-lg"
+                >
+                  {detail.value}
+                </Text>
               </View>
             ))}
           </View>
+          {post.routine && (
+            <View className="flex-row flex-wrap gap-2">
+              {post.routine.metadata.exercises.map((exercise) => (
+                <View
+                  key={exercise.id}
+                  className="flex-row items-center bg-stone-900 px-2 rounded-md"
+                >
+                  <Text className="text-white text-lg font-poppins">
+                    {exercise.name}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
         {post.images && post.images.length > 0 && (
-          <View>
+          <View className="relative">
             <Carousel
               ref={slideRef}
-              data={[1, 2]}
+              data={post.images}
               width={Math.max(width, 400)}
               height={Math.max(width, 400)}
+              loop={false}
               onProgressChange={slideProgress}
-              renderItem={() => (
+              renderItem={({ item }) => (
                 <Image
-                  source={require("../../../assets/images/auth-screen-1.png")}
+                  source={{ uri: item }}
                   contentFit="contain"
                   style={{
                     width: "100%",
@@ -145,20 +188,21 @@ export function FeedPost({ post, user }: FeedPostProps) {
                 />
               )}
             />
-            <Pagination.Basic
-              data={[1, 2]}
-              progress={slideProgress}
-              onPress={onPressPagination}
-              dotStyle={{ backgroundColor: Colors.grey, borderRadius: 50 }}
-              activeDotStyle={{ backgroundColor: Colors.primary }}
-              containerStyle={{ columnGap: 4 }}
-            />
+            {post.images.length > 1 && (
+              <Pagination.Basic
+                data={post.images}
+                progress={slideProgress}
+                onPress={onPressPagination}
+                containerStyle={{ columnGap: 4 }}
+                dotStyle={{ backgroundColor: Colors.grey, borderRadius: 50 }}
+                activeDotStyle={{ backgroundColor: Colors.primary }}
+              />
+            )}
           </View>
         )}
         <View className="gap-y-2 px-6">
           <View className="flex-row items-center gap-x-4">
             <Pressable
-              disabled={isPending}
               className="flex-row items-center gap-x-1"
               onPress={togglePostLike}
             >

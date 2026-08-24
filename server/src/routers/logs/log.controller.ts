@@ -1,6 +1,7 @@
-import { eq, inArray, type SQL } from "drizzle-orm";
-import type { Database } from "../../db";
+import { inArray, type SQL } from "drizzle-orm";
+
 import { meals } from "../../db/schema";
+import type { Database } from "../../db";
 
 export const getMealLogsWhere = async <T extends SQL>(
   db: Database,

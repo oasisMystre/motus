@@ -2,11 +2,11 @@ import type z from "zod";
 import { inArray, type SQL } from "drizzle-orm";
 
 import type { Database } from "../../db";
-import { equipments, muscles } from "../../db/schema";
+import { muscles } from "../../db/schema";
 import type { exerciseSelectSchema } from "../../db/zod";
 
 export const getExercisesWhere = async <T extends SQL | undefined>(
-  db: Database,
+  db: Omit<Database, "$client">,
   where: T,
   options?: { limit?: number; offset?: number },
 ): Promise<z.infer<typeof exerciseSelectSchema>[]> => {

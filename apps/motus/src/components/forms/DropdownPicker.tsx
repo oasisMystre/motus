@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import WheelPicker, {
   type PickerItem,
 } from "@quidone/react-native-wheel-picker";
@@ -7,18 +7,21 @@ type DropdownPickerProps<T extends PickerItem<unknown>[]> = {
   data: T;
   value?: T[number]["value"];
 } & Omit<React.ComponentProps<typeof WheelPicker>, "onValueChange" | "data">;
-export default function DropdownPicker<T extends PickerItem<unknown>[]>({
+
+export default memo(function DropdownPicker<T extends PickerItem<unknown>[]>({
   value,
+  onValueChanged,
   ...props
 }: DropdownPickerProps<T>) {
   useEffect(() => {
-    props.onValueChanged?.({ item: props.data[0], index: 0 });
-  }, []);
+    if (!value) onValueChanged?.({ index: 0, item: props.data[0] });
+  }, [value, props.data, onValueChanged]);
 
   return (
     <WheelPicker
       {...props}
       value={value}
+      onValueChanged={onValueChanged}
       enableScrollByTapOnItem
       itemTextStyle={[
         { color: "white", fontFamily: "Poppins_400Regular" },
@@ -26,4 +29,4 @@ export default function DropdownPicker<T extends PickerItem<unknown>[]>({
       ]}
     />
   );
-}
+});

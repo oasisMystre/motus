@@ -57,18 +57,25 @@ export function CommentItem({
 }
 
 const Comment = ({ text }: { text: string }) => {
-  const parts = text.split(/(@\w+)/g);
+  const parts = text.split(/(@[a-zA-Z0-9._-]+)/g);
 
   return (
     <Text
-      className="font-poppins"
-      style={{ color: Colors.text[2] }}
+      style={{
+        color: Colors.text[2],
+        flexShrink: 1,
+        flexWrap: "wrap",
+        fontFamily: "Poppins_400Regular",
+      }}
     >
       {parts.map((part, index) =>
         /^@/.test(part) ? (
           <Text
             key={index}
-            style={{ color: Colors.primary, fontFamily: "Poppins_500Medium" }}
+            style={{
+              color: Colors.primary,
+              fontFamily: "Poppins_500Medium",
+            }}
           >
             {part}
           </Text>

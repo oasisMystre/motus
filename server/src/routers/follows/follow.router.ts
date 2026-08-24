@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import { follows } from "../../db/schema";
 import { publicProcedure, router } from "../../trpc";
+import { createNotification } from "../notifications/notification.controller";
 import {
   followInsertSchema,
   followSelectSchema,
@@ -13,7 +14,6 @@ import {
 export const followRouter = router({
   create: publicProcedure
     .input(followInsertSchema.omit({ follower: true }))
-    .output(followSelectSchema.omit({ following: true }))
     .mutation(async ({ ctx, input }) => {
       const [createdFollow] = await ctx.drizzle
         .insert(follows)
@@ -25,21 +25,26 @@ export const followRouter = router({
         .returning();
 
       if (createdFollow) {
-        const follow = await ctx.drizzle.query.follows.findFirst({
-          with: {
-            follower: true,
-          },
-          where: and(
-            eq(follows.follower, createdFollow.follower),
-            eq(follows.following, createdFollow.following),
-          ),
-          columns: {
-            following: false,
-            follower: false,
-          },
-        });
+        if (input.isFollowing)
+          await createNotification(ctx.drizzle, {
+            user: createdFollow.following,
+            title: {
+              text: "notifications.new_follower",
+              external: true,
+              extra: {
+                username: ctx.user.username,
+              },
+            },
+            action: {
+              type: "new_follower",
+              extra: {
+                user: ctx.user.id,
+              },
+            },
+            icon: ctx.user.profile.avatar,
+          });
 
-        if (follow) return follow;
+        if (createdFollow) return createdFollow;
       }
 
       throw new TRPCError({

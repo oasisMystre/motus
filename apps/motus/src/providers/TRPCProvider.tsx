@@ -1,41 +1,48 @@
 import { format } from "util";
 import superjson from "superjson";
+import type { AppRouter } from "@motus/server";
 import { getItemAsync } from "expo-secure-store";
-import { type AppRouter, transformer } from "@motus/server";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  createTRPCClient,
-  httpBatchLink,
-  httpLink,
-  splitLink,
-} from "@trpc/client";
+  defaultShouldDehydrateQuery,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 export const { TRPCProvider, useTRPC, useTRPCClient } =
   createTRPCContext<AppRouter>();
 
-const queryClient = new QueryClient();
-const options = {
-  transformer,
-  url: process.env.EXPO_PUBLIC_BASE_API_URL!,
-  async headers() {
-    const token = await getItemAsync("firebase.token");
-    const sessionToken = await getItemAsync("firebase.session");
-
-    const headers = new Headers();
-    if (token) headers.set("authorization", format("Bearer %s", token));
-    if (sessionToken) headers.set("x-session-token", sessionToken);
-    return headers;
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    },
+    dehydrate: {
+      shouldDehydrateQuery(query) {
+        return (
+          defaultShouldDehydrateQuery(query) || query.state.status === "pending"
+        );
+      },
+    },
   },
-};
+});
 const trpcClient = createTRPCClient<AppRouter>({
   links: [
-    splitLink({
-      condition(op) {
-        return false;
+    httpBatchLink({
+      transformer: superjson,
+      url: process.env.EXPO_PUBLIC_BASE_API_URL!,
+      async headers() {
+        const token = await getItemAsync("firebase.token");
+        const sessionToken = await getItemAsync("firebase.session");
+
+        const headers = new Headers();
+        if (token) headers.set("authorization", format("Bearer %s", token));
+        if (sessionToken) headers.set("x-session-token", sessionToken);
+        return headers;
       },
-      true: httpLink(options),
-      false: httpBatchLink(options),
     }),
   ],
 });

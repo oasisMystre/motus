@@ -1,29 +1,27 @@
-import z from "zod";
-import path from "path";
+import type z from "zod/v3";
+import z4 from "zod";
+import { format } from "util";
 import { eq } from "drizzle-orm";
-import { readFileSync } from "fs";
 import { run } from "@openai/agents";
 
 import { messages } from "../../db/schema";
-import { __srcdir } from "../../instances";
 import { publicProcedure, router } from "../../trpc";
 import {
-  messageContentSchema,
   messageInsertSchema,
   messageSelectSchema,
   paginationSchema,
 } from "../../external";
-import { MotusMcpClient } from "../../mcp/client";
+import type { agentOutputSchema } from "../../mcp/schema";
 
 export const messageRouter = router({
   create: publicProcedure
     .input(messageInsertSchema.omit({ user: true, role: true }))
-    .output(z.array(messageSelectSchema))
+    .output(z4.array(messageSelectSchema))
     .mutation(async ({ ctx, input }) => {
       let context = [
         {
           role: "user" as const,
-          content: input.content,
+          content: format("user=%s %s", ctx.user.id, input.content),
           createdAt: new Date(),
         },
       ];
@@ -32,14 +30,7 @@ export const messageRouter = router({
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
       );
 
-      const agent = await ctx.mcpClient.createAgent({
-        model: "gpt-4.1-mini",
-        instructions: readFileSync(
-          path.resolve(__srcdir, "src/mcp/prompt.txt"),
-          "utf-8",
-        ).replace("%userId%", ctx.user.id),
-      });
-
+      const agent = await ctx.mcpClient.createAgent(undefined, ctx.user.id);
       const response = await run(
         agent,
         context.map((context) => ({
@@ -47,11 +38,15 @@ export const messageRouter = router({
           content: context.content,
         })),
       );
+      const finalOutput = response.finalOutput as z.infer<
+        typeof agentOutputSchema
+      >;
 
       return ctx.drizzle
         .insert(messages)
         .values([
           {
+            id: input.id,
             role: "user",
             user: ctx.user.id,
             content: { type: "text", data: input.content },
@@ -59,7 +54,7 @@ export const messageRouter = router({
           {
             role: "assistant",
             user: ctx.user.id,
-            content: { type: "text", data: response.finalOutput as string },
+            content: { type: "text", data: finalOutput.summary! },
           },
         ])
         .returning()

@@ -5,6 +5,7 @@ import { and, eq, type SQL } from "drizzle-orm";
 import { getPostsWhere } from "./post.controller";
 import { publicProcedure, router } from "../../trpc";
 import { commentLikes, comments, postLikes, posts } from "../../db/schema";
+import { createNotification } from "../notifications/notification.controller";
 import {
   commentInsertSchema,
   commentLikeInsertSchema,
@@ -14,7 +15,6 @@ import {
   postInsertSchema,
   postLikeInsertSchema,
   postSelectSchema,
-  userSelectSchema,
 } from "../../external";
 
 export const postRouter = router({
@@ -29,6 +29,25 @@ export const postRouter = router({
         .execute();
 
       if (createdPost) {
+        await createNotification(ctx.drizzle, {
+          skip: true,
+          user: ctx.user.id,
+          title: {
+            text: "notifications.new_post",
+            external: true,
+            extra: {
+              username: ctx.user.username,
+            },
+          },
+          action: {
+            type: "new_post",
+            extra: {
+              post: createdPost.id,
+            },
+          },
+          icon: ctx.user.profile.avatar,
+        });
+
         const [post] = await getPostsWhere(
           ctx.drizzle,
           eq(posts.id, createdPost.id),
@@ -43,6 +62,44 @@ export const postRouter = router({
   like: publicProcedure
     .input(postLikeInsertSchema.omit({ user: true }))
     .mutation(async ({ ctx, input }) => {
+      const post = await ctx.drizzle.query.posts
+        .findFirst({
+          where: eq(posts.id, input.post),
+          columns: {
+            id: true,
+            user: true,
+          },
+          with: {
+            user: {
+              columns: {
+                id: true,
+                username: true,
+                profile: true,
+              },
+            },
+          },
+        })
+        .execute();
+
+      if (post && post.user.id !== ctx.user.id)
+        await createNotification(ctx.drizzle, {
+          user: post.user.id,
+          title: {
+            text: "notifications.post_new_like",
+            external: true,
+            extra: {
+              username: ctx.user.username,
+            },
+          },
+          action: {
+            type: "post_new_like",
+            extra: {
+              post: post.id,
+            },
+          },
+          icon: ctx.user.profile.avatar,
+        });
+
       const [like] = await ctx.drizzle
         .insert(postLikes)
         .values({ ...input, user: ctx.user.id })
@@ -70,13 +127,8 @@ export const postRouter = router({
     .output(z.array(postExtendedSelectSchema))
     .query(async ({ ctx, input }) => {
       let where: SQL<unknown> | undefined;
-      const id =
-        input && input.filter && input.filter.user
-          ? input.filter.user
-          : ctx.user.id;
-
-      if (input && input.filter && input.filter.user)
-        where = eq(posts.user, input.filter.user);
+      const id = input?.filter?.user ? input.filter.user : ctx.user.id;
+      if (input?.filter?.user) where = eq(posts.user, input.filter.user);
 
       return getPostsWhere(
         ctx.drizzle,
@@ -94,11 +146,50 @@ export const postRouter = router({
       .input(commentInsertSchema.omit({ user: true }))
       .output(commentSelectSchema)
       .mutation(async ({ ctx, input }) => {
+        const post = await ctx.drizzle.query.posts
+          .findFirst({
+            where: eq(posts.id, input.post),
+            columns: {
+              id: true,
+              user: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  id: true,
+                  username: true,
+                  profile: true,
+                },
+              },
+            },
+          })
+          .execute();
+
         const [createdComment] = await ctx.drizzle
           .insert(comments)
           .values({ ...input, user: ctx.user.id })
           .returning()
           .execute();
+
+        if (post && post.user.id !== ctx.user.id)
+          await createNotification(ctx.drizzle, {
+            user: post.user.id,
+            title: {
+              text: "notifications.post_new_comment",
+              external: true,
+              extra: {
+                username: ctx.user.username,
+              },
+            },
+            action: {
+              type: "post_new_comment",
+              extra: {
+                post: post.id,
+                comment: createdComment?.id,
+              },
+            },
+            icon: ctx.user.profile.avatar,
+          });
 
         if (createdComment) {
           const comment = await ctx.drizzle.query.comments.findFirst({
@@ -120,6 +211,54 @@ export const postRouter = router({
     like: publicProcedure
       .input(commentLikeInsertSchema)
       .mutation(async ({ ctx, input }) => {
+        const comment = await ctx.drizzle.query.comments
+          .findFirst({
+            where: eq(comments.id, input.comment),
+            columns: {
+              id: true,
+              user: true,
+              post: true,
+            },
+            with: {
+              post: {
+                columns: {
+                  id: true,
+                  user: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      username: true,
+                      profile: true,
+                    },
+                  },
+                },
+              },
+            },
+          })
+          .execute();
+
+        if (comment && comment.post.user.id !== ctx.user.id)
+          await createNotification(ctx.drizzle, {
+            user: comment.post.user.id,
+            title: {
+              text: "notifications.post_new_comment_like",
+              external: true,
+              extra: {
+                username: ctx.user.username,
+              },
+            },
+            action: {
+              type: "post_new_comment_like",
+              extra: {
+                comment: comment.id,
+                post: comment.post.id,
+              },
+            },
+            icon: ctx.user.profile.avatar,
+          });
+
         const [like] = await ctx.drizzle
           .insert(commentLikes)
           .values({ ...input, user: ctx.user.id })

@@ -1,87 +1,116 @@
-import Color from "color";
-
-import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, ActivityIndicator, FlatList } from "react-native";
+import { useMemo, useRef, useState, useCallback } from "react";
+import {
+  KeyboardAvoidingView,
+  KeyboardAwareScrollView,
+} from "react-native-keyboard-controller";
+import {
+  View,
+  Text,
+  Pressable,
+  Animated,
+  type ScrollView,
+  type NativeScrollEvent,
+} from "react-native";
 
 import { Colors } from "../../../../constants";
+import Avatar from "../../../../components/Avatar";
 import { useUser } from "../../../../hooks/useUser";
-import { useTRPC } from "../../../../providers/TRPCProvider";
-import { FeedPost } from "../../../../components/feeds";
+import useDimensions from "../../../../hooks/useDimensions";
+import InfoScreen from "../../../../screens/profile/InfoScreen";
+import ItemsScreen from "../../../../screens/profile/ItemsScreen";
 
 export default function ProfileScreen() {
-  const trpc = useTRPC();
+  const { width } = useDimensions("window");
+  const courosel = useRef<ScrollView>(null);
+  const scrollX = useRef(new Animated.Value(0));
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const user = useUser(id);
 
-  const { data } = useQuery(
-    trpc.post.list.queryOptions({ filter: { user: id } }),
+  const tabs = useMemo(
+    () => [
+      { title: "My Info", tab: InfoScreen },
+      { title: "My Items", tab: ItemsScreen },
+    ],
+    [],
   );
 
-  const infos = [
+  const user = useUser(id);
+
+  const onScroll = Animated.event<NativeScrollEvent>(
+    [{ nativeEvent: { contentOffset: { x: scrollX.current } } }],
     {
-      value: user?.workoutsCount,
-      title: "Workouts",
+      useNativeDriver: false,
+      listener(event) {
+        const index = Math.round(event.nativeEvent.contentOffset.x / width);
+        setCurrentIndex(index);
+      },
     },
-    {
-      value: user?.followersCount,
-      title: "Followers",
-    },
-    {
-      value: user?.followingCount,
-      title: "Following",
-    },
-    {
-      value: user?.routinesCount,
-      title: "Routines",
-    },
-  ];
+  );
+
+  const scrollTo = useCallback(
+    (index: number) =>
+      courosel.current?.scrollTo({ x: width * index, animated: true }),
+    [width],
+  );
 
   return (
     user && (
-      <FlatList
-        data={data}
-        style={{ paddingHorizontal: 16, paddingTop: 32 }}
-        contentContainerStyle={{ flexGrow: 1 }}
-        ListEmptyComponent={() => <ActivityIndicator className="flex-1" />}
-        ListHeaderComponent={() => (
-          <View className="gap-y-8 mb-2">
-            <View className="self-center flex-row gap-x-1">
-              {infos.map((info, index) => (
-                <View
-                  key={index}
-                  className="items-center justify-center rounded-md p-2"
-                  style={{
-                    backgroundColor: Color(Colors.primary).alpha(0.25).hexa(),
-                  }}
-                >
-                  <Text className="text-white font-poppins-medium">
-                    {info.value}
-                  </Text>
-                  <Text
-                    className="font-poppins"
-                    style={{ color: Colors.grey }}
-                  >
-                    {info.title}
-                  </Text>
-                </View>
-              ))}
-            </View>
+      <KeyboardAvoidingView>
+        <View className="gap-y-8">
+          <View className="items-center justify-center gap-y-2">
+            <Avatar
+              url={user.profile.avatar}
+              style={{ width: 72, height: 72 }}
+            />
             <Text
               className="font-poppins"
               style={{ color: Colors.grey }}
             >
-              Recent Workouts
+              {user.name}
             </Text>
           </View>
-        )}
-        renderItem={({ item }) => (
-          <FeedPost
-            post={item}
-            user={user}
-          />
-        )}
-      />
+          <View className="flex-row">
+            {tabs.map((tab, index) => {
+              const selected = currentIndex === index;
+
+              return (
+                <Pressable
+                  key={tab.title}
+                  style={{
+                    flex: 1,
+                    paddingBottom: 8,
+                    borderBottomWidth: 3,
+                    borderBottomColor: selected ? Colors.primary : Colors.grey,
+                  }}
+                  onPress={() => scrollTo(index)}
+                >
+                  <Text className="text-white font-poppins text-center">
+                    {tab.title}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+        <KeyboardAwareScrollView
+          ref={courosel}
+          horizontal
+          onScroll={onScroll}
+          showsHorizontalScrollIndicator={false}
+          style={{ height: "80%" }}
+        >
+          {tabs.map(({ title, tab }) => {
+            const Tab = tab;
+            return (
+              <Tab
+                key={title}
+                user={user}
+              />
+            );
+          })}
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
     )
   );
 }

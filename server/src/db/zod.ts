@@ -13,6 +13,7 @@ import {
   meals,
   messages,
   muscles,
+  notifications,
   postLikes,
   posts,
   rewards,
@@ -60,22 +61,30 @@ export const profileSchema = z.object({
   weight: z
     .object({ unit: z.enum(["kg", "ibs"]), value: z.number() })
     .optional(),
-  age: z.number().optional(),
+  age: z.date().optional(),
   location: z.number().optional(),
   steps: z.coerce.number(),
   goals: goalSchema.optional(),
 });
 
 export const userInsertSchema = createInsertSchema(users, {
-  profile: profileSchema,
+  profile: profileSchema.extend({
+    age: z
+      .union([z.string().transform((value) => new Date(value)), z.date()])
+      .optional(),
+  }),
 });
 export const userSelectSchema = createSelectSchema(users, {
-  profile: profileSchema,
+  profile: profileSchema.omit({ age: true }).extend({
+    age: z
+      .union([z.string().transform((value) => new Date(value)), z.date()])
+      .optional(),
+  }),
 });
 export const userExtendSelectSchema = userSelectSchema.extend({
+  mealsCount: z.number(),
   workoutsCount: z.number(),
   routinesCount: z.number(),
-  mealsCount: z.number(),
   followingCount: z.number(),
   followersCount: z.number(),
 });
@@ -86,8 +95,34 @@ export const followSelectSchema = createSelectSchema(follows, {
   following: userSelectSchema,
 });
 
-export const mealInsertSchema = createInsertSchema(meals);
-export const mealSelectSchema = createSelectSchema(meals);
+const mealMetadataSchema = z.object({
+  portion: z.object({
+    size: z.object({
+      value: z.union([
+        z.number(),
+        z.string().transform((value) => parseFloat(value)),
+      ]),
+      unit: z.enum(["kg", "g", "cup", "litre", "bag", "ml", "sachet"]),
+    }),
+    count: z.union([
+      z.number(),
+      z.string().transform((value) => parseFloat(value)),
+    ]),
+  }),
+  nutriments: z.record(
+    z.string(),
+    z.object({
+      value: z.number(),
+      unit: z.enum(["g", "mg", "%", "cal", "kcal", "kJ"]),
+    }),
+  ),
+});
+export const mealInsertSchema = createInsertSchema(meals, {
+  metadata: mealMetadataSchema,
+});
+export const mealSelectSchema = createSelectSchema(meals, {
+  metadata: mealMetadataSchema,
+});
 
 const routineLogMetadataSchema = z.object({
   sets: z.coerce.number().gt(0, { error: "sets required" }),
@@ -217,9 +252,10 @@ export const postInsertSchema = createInsertSchema(posts, {
   metadata: postMetadataSchema.nullish(),
 });
 export const postSelectSchema = createSelectSchema(posts, {
-  metadata: postMetadataSchema.nullish(),
-  log: routineLogSelectSchema.optional(),
   user: minimalUserSchema,
+  metadata: postMetadataSchema.nullish(),
+  mealLog: mealLogSelectSchema.nullish(),
+  routineLog: routineLogSelectSchema.nullable(),
 });
 
 export const postLikeSelectSchema = createSelectSchema(postLikes, {
@@ -236,9 +272,11 @@ export const commentLikeInsertSchema = createInsertSchema(commentLikes);
 export const postExtendedSelectSchema = postSelectSchema.extend({
   liked: z.boolean(),
   likeCount: z.number(),
+  isFollowing: z.boolean(),
   commentCount: z.number(),
   peekLikes: z.array(postLikeSelectSchema),
   peekComments: z.array(commentSelectSchema),
+  routine: routineSelectSchema.omit({ previous: true }).nullish(),
 });
 
 export const paginationSchema = z.object({
@@ -275,4 +313,19 @@ export const messageInsertSchema = createInsertSchema(messages, {
 });
 export const messageSelectSchema = createSelectSchema(messages, {
   content: messageContentSchema,
+});
+
+const intlSchema = z.object({
+  text: z.string(),
+  external: z.boolean(),
+  extra: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const notificationInsertSchema = createInsertSchema(notifications, {
+  title: intlSchema.nullable().optional(),
+  subtitle: intlSchema.nullable().optional(),
+});
+export const notificationSelectSchema = createSelectSchema(notifications, {
+  title: intlSchema.nullable().optional(),
+  subtitle: intlSchema.nullable().optional(),
 });

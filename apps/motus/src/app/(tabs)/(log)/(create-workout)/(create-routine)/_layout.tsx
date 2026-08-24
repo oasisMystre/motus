@@ -25,10 +25,6 @@ export default function CreateWorkoutLayout() {
       })}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen
-        name="(add-exercise)"
-        options={{ headerShown: false }}
-      />
     </Stack>
   );
 }

@@ -8,8 +8,8 @@
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "outputs": ["dist/**", ".expo/**", "output/**"]
     },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+    "check": {
+      "dependsOn": ["^check"]
     },
     "dev": {
       "persistent": true,

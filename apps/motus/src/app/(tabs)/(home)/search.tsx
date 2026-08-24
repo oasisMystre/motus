@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
-
 import { useQuery } from "@tanstack/react-query";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ActivityIndicator,
   RefreshControl,
   View,
   FlatList,
+  Text,
 } from "react-native";
 
 import { Colors } from "../../../constants";
@@ -15,32 +17,33 @@ import { BackButton } from "../../../components/Header";
 import { useTRPC } from "../../../providers/TRPCProvider";
 import SearchInput from "../../../components/SearchInput";
 import KeyboardView from "../../../components/KeyboardView";
-import { useAppDispatch, useAppSelector } from "../../../store";
 import { ListItem } from "../../../components/search/ListItem";
-import { searchActions, searchUserSelectors } from "../../../store/search";
+import { useTanstackStore } from "../../../hooks/useTanstackStore";
 
 export default function SearchScreen() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
   const [search, setSearch] = useState<string>();
-  const { data, refetch, isRefetching } = useQuery(
+  const {
+    data: users = [],
+    refetch,
+    isRefetching,
+    isFetching,
+  } = useQuery(
     trpc.user.search.queryOptions({
       search: search && search.trim().length > 0 ? search : undefined,
     }),
   );
 
-  const dispatch = useAppDispatch();
-  const { users: usersState } = useAppSelector((state) => state.search);
-  const users = searchUserSelectors.selectAll(usersState);
-
-  useEffect(() => {
-    if (data) dispatch(searchActions.setUsers(data));
-
-    return () => {
-      dispatch(searchActions.removeAllUsers());
-    };
-  }, [data]);
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.user.search.queryKey({
+      search: search && search.trim().length > 0 ? search : undefined,
+    }),
+    (user) => user.id,
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -71,7 +74,7 @@ export default function SearchScreen() {
       ),
     });
     return () => navigation.setOptions({ header: undefined });
-  }, [navigation]);
+  }, [top, navigation]);
 
   return (
     <KeyboardView>
@@ -87,11 +90,38 @@ export default function SearchScreen() {
             tintColor={Colors.primary}
           />
         }
-        ListEmptyComponent={() => <ActivityIndicator style={{ flex: 1 }} />}
+        ListEmptyComponent={() => {
+          return (
+            <View className="flex-1 items-center justify-center">
+              {isFetching ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <>
+                  <MaterialIcons
+                    name="person"
+                    size={32}
+                    color="white"
+                  />
+                  <Text className="text-lg text-white font-poppins-medium">
+                    No User Found
+                  </Text>
+                  <Text className="text-white text-white/75 font-poppins">
+                    Search for a user by name or username.
+                  </Text>
+                </>
+              )}
+            </View>
+          );
+        }}
         ItemSeparatorComponent={() => (
           <View style={{ height: 1, backgroundColor: Colors.darkGray }} />
         )}
-        renderItem={({ item }) => <ListItem item={item} />}
+        renderItem={({ item }) => (
+          <ListItem
+            item={item}
+            updateUser={update}
+          />
+        )}
       />
     </KeyboardView>
   );

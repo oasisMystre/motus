@@ -1,10 +1,10 @@
 import type z from "zod";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import type { mealLogSelectSchema } from "@motus/server";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { type Icon, NotePencilIcon, ShareIcon } from "phosphor-react-native";
+import { type Icon, NotePencilIcon } from "phosphor-react-native";
 import {
   Pressable,
   type StyleProp,
@@ -19,7 +19,6 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
 import { MealLogConfirmDeletion } from "./MealLogConfirmDeletion";
 
 export function MealLogItemMenu({
@@ -28,7 +27,6 @@ export function MealLogItemMenu({
 }: Omit<React.ComponentProps<typeof BottomSheet>, "children"> & {
   meal: z.infer<typeof mealLogSelectSchema>;
 }) {
-  const dispatch = useAppDispatch();
   const { bottom } = useSafeAreaInsets();
   const [showDeleteMealLogModal, setShowDeleteMealLogModal] = useState(false);
   const onAction = useCallback(
@@ -43,7 +41,7 @@ export function MealLogItemMenu({
         },
       });
     },
-    [dispatch, props.onClose, router],
+    [props.onClose, meal.id],
   );
 
   const menuItems: {

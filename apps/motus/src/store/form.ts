@@ -48,6 +48,11 @@ export const formSlice = createSlice({
       if (state.signup) state.signup = { ...state.signup, ...payload };
       else state.signup = payload;
     },
+    resetWorkoutForm(state) {
+      state.createWorkout = {
+        exercises: [],
+      };
+    },
     updateWorkoutForm(
       state,
       { payload }: PayloadAction<FormState["createWorkout"]>,

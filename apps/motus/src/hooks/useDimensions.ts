@@ -11,7 +11,7 @@ export default function useDimensions(
     });
 
     return () => unsubscribe.remove();
-  }, []);
+  }, [args]);
 
   return dimension;
 }

@@ -6,11 +6,12 @@ import { streaks } from "./streaks";
 import { muscles } from "./muscles";
 import { routines } from "./routines";
 import { messages } from "./messages";
+import { mealLogs } from "./meal-logs";
 import { exercises } from "./exercises";
 import { equipments } from "./equipments";
+import { routineLogs } from "./routine-logs";
 import { rewards, rewardTypes } from "./rewards";
 import { commentLikes, comments, postLikes, posts } from "./posts";
-import { routineLogs } from "./routine-logs";
 
 export const userRelations = relations(users, ({ many }) => ({
   routines: many(routines),
@@ -50,8 +51,6 @@ export const exerciseRelations = relations(exercises, ({ one }) => ({
   }),
 }));
 
-export const rewardTypeRelations = relations(rewardTypes, ({ many }) => ({}));
-
 export const rewardRelations = relations(rewards, ({ one }) => ({
   user: one(users, { fields: [rewards.user], references: [users.id] }),
   type: one(rewardTypes, {
@@ -74,7 +73,14 @@ export const routineLogRelations = relations(routineLogs, ({ one, many }) => ({
 
 export const postRelations = relations(posts, ({ one, many }) => ({
   likes: many(postLikes),
-  log: one(routineLogs, { fields: [posts.log], references: [routineLogs.id] }),
+  mealLog: one(mealLogs, {
+    fields: [posts.mealLog],
+    references: [mealLogs.id],
+  }),
+  routineLog: one(routineLogs, {
+    fields: [posts.routineLog],
+    references: [routineLogs.id],
+  }),
   user: one(users, { fields: [posts.user], references: [users.id] }),
 }));
 export const postLikeRelations = relations(postLikes, ({ one }) => ({

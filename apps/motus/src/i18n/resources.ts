@@ -161,6 +161,14 @@ export const resources = {
           "auth/custom-error": "Unexpected error occurred. Try again!",
         },
       },
+      notifications: {
+        new_follower: "{{ username }} followed you",
+        new_post: "{{ username }} just made a new workout post",
+        post_new_like: "{{ username }} liked your workout post",
+        post_new_comment: "{{ username }} replied to your workout post",
+        post_new_comment_like: "{{ username }} liked comment",
+        new_mention: "{{ username }} mentioned you",
+      },
     },
   },
 } as const;

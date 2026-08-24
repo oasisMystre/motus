@@ -1,6 +1,6 @@
 import type z from "zod";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import type { mealLogSelectSchema } from "@motus/server";
@@ -12,8 +12,6 @@ import Button from "../../../../components/Button";
 import { useTRPC } from "../../../../providers/TRPCProvider";
 import SearchInput from "../../../../components/SearchInput";
 import KeyboardView from "../../../../components/KeyboardView";
-import { useAppDispatch, useAppSelector } from "../../../../store";
-import { logActions, mealLogSelector } from "../../../../store/log";
 import { MealLogItem, MealLogItemMenu } from "../../../../components/meal";
 
 export default function LogMealScreen() {
@@ -23,17 +21,9 @@ export default function LogMealScreen() {
     null,
   );
 
-  const dispatch = useAppDispatch();
-  const mealLogState = useAppSelector((state) => state.log.meal);
-  const meals = mealLogSelector.selectAll(mealLogState);
-
-  const { isSuccess, isPending, data } = useQuery(
+  const { isPending, data: meals } = useQuery(
     trpc.log.meal.list.queryOptions({ search }),
   );
-
-  useEffect(() => {
-    if (data) dispatch(logActions.setMealLogs(data));
-  }, [isSuccess, data]);
 
   return (
     <>
@@ -49,7 +39,13 @@ export default function LogMealScreen() {
             data={meals}
             contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={() => {
-              if (isPending) return <ActivityIndicator style={{ flex: 1 }} />;
+              if (isPending)
+                return (
+                  <ActivityIndicator
+                    color="white"
+                    style={{ flex: 1 }}
+                  />
+                );
 
               return (
                 <View className="items-center justify-center gap-y-6 mt-48">
@@ -76,6 +72,7 @@ export default function LogMealScreen() {
               );
             }}
             ListHeaderComponent={() =>
+              meals &&
               meals.length > 0 && (
                 <View className="gap-y-8 mb-2">
                   <Button

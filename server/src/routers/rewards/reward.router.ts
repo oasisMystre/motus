@@ -31,7 +31,7 @@ export const rewardRouter = router({
         .innerJoin(rewardTypes, eq(rewardTypes.id, rewards.type))
         .where(eq(rewards.user, ctx.user.id))
         .execute();
-      if (points && points.points && newUserReward)
+      if (points?.points && newUserReward)
         return { points: parseFloat(points.points), newUserReward };
 
       throw new TRPCError({

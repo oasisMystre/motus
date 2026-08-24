@@ -1,6 +1,6 @@
 import { v7 as uuid } from "uuid";
 import { useTranslation } from "react-i18next";
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -12,9 +12,8 @@ import {
   View,
 } from "react-native";
 
-import { useAppDispatch } from "../store";
-import { authActions } from "../store/auth";
 import useDimensions from "../hooks/useDimensions";
+import { useFirebase } from "../providers/FirebaseProvider";
 import {
   LinearGradientTextLayerBackground,
   PaginationDots,
@@ -23,7 +22,7 @@ import {
 
 export default function OnboardingCarousel() {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
+  const { setAnonymousUser } = useFirebase();
   const { width } = useDimensions("window");
   const { top, bottom } = useSafeAreaInsets();
 
@@ -64,7 +63,7 @@ export default function OnboardingCarousel() {
 
   const showActionButton = useMemo(
     () => currentIndex >= onboardingStories.length - 1,
-    [currentIndex],
+    [currentIndex, onboardingStories.length],
   );
 
   return (
@@ -125,7 +124,7 @@ export default function OnboardingCarousel() {
             onSwipeComplete={() => {
               const uid = uuid();
               AsyncStorage.setItem("anonymous_user", uid).then(() =>
-                dispatch(authActions.setUser({ type: "anonymous", uid })),
+                setAnonymousUser({ uid }),
               );
             }}
           />

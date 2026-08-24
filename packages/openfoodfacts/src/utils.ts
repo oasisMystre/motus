@@ -8,9 +8,12 @@ export const convertProductToMeal = (
   productName: string;
   name: string;
   metadata: {
-    portionSize: {
-      value: number;
-      unit: "cup" | "sachet" | "bag" | "litre" | "g" | "kg";
+    portion: {
+      count: number;
+      size: {
+        value: number;
+        unit: "cup" | "sachet" | "bag" | "litre" | "g" | "kg";
+      };
     };
     nutriments: {
       [key: string]: { value: number; unit: "g" | "mg" | "%" | "cal" | "kcal" };
@@ -25,9 +28,16 @@ export const convertProductToMeal = (
       product.product_name_en! ||
       product.product_name!,
     metadata: {
-      portionSize: {
-        value: parseFloat(product.serving_quantity!),
-        unit: product.serving_quantity_unit! as "g",
+      portion: {
+        count: 1,
+        size: {
+          value: parseFloat(
+            product.serving_quantity ?? product.product_quantity ?? "0",
+          ),
+          unit: (product.serving_quantity_unit ??
+            product.product_quantity_unit ??
+            "g") as "g",
+        },
       },
       nutriments: Object.fromEntries(
         Object.entries(product.nutriments!)
@@ -46,6 +56,7 @@ export const convertProductToMeal = (
 
               if (unit && value) return [key, { unit, value }];
             }
+            return undefined;
           })
           .filter((value) => !!value),
       ),

@@ -48,7 +48,7 @@ export const routineLogRouter = router({
     .query(({ ctx, input }) => {
       const where: (SQL | undefined)[] = [];
 
-      if (input && input.search) {
+      if (input?.search) {
         const innerWhere: SQL[] = [];
         innerWhere.push(
           ilike(routineLogs.name, format("%%%s%%", input.search)),

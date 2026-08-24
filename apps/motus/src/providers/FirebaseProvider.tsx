@@ -1,21 +1,46 @@
-import * as Sentry from "@sentry/react-native";
+import type z from "zod";
 import { setItemAsync } from "expo-secure-store";
+import { useQueryClient } from "@tanstack/react-query";
+import type { userExtendSelectSchema } from "@motus/server";
 import { getStorage } from "@react-native-firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  getAuth,
+  onAuthStateChanged,
+  type FirebaseAuthTypes,
+} from "@react-native-firebase/auth";
+import {
+  useRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  createContext,
+} from "react";
 
 import "../firebase";
-import { useAppDispatch } from "../store";
-import { authActions } from "../store/auth";
-import { useTRPCClient } from "./TRPCProvider";
+import type { NonNullable } from "../@types";
+import { useTRPCClient, useTRPC } from "./TRPCProvider";
+
+type User = z.infer<typeof userExtendSelectSchema>;
 
 type FirebaseContext = {
+  user: User | null;
+  signIn: (user: FirebaseAuthTypes.User | null) => Promise<void>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setAnonymousUser: React.Dispatch<
+    React.SetStateAction<{ uid: string } | undefined>
+  >;
+  anonymousUser?: { uid: string };
   firebase: {
     auth: ReturnType<typeof getAuth>;
     storage: ReturnType<typeof getStorage>;
   };
-  state: "idle" | "initializing" | "completed";
+  state:
+    | "firebase.auth.idle"
+    | "firebase.auth.initializing"
+    | "firebase.auth.initialized";
 };
 
 export const FirebaseContext = createContext<FirebaseContext | null>(null);
@@ -23,54 +48,81 @@ export const FirebaseContext = createContext<FirebaseContext | null>(null);
 export default function FirebaseProvider({
   children,
 }: React.PropsWithChildren) {
-  const trpc = useTRPCClient();
-  const auth = useRef(getAuth());
-  const storage = useRef(getStorage());
-  const [state, setState] = useState<FirebaseContext["state"]>("idle");
+  const trpc = useTRPC();
+  const trpcClient = useTRPCClient();
+  const queryClient = useQueryClient();
+  const loginPromise = useRef<Promise<void>>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [anonymousUser, setAnonymousUser] = useState<{ uid: string }>();
+  const [state, setState] =
+    useState<FirebaseContext["state"]>("firebase.auth.idle");
 
-  const dispatch = useAppDispatch();
+  const auth = useMemo(() => getAuth(), []);
+  const storage = useMemo(() => getStorage(), []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth.current,
-      async (firebaseUser) => {
-        setState("initializing");
+  const fetchData = useCallback(
+    async () =>
+      Promise.all([
+        queryClient.prefetchQuery(trpc.post.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.muscle.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.reward.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.streak.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.equipment.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.exercise.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.reward.aggregrate.queryOptions()),
+        queryClient.prefetchQuery(trpc.streak.aggregate.queryOptions()),
+      ]),
+    [queryClient, trpc],
+  );
+
+  const signIn = useCallback(
+    async (firebaseUser: FirebaseAuthTypes.User | null) => {
+      const asyncFn = async () => {
+        setState("firebase.auth.initializing");
 
         if (firebaseUser) {
           const idToken = await firebaseUser.getIdToken();
           await setItemAsync("firebase.token", idToken);
 
-          const user = await trpc.user.retrieve.query().catch((error) => {
-            Sentry.captureException(error);
-            return null;
-          });
+          const [, user] = await Promise.all([
+            fetchData().catch(() => null),
+            trpcClient.user.retrieve.query().catch(() => null),
+          ]);
           if (user) {
             if (user.token) await setItemAsync("firebase.session", user.token);
-
-            dispatch(
-              authActions.setUser({
-                ...user,
-                type: firebaseUser.isAnonymous ? "anonymous" : "firebase",
-              }),
-            );
+            setUser(user);
           }
         } else {
           const uid = await AsyncStorage.getItem("anonymous_user");
-          dispatch(authActions.setUser({ type: "anonymous", uid }));
+          if (uid) setAnonymousUser({ uid });
         }
 
-        setState("completed");
-      },
-    );
+        setState("firebase.auth.initialized");
+      };
 
+      if (loginPromise.current) return loginPromise.current;
+      loginPromise.current = asyncFn().finally(() => {
+        loginPromise.current = null;
+      });
+    },
+    [trpcClient, fetchData],
+  );
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, signIn);
     return () => unsubscribe();
-  }, []);
+  }, [auth, signIn]);
 
   return (
     <FirebaseContext.Provider
       value={{
-        firebase: { auth: auth.current, storage: storage.current },
+        user,
+        setUser,
         state,
+        signIn,
+        anonymousUser,
+        setAnonymousUser,
+        firebase: { auth, storage },
       }}
     >
       {children}
@@ -78,4 +130,5 @@ export default function FirebaseProvider({
   );
 }
 
-export const useFirebase = () => useContext(FirebaseContext) as FirebaseContext;
+export const useFirebase = () =>
+  useContext(FirebaseContext) as NonNullable<FirebaseContext>;

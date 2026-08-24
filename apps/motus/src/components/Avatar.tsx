@@ -22,7 +22,8 @@ export default function Avatar({
     <Image
       {...props}
       source={{ uri: url }}
-      className={clsx("size-16 rounded-full", props.className)}
+      style={[props.style, { borderRadius: 100 }]}
+      className={clsx("size-16", props.className)}
     />
   ) : (
     <View

@@ -1,5 +1,6 @@
 import assert from "assert";
-import { Text } from "react-native";
+import Markdown from "react-native-markdown-display";
+
 import type { IMessage } from "../../store/message";
 
 export function MessageText({
@@ -12,15 +13,17 @@ export function MessageText({
   assert(type === "text");
 
   return (
-    <Text
-      selectable
+    <Markdown
+      mergeStyle
       style={{
-        paddingVertical: 8,
-        paddingHorizontal: 8,
+        body: {
+          color: "white",
+          paddingHorizontal: 8,
+          fontFamily: "Poppins",
+        },
       }}
-      className="text-white font-poppins"
     >
       {data}
-    </Text>
+    </Markdown>
   );
 }

@@ -11,7 +11,7 @@ import LoadingScreen from "../../../../components/loading/LoadingScreen";
 
 export default function CreateGoalScreen() {
   const { setScreens } = useScreen();
-  const { isSubmitting, status } = useFormikContext();
+  const { status } = useFormikContext();
 
   return (
     <>
@@ -62,12 +62,12 @@ export default function CreateGoalScreen() {
           ] as const
         }
       />
-      {isSubmitting && (
+      {["submitting", "successful"].includes(status) && (
         <LoadingScreen
           className="bg-black"
           title="Great Work"
           subtitle="Creating a personalised plan for you..."
-          children={
+          child={
             status === "successful" && (
               <>
                 <DumbBell />

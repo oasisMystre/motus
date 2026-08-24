@@ -1,22 +1,32 @@
 import "dotenv/config";
-
+import path from "path";
+import dotenv from "dotenv";
 import { format } from "util";
+import { execSync } from "child_process";
+
+if (process.env.NODE_ENV !== "production") {
+  const root = execSync("git rev-parse --show-toplevel").toString().trim();
+  dotenv.config({ path: path.resolve(root, ".env") });
+  dotenv.config(); // local .env file have more priority than global .env file
+}
 
 type Env =
   | "PORT"
   | "HOST"
+  | "REDIS_MAX_SENTINELS"
+  | "REDIS_MASTER_NAME"
+  | "REDIS_SENTINEL_PORT"
   | "REDIS_URL"
+  | "REDIS_SENTINEL_HOSTNAME"
+  | "REDIS_PASSWORD"
   | "MCP_SERVER_URL"
   | "DATABASE_URL"
   | "OPEN_API_KEY"
   | "SECRET_KEY"
   | "SERVICE_ACCOUNT";
 
-export const getEnv = <T extends object | number | string | null = string>(
-  name: Env,
-  refine?: <K>(value: K) => T,
-) => {
-  const value = process.env["APP_" + name] || process.env[name];
+export const getEnv = <T>(name: Env, refine?: <K>(value: K) => T): T => {
+  const value = process.env[name] || process.env[format("APP_%s", name)];
   if (value)
     try {
       const parsed = JSON.parse(value) as T;

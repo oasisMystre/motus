@@ -1,10 +1,12 @@
 import type z from "zod";
 import { useMemo } from "react";
 import { useFormikContext } from "formik";
+import capitalize from "lodash.capitalize";
 import { useTranslation } from "react-i18next";
 import type { userSelectSchema } from "@motus/server";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Colors } from "../../constants";
 import Input from "../../components/Input";
@@ -26,19 +28,16 @@ export function SetWeightScreen({ goBack, next }: SetWeightScreenProps) {
     useFormikContext<Partial<z.infer<typeof userSelectSchema>>>();
 
   const isValid = useMemo(
-    () => values.profile?.height?.unit && values.profile.height.value,
+    () => values.profile?.weight?.unit && values.profile.weight.value,
     [values],
   );
 
   return (
-    <View
-      className="flex-1 px-6"
+    <KeyboardAwareScrollView
+      contentContainerClassName="flex-1 px-6"
       style={{ width, marginBottom: bottom }}
     >
-      <ScrollView
-        contentContainerClassName="flex-1 gap-y-8 pt-8"
-        keyboardShouldPersistTaps="handled"
-      >
+      <View className="flex-1 gap-y-8 pt-8">
         <View>
           <Text className="text-xl text-white font-poppins-semibold">
             {t("auth.profile.more.title")}
@@ -68,14 +67,17 @@ export function SetWeightScreen({ goBack, next }: SetWeightScreenProps) {
           />
           <DropdownPicker
             value={values.profile?.weight?.unit}
-            data={["kg", "ibs"].map((value) => ({ label: value, value }))}
+            data={["kg", "ibs"].map((value) => ({
+              label: ["ibs"].includes(value) ? capitalize(value) : value,
+              value,
+            }))}
             itemTextStyle={{ color: "white" }}
             onValueChanged={({ item: { value } }) =>
               handleChange("profile.weight.unit")(value)
             }
           />
         </View>
-      </ScrollView>
+      </View>
       <View className="flex-row items-center gap-x-8">
         <CircularBackButton
           canGoBack
@@ -94,6 +96,6 @@ export function SetWeightScreen({ goBack, next }: SetWeightScreenProps) {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 }

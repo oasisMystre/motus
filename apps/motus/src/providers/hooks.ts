@@ -1,2 +1,4 @@
+export { useSensor } from "./SensorProvider";
 export { useLoading } from "./LoadingProvider";
-export { useSnackbar } from "./SnackbarProvider";
+export { useFirebase } from "./FirebaseProvider";
+export { useSnackbar, withSnackbar } from "./SnackbarProvider";

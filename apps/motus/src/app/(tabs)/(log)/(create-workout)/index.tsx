@@ -2,17 +2,16 @@ import type z from "zod";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { Text, View, FlatList } from "react-native";
+import { useCallback, useState } from "react";
 import type { routineSelectSchema } from "@motus/server";
-import { useCallback, useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { NotepadIcon, PlusIcon } from "phosphor-react-native";
+import { Text, View, FlatList, ActivityIndicator } from "react-native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Colors } from "../../../../constants";
 import Button from "../../../../components/Button";
 import { useTRPC } from "../../../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../../../store";
-import { routineActions, routineSelector } from "../../../../store/routine";
+import { useTanstackStore } from "../../../../hooks/useTanstackStore";
 import {
   RoutineListItem,
   RoutineMenu,
@@ -20,27 +19,24 @@ import {
 
 export default function CreateWorkoutScreen() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [routine, setRoutine] = useState<z.infer<
     typeof routineSelectSchema
   > | null>(null);
 
-  const dispatch = useAppDispatch();
-  const routineState = useAppSelector((state) => state.routine);
-  const routines = routineSelector.selectAll(routineState);
+  const { add } = useTanstackStore(queryClient, trpc.routine.list.queryKey());
 
-  const { data } = useQuery(trpc.routine.list.queryOptions());
-  const { mutateAsync } = useMutation(
+  const { data: routines = [], isFetching } = useQuery({
+    initialData: [],
+    ...trpc.routine.list.queryOptions(),
+  });
+
+  const { mutateAsync, isPending } = useMutation(
     trpc.routine.create.mutationOptions({
-      onSuccess(data) {
-        dispatch(routineActions.addRoutine(data));
-      },
+      onSuccess: add,
     }),
   );
-
-  useEffect(() => {
-    if (data) dispatch(routineActions.addRoutines(data));
-  }, [data]);
 
   const Header = useCallback(
     () => (
@@ -63,7 +59,14 @@ export default function CreateWorkoutScreen() {
             }
           />
           <Button
-            icon={<PlusIcon color="white" />}
+            disabled={isPending}
+            icon={
+              isPending ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <PlusIcon color="white" />
+              )
+            }
             style={{
               flex: 1,
               rowGap: 8,
@@ -78,7 +81,6 @@ export default function CreateWorkoutScreen() {
                   exercises: [],
                 },
               });
-
               router.push({
                 pathname: "/start-routine",
                 params: { id: routine.id },
@@ -100,7 +102,7 @@ export default function CreateWorkoutScreen() {
         )}
       </View>
     ),
-    [t, routines, routine],
+    [t, routines, isPending, mutateAsync],
   );
 
   return (
@@ -111,6 +113,16 @@ export default function CreateWorkoutScreen() {
         contentContainerStyle={{ gap: 16 }}
         keyExtractor={(workout) => workout.id}
         style={{ paddingHorizontal: 16, paddingTop: 16 }}
+        ListEmptyComponent={() => {
+          if (isFetching)
+            return (
+              <ActivityIndicator
+                color="white"
+                size={32}
+              />
+            );
+          return null;
+        }}
         renderItem={({ item }) => (
           <RoutineListItem
             routine={item}

@@ -1,20 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import { Pressable, View, Text, FlatList } from "react-native";
 
+import { useReward } from "../../../hooks/useReward";
+import { useTRPC } from "../../../providers/TRPCProvider";
 import {
   RewardRecent,
   RewardMultiplier,
   RewardPoints,
   RewardItem,
 } from "../../../components/rewards";
-import { useAppSelector } from "../../../store";
-import { rewardSelectors } from "../../../store/reward";
 
 export default function RewardsScreen() {
-  const { points, newUserReward, ...rewardState } = useAppSelector(
-    (state) => state.reward,
-  );
-
-  const rewards = rewardSelectors.selectAll(rewardState);
+  const trpc = useTRPC();
+  const { points, newUserReward } = useReward();
+  const { data: rewards = [] } = useQuery(trpc.reward.list.queryOptions());
 
   return (
     <FlatList
@@ -39,8 +38,8 @@ export default function RewardsScreen() {
         marginVertical: 16,
       }}
       ListFooterComponent={() => (
-        <Pressable className="p-2">
-          <Text className="text-primary">Sell All Transactions</Text>
+        <Pressable className="p-2 hidden">
+          <Text className="text-primary">See All Transactions</Text>
         </Pressable>
       )}
     />

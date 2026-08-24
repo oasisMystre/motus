@@ -116,9 +116,15 @@ export function SelectForm<T extends { name: string; description?: string }>({
               )}
             </View>
             {type === "radio" ? (
-              <RadioInput value={value} />
+              <RadioInput
+                value={value}
+                disabled
+              />
             ) : (
-              <CheckboxInput value={value} />
+              <CheckboxInput
+                value={value}
+                disabled
+              />
             )}
           </Pressable>
         );

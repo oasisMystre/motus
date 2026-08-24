@@ -1,5 +1,4 @@
 import z from "zod";
-import assert from "assert";
 import { format } from "util";
 import { useFormik } from "formik";
 import { useMemo, useState } from "react";
@@ -9,16 +8,17 @@ import { useMutation } from "@tanstack/react-query";
 import { Text, View, Pressable, FlatList } from "react-native";
 
 import { Colors } from "../../../../constants";
+import { useAppDispatch } from "../../../../store";
 import { withZodSchema } from "../../../../utils";
 import Button from "../../../../components/Button";
-import { authActions } from "../../../../store/auth";
+import { useFirebase } from "../../../../providers";
 import { useTRPC } from "../../../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../../../store";
 import { UnitSheet } from "../../../../components/bottom-sheets/UnitSheet";
 import { ChoiceSheet } from "../../../../components/bottom-sheets/ChoiceSheet";
 
 export default function GoalScreen() {
   const trpc = useTRPC();
+  const { user, setUser } = useFirebase();
   const [showWeeklyGoalModal, setShowWeeklyGoalModal] = useState(false);
   const [showGoalWeightModal, setShowGoalWeightModal] = useState(false);
   const [showCurrentWeightModal, setShowCurrentGoalModal] = useState(false);
@@ -26,14 +26,11 @@ export default function GoalScreen() {
   const [showStartingWeightModal, setShowStartingWeightModal] = useState(false);
 
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-
-  assert(user && user.type === "firebase");
 
   const { mutateAsync } = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess(data) {
-        dispatch(authActions.updateUser(data));
+        setUser((previous) => (previous ? { ...previous, ...data } : null));
       },
     }),
   );

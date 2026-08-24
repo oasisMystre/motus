@@ -47,4 +47,11 @@ export default function LoadingProvider({ children }: React.PropsWithChildren) {
   );
 }
 
+export const withLoading =
+  <T extends React.ElementType>(Component: T) =>
+  (props: React.ComponentProps<T>) => (
+    <LoadingProvider>
+      <Component {...props} />
+    </LoadingProvider>
+  );
 export const useLoading = () => useContext(LoadingContext) as LoadingContext;

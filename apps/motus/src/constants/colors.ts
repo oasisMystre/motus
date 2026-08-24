@@ -1,4 +1,5 @@
 export const Colors = {
+  backgroundColor: "#000000",
   purple: "#9747FF",
   iconColor: "#666666",
   subtitleColor: "#6B6B6B",

@@ -65,14 +65,14 @@ export const Dot = ({ delay, duration, ...props }: DotProps) => {
         false,
       ),
     );
-  }, [delay, duration]);
+  }, [delay, duration, translation, opacity]);
 
   const style = useAnimatedStyle(
     () => ({
       opacity: opacity.value,
       transform: [{ translateY: translation.value }],
     }),
-    [opacity, translation],
+    [opacity, translation, opacity],
   );
 
   return (

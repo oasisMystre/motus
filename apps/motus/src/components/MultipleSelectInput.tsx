@@ -2,6 +2,7 @@ import Color from "color";
 import { format } from "util";
 import { useState } from "react";
 import { isString } from "formik";
+import capitalize from "lodash.capitalize";
 import { Ionicons } from "@expo/vector-icons";
 
 import { CaretRightIcon, CheckIcon } from "phosphor-react-native";
@@ -93,10 +94,10 @@ export default function MultipleSelectInput<
                     }}
                   >
                     <Text
-                      className="text-white font-poppins capitalize"
+                      className="text-white font-poppins"
                       style={inputAttrs?.style}
                     >
-                      {option.label}
+                      {capitalize(option.label)}
                     </Text>
                     <Pressable
                       onPress={() => {
@@ -132,10 +133,7 @@ export default function MultipleSelectInput<
         />
       </Pressable>
       {error && isString(error) && (
-        <Text className="text-red-500 font-poppins">
-          {error.slice(0, 1).toLocaleUpperCase()}
-          {error.slice(1)}
-        </Text>
+        <Text className="text-red-500 font-poppins">{capitalize(error)}</Text>
       )}
       {show && (
         <FlatList
@@ -176,7 +174,9 @@ export default function MultipleSelectInput<
                       : "transparent",
                 }}
               >
-                <Text className="flex-1 text-white">{item.label}</Text>
+                <Text className="flex-1 text-white">
+                  {capitalize(item.label)}
+                </Text>
                 {selected && (
                   <CheckIcon
                     size={14}

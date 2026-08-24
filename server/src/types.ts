@@ -1,10 +1,10 @@
 export const RewardType = {
-  new_user_rewards: 1,
-  daily_check_in: 8,
-  workout_logged: 7,
-  meal_logged: 4,
-  weekly_goals_achieved: 6,
-  "7_days_streak": 3,
-  "14_days_streak": 2,
-  "30_days_streak": 5,
+  new_user_rewards: 0,
+  daily_check_in: 1,
+  workout_logged: 2,
+  meal_logged: 3,
+  weekly_goals_achieved: 4,
+  "7_days_streak": 5,
+  "14_days_streak": 6,
+  "30_days_streak": 7,
 } as const;

@@ -1,12 +1,15 @@
 import fastify from "fastify";
-import IoRedis from "ioredis";
 import fastifyCors from "@fastify/cors";
-import { cert } from "firebase-admin/app";
 import { RedisStore } from "connect-redis";
 import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import { streamableHttp } from "fastify-mcp";
-import { initializeApp } from "firebase-admin/app";
+import {
+  initializeApp,
+  cert,
+  getApps,
+  type ServiceAccount,
+} from "firebase-admin/app";
 import {
   fastifyTRPCPlugin,
   type FastifyTRPCPluginOptions,
@@ -15,14 +18,20 @@ import {
 import { getEnv } from "./env";
 import { createMcpServer } from "./mcp";
 import { createContext } from "./context";
+import { createRedis } from "./instances";
 import { appRouter, type AppRouter } from "./routers";
 
-initializeApp({
-  credential: cert(getEnv<string>("SERVICE_ACCOUNT")),
-});
+const apps = getApps();
 
-const redis = new IoRedis(getEnv<string>("REDIS_URL"));
-const store = new RedisStore({ client: redis });
+if (apps.length === 0) {
+  const serviceAccount: ServiceAccount = JSON.parse(
+    Buffer.from(getEnv<string>("SERVICE_ACCOUNT"), "base64").toString("utf-8"),
+  );
+  initializeApp({
+    credential: cert(serviceAccount),
+  });
+}
+const store = new RedisStore({ client: createRedis() });
 
 const server = fastify({
   logger: true,
@@ -38,6 +47,7 @@ server.register(fastifySession, {
   cookie: { secure: true, httpOnly: true, sameSite: "lax" },
 });
 
+// @ts-expect-error
 server.register(streamableHttp, {
   stateful: false,
   mcpEndpoint: "/mcp",

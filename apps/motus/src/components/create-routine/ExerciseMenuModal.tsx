@@ -1,9 +1,12 @@
 import type z from "zod";
 import clsx from "clsx";
-import { router } from "expo-router";
 import type { exerciseSelectSchema } from "@motus/server";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ArrowClockwiseIcon, type Icon } from "phosphor-react-native";
+import {
+  ArrowClockwiseIcon,
+  type Icon,
+  PencilIcon,
+} from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Pressable,
@@ -19,36 +22,50 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 
 import { Colors } from "../../constants";
-import { useAppDispatch } from "../../store";
+import { useMemo } from "react";
 
 export default function ExerciseMenuModal({
   exercise,
   removeExercise,
+  replaceExercise,
+  quickEditExercise,
   ...props
 }: Omit<React.ComponentProps<typeof BottomSheet>, "children"> & {
   exercise: z.infer<typeof exerciseSelectSchema>;
   removeExercise: (id: string) => void;
+  quickEditExercise?: (value: z.infer<typeof exerciseSelectSchema>) => void;
+  replaceExercise: (value: z.infer<typeof exerciseSelectSchema>) => void;
 }) {
-  const dispatch = useAppDispatch();
   const { bottom } = useSafeAreaInsets();
 
-  const menuItems: {
-    icon?: Icon;
-    name: string;
-    onPress?: () => void;
-    textStyle?: StyleProp<TextStyle>;
-  }[] = [
-    {
-      icon: ArrowClockwiseIcon,
-      name: "Replace Exercise",
-      onPress() {
-        router.push(
-          "/(tabs)/(log)/(create-workout)/(create-routine)/(add-exercise)",
-        );
-        props.onClose?.();
+  const menuItems = useMemo(() => {
+    const menuItems: {
+      icon?: Icon;
+      name: string;
+      onPress?: () => void;
+      textStyle?: StyleProp<TextStyle>;
+    }[] = [
+      {
+        icon: ArrowClockwiseIcon,
+        name: "Replace Exercise",
+        onPress() {
+          replaceExercise(exercise);
+          props.onClose?.();
+        },
       },
-    },
-    {
+    ];
+
+    if (quickEditExercise)
+      menuItems.push({
+        icon: PencilIcon,
+        name: "Quick Edit",
+        onPress() {
+          quickEditExercise(exercise);
+          props.onClose?.();
+        },
+      });
+
+    menuItems.push({
       icon: (props) => (
         <MaterialCommunityIcons
           name="delete-outline"
@@ -62,8 +79,16 @@ export default function ExerciseMenuModal({
         removeExercise(exercise.id);
         props.onClose?.();
       },
-    },
-  ];
+    });
+
+    return menuItems;
+  }, [
+    quickEditExercise,
+    replaceExercise,
+    removeExercise,
+    exercise,
+    props.onClose,
+  ]);
 
   return (
     <BottomSheet

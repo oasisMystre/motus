@@ -3,11 +3,7 @@ import { Text, type View } from "react-native";
 import { Octicons } from "@expo/vector-icons";
 import type React from "react";
 import { useMemo, useState } from "react";
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -36,7 +32,7 @@ export function SwipeAbleButton({
 
   const threshold = useMemo(
     () => Math.max(containerWidth - totalKnobWidth, 0),
-    [containerWidth],
+    [containerWidth, totalKnobWidth],
   );
 
   const gesture = Gesture.Pan()

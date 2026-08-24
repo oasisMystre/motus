@@ -19,7 +19,7 @@ export const userRouter = router({
     .input(userSelectSchema.pick({ id: true }).optional())
     .output(userExtendSelectSchema.extend({ token: z.string().optional() }))
     .query(async ({ ctx, input }) => {
-      const id = input && input.id ? input.id : ctx.user.id;
+      const id = input?.id ? input.id : ctx.user.id;
       const user = await getUserById(ctx.drizzle, id);
       if (user) return { ...user, token: ctx.user.token };
 
@@ -39,6 +39,9 @@ export const userRouter = router({
 
       throw new TRPCError({ code: "NOT_FOUND", message: "user not found" });
     }),
+  delete: publicProcedure.mutation(({ ctx }) => {
+    return ctx.drizzle.delete(users).where(eq(users.id, ctx.user.id)).execute();
+  }),
   search: publicProcedure
     .input(
       z
@@ -46,11 +49,13 @@ export const userRouter = router({
         .extend({ search: z.string().min(1).optional() })
         .optional(),
     )
-    .output(z.array(userSelectSchema.extend({ isFollowing: z.boolean() })))
+    .output(
+      z.array(userSelectSchema.extend({ isFollowing: z.boolean().nullable() })),
+    )
     .query(async ({ ctx, input }) => {
       const where: (SQL<unknown> | undefined)[] = [];
 
-      if (input && input.search) {
+      if (input?.search) {
         const innerWhere: SQL<unknown>[] = [];
 
         innerWhere.push(like(users.name, format("%%%s%%", input.search)));
@@ -62,12 +67,18 @@ export const userRouter = router({
       const following = ctx.drizzle.select().from(follows).as("following");
 
       const query = ctx.drizzle
-        .select({
+        .selectDistinctOn([users.id], {
           ...getTableColumns(users),
           isFollowing: coalesce(following.isFollowing, false).mapWith(Boolean),
         })
         .from(users)
-        .leftJoin(following, eq(following.follower, ctx.user.id))
+        .leftJoin(
+          following,
+          and(
+            eq(following.follower, ctx.user.id),
+            eq(following.following, users.id),
+          ),
+        )
         .where(and(...where, not(eq(users.id, ctx.user.id))));
 
       if (input) {
@@ -75,10 +86,32 @@ export const userRouter = router({
         if (input.offset) query.offset(input.offset);
       }
 
-      return query.execute();
+      const result = await query.execute();
+      return result;
     }),
-  analytic: publicProcedure
-    .input(z.object())
-    .output(z.object({}))
-    .query(async () => ({})),
+  username_exists: publicProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        exists: z.boolean(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userList = await ctx.drizzle
+        .select({
+          id: users.id,
+        })
+        .from(users)
+        .where(eq(users.username, input.username))
+        .limit(1)
+        .execute();
+
+      return {
+        exists: userList.length > 0,
+      };
+    }),
 });

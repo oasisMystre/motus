@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { BackButton } from "../../../../components/Header";
 
 export default function CreateWorkoutLayout() {
@@ -36,25 +36,6 @@ export default function CreateWorkoutLayout() {
               icon={
                 <Feather
                   name="chevron-down"
-                  color="white"
-                  size={24}
-                />
-              }
-            />
-          ),
-        })}
-      />
-      <Stack.Screen
-        name="post-routine"
-        options={({ navigation }) => ({
-          title: "Save Workout",
-          headerLeft: (props) => (
-            <BackButton
-              {...props}
-              navigation={navigation}
-              icon={
-                <Ionicons
-                  name="close"
                   color="white"
                   size={24}
                 />

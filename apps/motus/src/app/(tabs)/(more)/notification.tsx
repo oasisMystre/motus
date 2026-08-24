@@ -1,28 +1,23 @@
-import assert from "assert";
+import color from "color";
 import { useFormik } from "formik";
-import { useEffect, useMemo } from "react";
 import { useNavigation } from "expo-router";
-
+import { useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Switch, Text, View, FlatList } from "react-native";
+import { Switch, Text, View, FlatList, Platform } from "react-native";
 
 import { Colors } from "../../../constants";
-import { authActions } from "../../../store/auth";
+import { useFirebase } from "../../../providers";
 import { useTRPC } from "../../../providers/TRPCProvider";
-import { useAppDispatch, useAppSelector } from "../../../store";
 
 export default function NotificationSettingsScreen() {
   const trpc = useTRPC();
+  const { user, setUser } = useFirebase();
   const navigation = useNavigation();
-
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  assert(user && user.type === "firebase");
 
   const { mutateAsync } = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess(data) {
-        dispatch(authActions.updateUser(data));
+        setUser((previous) => (previous ? { ...previous, ...data } : null));
       },
     }),
   );
@@ -83,7 +78,7 @@ export default function NotificationSettingsScreen() {
     });
 
     return () => unsubscribe();
-  }, [navigation]);
+  }, [navigation, handleSubmit]);
 
   return (
     <FlatList
@@ -110,7 +105,15 @@ export default function NotificationSettingsScreen() {
           </View>
           <Switch
             value={item.checked}
-            trackColor={{ true: Colors.primary }}
+            thumbColor={
+              Platform.OS === "android"
+                ? color(Colors.primary).whiten(0.25).hexa()
+                : undefined
+            }
+            trackColor={{
+              true: Colors.primary,
+              false: Platform.OS === "android" ? Colors.primary : undefined,
+            }}
             onValueChange={async (value) => {
               setFieldValue(item.name, value);
             }}

@@ -6,29 +6,30 @@ import { useFormik } from "formik";
 import type { exerciseSelectSchema } from "@motus/server";
 import { array, boolean, number, object, string } from "yup";
 import { BarbellIcon, PlusIcon } from "phosphor-react-native";
+import { useNavigation, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useLocalSearchParams, router } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import {
-  ActivityIndicator,
   Text,
-  Pressable,
   View,
   FlatList,
+  Pressable,
+  ActivityIndicator,
 } from "react-native";
 
 import { Colors } from "../../../../constants";
 import useTimer from "../../../../hooks/useTimer";
 import Button from "../../../../components/Button";
-import { formActions } from "../../../../store/form";
 import useRoutine from "../../../../hooks/useRoutine";
-import { routineActions } from "../../../../store/routine";
 import KeyboardView from "../../../../components/KeyboardView";
-import { useAppDispatch, useAppSelector } from "../../../../store";
 import TimerSheet from "../../../../components/bottom-sheets/TimerSheet";
 import { ListHeader, ListItem } from "../../../../components/start-routine";
+import PostRoutineModal from "../../../../components/modals/PostRoutineModal";
+import AddExerciseModal from "../../../../components/exercises/ExerciseModal";
+import type { WorkoutLog } from "../../../../components/modals/PostRoutineModal";
 import ExerciseMenuModal from "../../../../components/create-routine/ExerciseMenuModal";
+import CreateExerciseModal from "../../../../components/exercises/ExerciseCreateModal";
 
 const createInitialSet = (value: any) => {
   const { set, previous, ...rest } = value;
@@ -86,19 +87,21 @@ const validationSchema = object({
   }),
 });
 
-export default function StartRoutine() {
+export default function StartRoutineScreen() {
   const navigation = useNavigation();
   const { bottom } = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [workoutLog, setWorkoutLog] = useState<WorkoutLog | null>(null);
+  const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
   const [timerFieldName, setTimerFieldName] = useState<string | null>(null);
+  const [quickEdit, setQuickEdit] = useState<z.infer<
+    typeof exerciseSelectSchema
+  > | null>(null);
   const [exercise, setExercise] = useState<z.infer<
     typeof exerciseSelectSchema
   > | null>(null);
 
-  const routine = useRoutine(id);
-  const dispatch = useAppDispatch();
-  const { createWorkout } = useAppSelector((state) => state.form);
-
+  const routine = useRoutine(id)!;
   const exercises = useMemo(
     () =>
       routine.metadata.exercises.map((exercise) => ({
@@ -130,33 +133,13 @@ export default function StartRoutine() {
       },
 
       async onSubmit(values) {
-        dispatch(formActions.setWorkoutLog({ ...values, title: routine.name }));
-        return router.push("/post-routine");
+        setWorkoutLog({ ...values, title: routine.name });
       },
     });
 
   useTimer(() => {
     setFieldValue("duration", values.duration + 1000);
   });
-
-  useEffect(() => {
-    setFieldValue("metadata.exercises", [
-      ...exercises,
-      ...createWorkout.exercises.map((exercise) => ({
-        ...exercise,
-        sets: [
-          {
-            set: "n",
-            previous: undefined,
-            ...Object.fromEntries(
-              exercise.exercise_types.map((type) => [type, undefined]),
-            ),
-            completed: false,
-          },
-        ],
-      })),
-    ]);
-  }, [createWorkout.exercises]);
 
   useEffect(() => {
     const completedSets = values.metadata.exercises.reduce(
@@ -177,7 +160,7 @@ export default function StartRoutine() {
 
     setFieldValue("sets", completedSets);
     setFieldValue("volume.value", totalVolume);
-  }, [values.metadata.exercises]);
+  }, [values.metadata.exercises, setFieldValue]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -187,7 +170,7 @@ export default function StartRoutine() {
           onPress={() => handleSubmit()}
         >
           {isSubmitting ? (
-            <ActivityIndicator />
+            <ActivityIndicator color="white" />
           ) : (
             <Text style={{ color: isValid ? Colors.primary : Colors.grey }}>
               Finish
@@ -197,27 +180,39 @@ export default function StartRoutine() {
       ),
     });
 
-    return () => {
-      navigation.setOptions({ headerRight: undefined });
-      dispatch(formActions.updateWorkoutForm({ exercises: [] }));
-      dispatch(formActions.setWorkoutLog({ ...values, title: routine.name }));
-    };
-  }, [isValid, isSubmitting]);
+    return () => navigation.setOptions({ headerRight: undefined });
+  }, [navigation, isValid, isSubmitting, handleSubmit]);
 
   const removeExercise = useCallback(
     (id: string) => {
       const exercises = values.metadata.exercises.filter(
         (exercise) => exercise.id !== id,
       );
-      dispatch(
-        routineActions.updateRoutine({
-          id: routine.id,
-          changes: { metadata: { exercises } },
-        }),
-      );
+
       setFieldValue("metadata.exercises", exercises);
     },
     [values.metadata.exercises, setFieldValue],
+  );
+
+  const addExercises = useCallback(
+    (values: z.infer<typeof exerciseSelectSchema>[]) => {
+      const exercises = values.map((exercise) => ({
+        ...exercise,
+        sets: [
+          {
+            set: "n",
+            previous: undefined,
+            ...Object.fromEntries(
+              exercise.exercise_types.map((type) => [type, undefined]),
+            ),
+            completed: false,
+          },
+        ],
+      }));
+
+      setFieldValue("metadata.exercises", exercises);
+    },
+    [setFieldValue],
   );
 
   const addSet = useCallback(
@@ -235,8 +230,13 @@ export default function StartRoutine() {
           }),
         );
 
-        const updatedSets = [...exercise?.sets, newSet];
-        setFieldValue(format("metadata.exercises.%d.sets", index), updatedSets);
+        if (exercise?.sets) {
+          const updatedSets = [...exercise.sets, newSet];
+          setFieldValue(
+            format("metadata.exercises.%d.sets", index),
+            updatedSets,
+          );
+        }
       }
     },
     [values.metadata.exercises, setFieldValue],
@@ -308,11 +308,35 @@ export default function StartRoutine() {
                   size={16}
                 />
               }
-              onPress={() => router.push("/(create-routine)/(add-exercise)/")}
+              onPress={() => setShowAddExerciseModal(true)}
             />
           )}
         />
       </KeyboardView>
+      {quickEdit && (
+        <CreateExerciseModal
+          visible={Boolean(quickEdit)}
+          initialValues={quickEdit}
+          onSubmit={(value) => {
+            const index = values.metadata.exercises.findIndex(
+              (exercise) => quickEdit.id === exercise.id,
+            );
+            const exercise = values.metadata.exercises[index];
+            exercise.sets = Array.from<(typeof exercise.sets)[number]>({
+              length: exercise.sets.length,
+            }).fill(
+              createInitialSet({
+                ...Object.fromEntries(
+                  value.exercise_types.map((key) => [key, undefined]),
+                ),
+                ...exercise.sets[0],
+              }),
+            );
+            setFieldValue(format("metadata.exercises.%d", index), exercise);
+          }}
+          onRequestClose={() => setQuickEdit(null)}
+        />
+      )}
       {timerFieldName && (
         <TimerSheet
           style={{ zIndex: 1000 }}
@@ -324,7 +348,22 @@ export default function StartRoutine() {
         <ExerciseMenuModal
           exercise={exercise}
           removeExercise={removeExercise}
+          quickEditExercise={setQuickEdit}
+          replaceExercise={() => setShowAddExerciseModal(true)}
           onClose={() => setExercise(null)}
+        />
+      )}
+      <AddExerciseModal
+        visible={showAddExerciseModal}
+        values={values.metadata.exercises}
+        onValueChange={addExercises}
+        onRequestClose={() => setShowAddExerciseModal(false)}
+      />
+      {workoutLog && (
+        <PostRoutineModal
+          workoutLog={workoutLog}
+          visible={Boolean(workoutLog)}
+          onRequestClose={() => setWorkoutLog(null)}
         />
       )}
     </>

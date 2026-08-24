@@ -1,15 +1,20 @@
 import z from "zod";
+import { v4 } from "uuid";
 import { Formik } from "formik";
 import { useMemo } from "react";
-import { mealLogInsertSchema, mealSelectSchema } from "@motus/server";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import {
+  mealLogInsertSchema,
+  type mealLogSelectSchema,
+  mealSelectSchema,
+} from "@motus/server";
 
-import { withZodSchema } from "../../../../../utils";
-import { useAppDispatch } from "../../../../../store";
-import { useMeal } from "../../../../../hooks/useMeal";
+import { useFirebase } from "../../../../../providers";
 import { BackButton } from "../../../../../components/Header";
-import { logActions } from "../../../../../store/log";
-import { useTRPCClient } from "../../../../../providers/TRPCProvider";
+import { useTanstackStore } from "../../../../../hooks/useTanstackStore";
+import { uploadImageFromUri, withZodSchema } from "../../../../../utils";
+import { useTRPC, useTRPCClient } from "../../../../../providers/TRPCProvider";
 
 const mealFormSchema = mealLogInsertSchema
   .omit({ user: true, meals: true })
@@ -18,41 +23,53 @@ const mealFormSchema = mealLogInsertSchema
   });
 
 export default function LogMealLayout() {
-  const trpc = useTRPCClient();
-  const dispatch = useAppDispatch();
-  const { id, action } = useLocalSearchParams<{
+  const trpc = useTRPC();
+  const trpcClient = useTRPCClient();
+  const queryClient = useQueryClient();
+  const {
+    firebase: { storage },
+  } = useFirebase();
+  const { id } = useLocalSearchParams<{
     id?: string;
     action?: "edit" | "duplicate";
   }>();
 
-  const meal = useMeal(id);
+  const { data: meal } = useQuery({
+    enabled: Boolean(id),
+    ...trpc.log.meal.retrieve.queryOptions({ id: id! }),
+  });
+  const { update } = useTanstackStore(
+    queryClient,
+    trpc.log.meal.list.queryKey({ search: undefined }),
+    (meal) => meal.id,
+  );
 
   const initialValues: Omit<z.infer<typeof mealFormSchema>, "user"> = useMemo(
     () =>
       meal
         ? {
             name: meal.name,
-            category: meal.category,
             meals: meal.meals,
+            category: meal.category,
             metadata: meal.metadata,
           }
         : {
             name: "",
             meals: [],
-            category: "breakfast" as const,
+            category: "breakfast",
             metadata: {
-              energy: { value: 0, unit: "kcal" as const },
+              energy: { value: 0, unit: "kcal" },
               fats: {
                 value: 0,
-                unit: "g" as const,
+                unit: "g",
               },
               proteins: {
                 value: 0,
-                unit: "g" as const,
+                unit: "g",
               },
               carbohydrates: {
                 value: 0,
-                unit: "g" as const,
+                unit: "g",
               },
             },
           },
@@ -64,26 +81,28 @@ export default function LogMealLayout() {
       validate={withZodSchema(mealFormSchema)}
       initialValues={initialValues}
       onSubmit={async (value, { resetForm }) => {
-        if (action === "edit" && id)
-          await trpc.log.meal.update
-            .mutate({
-              id,
-              ...value,
-              meals: value.meals.map((meal) => meal.id),
-            })
-            .then((data) =>
-              dispatch(logActions.updateMealLog({ id, changes: data })),
-            );
-
-        await trpc.log.meal.create
-          .mutate({
+        value.id = id ?? v4();
+        if (value.image)
+          value.image = await uploadImageFromUri(storage, value.image, {
+            fileName: value.id,
+          });
+        let response: z.infer<typeof mealLogSelectSchema>;
+        if (id)
+          response = await trpcClient.log.meal.update.mutate({
+            id,
             ...value,
             meals: value.meals.map((meal) => meal.id),
-          })
-          .then((data) => dispatch(logActions.addMealLog(data)));
+          });
+        else
+          response = await trpcClient.log.meal.create.mutate({
+            ...value,
+            meals: value.meals.map((meal) => meal.id),
+          });
 
-        router.dismissAll();
+        update(response);
+
         resetForm();
+        router.dismissAll();
       }}
     >
       <Stack
@@ -102,13 +121,6 @@ export default function LogMealLayout() {
         <Stack.Screen
           name="index"
           options={{ title: "Meal Log" }}
-        />
-        <Stack.Screen
-          name="(add-food)"
-          options={{
-            title: "Add Food",
-            headerShown: false,
-          }}
         />
       </Stack>
     </Formik>

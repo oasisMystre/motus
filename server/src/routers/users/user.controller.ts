@@ -1,5 +1,5 @@
 import type z from "zod";
-import { and, count, eq, getTableColumns } from "drizzle-orm";
+import { count, eq, getTableColumns } from "drizzle-orm";
 
 import type { Database } from "../../db";
 import { coalesce } from "../../db/custom-value";

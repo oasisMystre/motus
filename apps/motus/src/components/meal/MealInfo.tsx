@@ -3,50 +3,34 @@ import { Text, View } from "react-native";
 import { VictoryPie } from "victory-native";
 
 import { Colors } from "../../constants";
+import type { getMealInfo } from "../../utils/get-meal-info";
 
-const important_fact_keys = [
+const importantFacts = [
   { key: "proteins", color: Colors.green[0], atwaterFactor: 4 },
   { key: "carbohydrates", color: Colors.primary, atwaterFactor: 4 },
   { key: "fats", color: Colors.blue[0], atwaterFactor: 9 },
 ] as const;
 
 type MealInfoProps = {
-  info: Record<
-    (typeof important_fact_keys)[number]["key"],
-    {
-      value: number;
-      unit: string;
-    }
-  >;
-  energy: { value: number; unit: string };
+  info: ReturnType<typeof getMealInfo>;
 };
 
-export function MealInfo({ info, energy }: MealInfoProps) {
-  const data = important_fact_keys
-    .map(({ key, color, atwaterFactor }) => {
-      const value = info[key];
-      if (value) {
-        const percentage = ((value.value * atwaterFactor) / energy.value) * 100;
-        return {
-          color,
-          percentage,
-          label: key,
-          unit: value.unit,
-          value: value.value * atwaterFactor,
-        };
-      }
-      return null;
-    })
-    .filter(Boolean) as {
-    label: string;
-    color: string;
-    value: number;
-    unit: string;
-    percentage: number;
-  }[];
+export function MealInfo({ info }: MealInfoProps) {
+  const data = importantFacts.map(({ key, color, atwaterFactor }) => {
+    const nutriment = info[key];
+    const percentage =
+      ((nutriment.value * atwaterFactor) / info.energy.value) * 100;
+    return {
+      color,
+      percentage,
+      label: key,
+      unit: nutriment.unit,
+      value: nutriment.value,
+    };
+  });
 
   return (
-    <View className="flex-row gap-x-8 items-center">
+    <View className="flex-row gap-x-4 items-center">
       <View
         className="items-center justify-center"
         style={{ width: 96, height: 96 }}
@@ -55,9 +39,12 @@ export function MealInfo({ info, energy }: MealInfoProps) {
           data={data}
           x="label"
           y="percentage"
-          colorScale={data.map((data) => data.color)}
+          width={96}
+          height={96}
+          radius={48}
+          innerRadius={28}
           labels={({ datum }) => datum.label}
-          innerRadius={80}
+          colorScale={data.map((data) => data.color)}
         />
         <View
           className="items-center justify-center"
@@ -69,16 +56,16 @@ export function MealInfo({ info, energy }: MealInfoProps) {
             borderRadius: 100,
           }}
         >
-          <Text className="text-xl font-poppins">{energy.value}</Text>
-          <Text className="text-xl font-poppins-bold">{energy.unit}</Text>
+          <Text className="text-xl font-poppins">{info.energy.value}</Text>
+          <Text className="text-xl font-poppins-bold">{info.energy.unit}</Text>
         </View>
       </View>
       <View className="flex-1 flex-row gap-x-8">
-        {important_fact_keys.map(({ key, color }, index) => {
-          const value = data.find((data) => data.label === key);
+        {importantFacts.map(({ key, color }, index) => {
+          const nutriment = data.find((data) => data.label === key);
 
           return (
-            value && (
+            nutriment && (
               <View
                 key={index}
                 className="flex-1 items-center justify-center"
@@ -87,11 +74,11 @@ export function MealInfo({ info, energy }: MealInfoProps) {
                   className="font-poppins"
                   style={{ color }}
                 >
-                  {value.percentage.toFixed(2)}%
+                  {nutriment.percentage.toFixed(2)}%
                 </Text>
                 <Text className="text-white font-poppins">
-                  {value.value.toFixed(2)}
-                  {value.unit}
+                  {nutriment.value.toFixed(2)}
+                  {nutriment.unit}
                 </Text>
                 <Text
                   className="capitalize font-poppins truncate"

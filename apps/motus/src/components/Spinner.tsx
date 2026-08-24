@@ -1,5 +1,5 @@
 import { format } from "util";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { View, Animated, Easing } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 

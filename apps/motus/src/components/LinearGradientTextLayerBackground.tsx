@@ -1,7 +1,7 @@
 import color from "color";
 import { Image } from "expo-image";
+import { View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "../constants";
@@ -61,10 +61,11 @@ export function LinearGradientTextLayerBackground({
       )}
       <LinearGradient
         style={{
-          height,
           gap: 24,
           left: 0,
           right: 0,
+          top: 0,
+          bottom: 0,
           zIndex: 10,
           position: "absolute",
           justifyContent: "flex-end",

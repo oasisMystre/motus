@@ -46,7 +46,7 @@ export default function LogoutWorkoutScreen() {
 
   useEffect(() => {
     if (data) dispatch(logActions.setWorkouts(data));
-  }, [data]);
+  }, [data, dispatch]);
 
   useEffect(() => {
     if (workouts.length > 0) {
@@ -91,7 +91,10 @@ export default function LogoutWorkoutScreen() {
             contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={() =>
               isPending ? (
-                <ActivityIndicator className="flex-1" />
+                <ActivityIndicator
+                  color="white"
+                  className="flex-1"
+                />
               ) : (
                 <View className="items-center justify-center gap-y-8 mt-16">
                   <View className="items-center justify-center gap-y-4">
@@ -109,7 +112,7 @@ export default function LogoutWorkoutScreen() {
                     </View>
                   </View>
                   <Button
-                    text="Log Workout"
+                    text="Create Workout"
                     style={{ paddingHorizontal: 16, paddingVertical: 8 }}
                     onPress={() => router.push("/log-workout")}
                   />

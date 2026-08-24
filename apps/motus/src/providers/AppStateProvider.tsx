@@ -1,71 +1,45 @@
-import { useEffect, useState } from "react";
 import { hideAsync } from "expo-splash-screen";
 import * as Sentry from "@sentry/react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 
-import { useTRPCClient } from "./TRPCProvider";
+import { useTRPC } from "./TRPCProvider";
 import { useFirebase } from "./FirebaseProvider";
-import { postActions } from "../store/post";
-import { rewardActions } from "../store/reward";
-import { streakActions } from "../store/streak";
-import { routineActions } from "../store/routine";
-import { metadataActions } from "../store/metadata";
-import { exerciseActions } from "../store/exercise";
-import { useAppDispatch, useAppSelector } from "../store";
 
 export default function AppStateProvider({
   children,
 }: React.PropsWithChildren) {
-  const trpc = useTRPCClient();
-  const { state } = useFirebase();
+  const trpc = useTRPC();
+  const { user, state } = useFirebase();
+  const queryClient = useQueryClient();
+
   const [render, setRender] = useState(false);
-  const { user } = useAppSelector((state) => state.auth);
 
-  const dispatch = useAppDispatch();
-
-  const fetchData = async () =>
-    Promise.all([
-      trpc.equipment.list
-        .query()
-        .then((equipments) =>
-          dispatch(metadataActions.addEquipments(equipments)),
-        ),
-      trpc.exercise.list.query().then((exercises) => {
-        dispatch(exerciseActions.addCustomExercises(exercises.custom));
-        dispatch(exerciseActions.addExercises(exercises.default));
-      }),
-      trpc.muscle.list
-        .query()
-        .then((muscles) => dispatch(metadataActions.addMuscles(muscles))),
-      trpc.reward.list
-        .query()
-        .then((rewards) => dispatch(rewardActions.addRewards(rewards))),
-      trpc.reward.aggregrate
-        .query()
-        .then((extra) => dispatch(rewardActions.addExtra(extra))),
-      trpc.streak.list
-        .query()
-        .then((streaks) => dispatch(streakActions.addStreaks(streaks))),
-      trpc.streak.aggregate
-        .query()
-        .then((streak) => dispatch(streakActions.setLongestStreak(streak))),
-      trpc.routine.list
-        .query()
-        .then((routines) => dispatch(routineActions.addRoutines(routines))),
-      trpc.post.list
-        .query()
-        .then((posts) => dispatch(postActions.addPosts(posts))),
-    ]);
+  const fetchData = useCallback(
+    async () =>
+      Promise.all([
+        queryClient.prefetchQuery(trpc.post.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.muscle.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.reward.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.streak.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.equipment.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.exercise.list.queryOptions()),
+        queryClient.prefetchQuery(trpc.reward.aggregrate.queryOptions()),
+        queryClient.prefetchQuery(trpc.streak.aggregate.queryOptions()),
+      ]),
+    [queryClient, trpc],
+  );
 
   useEffect(() => {
-    if (state === "completed") {
-      hideAsync();
+    const render = () => {
       setRender(true);
+      hideAsync();
+    };
+    if (state === "firebase.auth.initialized") {
+      if (user) fetchData().catch(Sentry.captureException).finally(render);
+      else render();
     }
-  }, [state, user]);
-
-  useEffect(() => {
-    if (user?.type === "firebase") fetchData().catch(Sentry.captureException);
-  }, [user?.type]);
+  }, [state, user, fetchData]);
 
   if (render) return children;
 }

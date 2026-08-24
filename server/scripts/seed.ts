@@ -1,5 +1,4 @@
 import { writeFileSync } from "fs";
-import { and, eq, isNull } from "drizzle-orm";
 
 import rewardList from "./seed/rewards.json";
 import muscleList from "./seed/muscles.json";
@@ -9,14 +8,7 @@ import equipmentList from "./seed/equipments.json";
 import { db } from "../src/instances";
 import type { Database } from "../src/db";
 import { exerciseInsertSchema } from "../src/external";
-import { getRoutinesWhere } from "../src/routers/routines/routine.controller";
-import {
-  equipments,
-  exercises,
-  muscles,
-  rewardTypes,
-  routines,
-} from "../src/db/schema";
+import { equipments, exercises, muscles, rewardTypes } from "../src/db/schema";
 
 async function main(db: Database) {
   const dbMuscles = await db
@@ -40,8 +32,6 @@ async function main(db: Database) {
     .insert(exercises)
     .values(
       exerciseList.map((exercise) => {
-        console.log(exercise);
-
         const other_muscles = dbMuscles
           .filter((muscle) =>
             exercise.otherMuscles.find((value) => value === muscle.name),
@@ -67,13 +57,13 @@ async function main(db: Database) {
       target: [exercises.user, exercises.name],
       set: { name: exercises.name },
     });
-
+  await db.delete(rewardTypes).execute();
   const dbRewardTypes = Object.fromEntries(
     await Promise.all(
-      rewardList.map(async (reward) => {
+      rewardList.map(async (reward, id) => {
         const [rewardType] = await db
           .insert(rewardTypes)
-          .values(reward)
+          .values({ ...reward, id })
           .onConflictDoUpdate({ target: rewardTypes.title, set: reward })
           .returning()
           .execute();

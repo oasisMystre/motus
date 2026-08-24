@@ -25,7 +25,7 @@ export default function SearchInput({
         inputAttrs?.onChangeText?.(text);
         context?.setValue(text);
       }, 500),
-    [inputAttrs?.onChangeText],
+    [inputAttrs?.onChangeText, context],
   );
 
   return (
@@ -69,7 +69,7 @@ export default function SearchInput({
         }}
         onChangeText={onChangeText}
       />
-      {isSearching && <ActivityIndicator />}
+      {isSearching && <ActivityIndicator color="white" />}
     </View>
   );
 }

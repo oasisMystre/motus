@@ -55,7 +55,7 @@ export function RoutineMenu({
         },
       });
     },
-    [dispatch, props.onClose, router],
+    [dispatch, routine.name, routine.metadata.exercises, props.onClose],
   );
 
   const menuItems: {

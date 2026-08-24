@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
-import { useFormik } from "formik";
 import { string, object } from "yup";
+import { useFormik } from "formik";
 import { useCallback, useEffect, useRef } from "react";
 import { PaperPlaneTiltIcon } from "phosphor-react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import {
   TextInput,
   View,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 
 import { Colors } from "../../constants";
@@ -24,7 +25,7 @@ import { messageActions, messageSelectors } from "../../store/message";
 export default function AIScreen() {
   const trpc = useTRPC();
   const listRef = useRef<FlatList>(null);
-  const { isSuccess, data, refetch, isRefetching } = useQuery(
+  const { data, refetch, isRefetching, isFetching } = useQuery(
     trpc.message.list.queryOptions(),
   );
 
@@ -44,6 +45,28 @@ export default function AIScreen() {
     }),
   );
 
+  const sendMessage = useCallback(
+    async (values: { content: string }, resetForm?: () => void) => {
+      const message = {
+        id: v4(),
+        reply: null,
+        role: "user" as const,
+        createdAt: new Date(),
+        content: {
+          type: "text" as const,
+          data: values.content,
+        },
+      };
+
+      dispatch(messageActions.addMessage(message));
+      resetForm?.();
+      return mutateAsync({ ...message, content: values.content })
+        .then((messages) => dispatch(messageActions.upsertMessages(messages)))
+        .finally(() => scrollToBottom());
+    },
+    [mutateAsync, dispatch, scrollToBottom],
+  );
+
   const {
     isValid,
     isSubmitting,
@@ -58,22 +81,7 @@ export default function AIScreen() {
       content: "",
     },
     async onSubmit(values, { resetForm }) {
-      const message = {
-        id: v4(),
-        reply: null,
-        role: "user" as const,
-        createdAt: new Date(),
-        content: {
-          type: "text" as const,
-          data: values.content,
-        },
-      };
-
-      dispatch(messageActions.addMessage(message));
-      resetForm();
-      return mutateAsync({ ...message, content: values.content })
-        .then((messages) => dispatch(messageActions.upsertMessages(messages)))
-        .finally(() => scrollToBottom());
+      return sendMessage(values, resetForm);
     },
   });
 
@@ -82,7 +90,7 @@ export default function AIScreen() {
       dispatch(messageActions.setMessages(data));
       scrollToBottom();
     }
-  }, [isSuccess, data]);
+  }, [data, dispatch, scrollToBottom]);
 
   return (
     <KeyboardStickyView className="flex-1 p-4 px-6">
@@ -103,7 +111,18 @@ export default function AIScreen() {
           justifyContent: "flex-end",
           paddingVertical: 16,
         }}
-        ListEmptyComponent={EmptyState}
+        ListEmptyComponent={() => {
+          if (isFetching)
+            return (
+              <ActivityIndicator
+                color="white"
+                className="m-auto"
+              />
+            );
+          return (
+            <EmptyState onMessage={(content) => sendMessage({ content })} />
+          );
+        }}
         scrollEnabled
         renderItem={({ item, index }) => {
           const previousMessage = messages[index - 1];
@@ -164,8 +183,14 @@ export default function AIScreen() {
   );
 }
 
-const EmptyState = () => {
-  const questions = ["Create a routine plan", "My calories this week"];
+type EmptyStateProps = {
+  onMessage: (message: string) => void;
+};
+const EmptyState = ({ onMessage }: EmptyStateProps) => {
+  const questions = [
+    "What can you do?",
+    "What is my calories count for this week",
+  ];
   return (
     <View className="flex-1  items-center justify-center gap-y-6">
       <Text className="text-white text-2xl font-poppins-semibold">
@@ -177,6 +202,7 @@ const EmptyState = () => {
             key={index}
             className="flex-1 px-4 py-3 rounded-xl"
             style={{ backgroundColor: Colors.background[9] }}
+            onPress={() => onMessage(question)}
           >
             <Text
               className="text-white font-poppins"
